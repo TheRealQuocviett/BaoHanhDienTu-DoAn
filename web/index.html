@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý bảo hành</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Giao diện sáng – xanh dương ===== */
+:root{color-scheme:light;
+  --bg:#f3f6fb;--card:#fff;--ink:#0f172a;--mute:#64748b;--line:#e3e8f0;--line2:#eef2f7;
+  --acc:#2563eb;--acc2:#1d4ed8;--accs:#eaf1ff;--acct:#1e40af;
+  --ok:#059669;--oks:#e7f8f1;--bad:#dc2626;--bads:#fdecec;--warn:#b45309;--warns:#fff5e0;--vio:#7c3aed;--vios:#f2ecff;
+  --soft:#f6f8fc;--side:#fff;--r:14px;
+  --sh:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);--sh2:0 10px 30px -10px rgba(15,23,42,.18)}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+/* --- khung --- */
+.shell{display:grid;grid-template-columns:252px minmax(0,1fr);min-height:100vh}
+aside{background:var(--side);color:#334155;position:sticky;top:0;height:100vh;overflow-y:auto;padding:16px 12px;border-right:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;color:var(--ink);padding:4px 8px 18px;font-size:15.5px;letter-spacing:-.01em}
+.brand i{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);flex:none;display:grid;place-items:center;box-shadow:0 6px 14px -6px #2563eb}
+.brand i::after{content:"";width:14px;height:16px;background:#fff;clip-path:polygon(50% 0,100% 18%,100% 55%,50% 100%,0 55%,0 18%)}
+.brand small{display:block;font-weight:500;font-size:11.5px;color:var(--mute)}
+.navg{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;padding:16px 10px 6px}
+aside a{display:flex;align-items:center;gap:11px;color:#475569;text-decoration:none;padding:8px 10px;border-radius:9px;font-weight:500;font-size:14.5px;margin:1px 0}
+aside a span{flex:1}
+aside a:hover{background:var(--soft);color:var(--ink)}
+aside a.on{background:var(--accs);color:var(--acct);font-weight:600}aside a.on svg.i{color:var(--acc)}
+aside a svg.i{color:#94a3b8}
+aside a em{font-style:normal;font-size:11.5px;font-weight:600;background:var(--acc);color:#fff;border-radius:99px;padding:1px 7px;line-height:1.5}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px max(2.5vw,16px);border-bottom:1px solid var(--line);background:rgba(255,255,255,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10}
+#pageTitle{font-weight:600;color:var(--mute);font-size:14px}
+.who{display:flex;align-items:center;gap:10px;font-size:14px}.who b{font-weight:600}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#60a5fa,#2563eb);color:#fff;display:grid;place-items:center;font-weight:600;font-size:14px;flex:none}
+.who .nm{display:flex;align-items:center;gap:9px;line-height:1.2}.who .nm small{display:block;color:var(--mute);font-size:12px}
+.btn.menu-btn{display:none}
+@media(max-width:600px){.who .nm>span,#pwBtn{display:none}.top{padding:10px 12px}.top>.row{flex-wrap:nowrap}#pageTitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+main{padding:26px max(2.5vw,16px) 60px;max-width:1320px}
+@media(max-width:900px){.shell{grid-template-columns:minmax(0,1fr)}aside{position:fixed;inset:0 auto 0 0;width:272px;z-index:40;transform:translateX(-100%);transition:transform .2s}
+  aside.open{transform:none;box-shadow:0 0 0 100vmax #0f172a66}.btn.menu-btn{display:inline-flex}}
+h1{font-size:clamp(22px,2.6vw,28px);line-height:1.2;margin:0 0 4px;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
+.muted{color:var(--mute)}h2{font-size:16.5px;margin:0 0 12px;font-weight:600;letter-spacing:-.01em}h3{font-size:14.5px;margin:14px 0 8px;font-weight:600}
+.sub{color:var(--mute);margin:0 0 20px;font-size:14.5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.grid{display:grid;gap:14px}
+.tiles{grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))}
+.tile{cursor:pointer;display:flex;gap:14px;align-items:center;transition:transform .15s,box-shadow .15s,border-color .15s}
+.tile:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-color:#cfdcf3}
+.tile .ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--accs);color:var(--acc)}
+.tile .ic svg.i{width:22px;height:22px}
+.tile .ic.ok{background:var(--oks);color:var(--ok)}.tile .ic.bad{background:var(--bads);color:var(--bad)}.tile .ic.warn{background:var(--warns);color:var(--warn)}.tile .ic.vio{background:var(--vios);color:var(--vio)}
+.tile b{display:block;font-size:clamp(22px,2.4vw,28px);line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.tile span{color:var(--mute);font-size:13px;line-height:1.35;display:block}.tile b.long{font-size:clamp(17px,1.5vw,20px);padding:2px 0;white-space:nowrap}.tile.hot b{color:var(--bad)}
+.two{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+@media(max-width:1000px){.two{grid-template-columns:minmax(0,1fr)}}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+/* --- điều khiển --- */
+input,select,textarea{font-size:14.5px;background:#fff;border:1px solid #d6deea;border-radius:10px;padding:9px 12px;width:100%;min-height:42px;transition:border-color .15s,box-shadow .15s}
+input:hover,select:hover,textarea:hover{border-color:#b9c6da}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 3px #2563eb26}
+textarea{min-height:70px;resize:vertical}
+input[type=checkbox]{width:18px;min-height:18px;height:18px;accent-color:var(--acc);box-shadow:none}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+label{display:block;font-size:13px;font-weight:500;margin:0 0 5px;color:#334155}
+.f{margin-bottom:14px}.req::after{content:" *";color:var(--bad)}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 14px}
+@media(max-width:600px){.cols{grid-template-columns:minmax(0,1fr)}}
+.btn{white-space:nowrap;font-weight:600;border:1px solid transparent;border-radius:10px;padding:9px 16px;min-height:42px;cursor:pointer;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,box-shadow .15s,transform .05s}
+.btn:active{transform:translateY(1px)}
+.btn.acc{background:var(--acc);color:#fff;box-shadow:0 1px 2px #1d4ed84d,inset 0 1px 0 #ffffff26}.btn.acc:hover{background:var(--acc2)}
+.btn.ghost{background:#fff;color:var(--ink);border-color:#d6deea}.btn.ghost:hover{background:var(--soft);border-color:#b9c6da}
+.btn.danger{background:#fff;color:var(--bad);border-color:#f3b4b4}.btn.danger:hover{background:var(--bads)}
+.btn.sm{min-height:34px;padding:5px 12px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;min-height:34px;color:#475569}
+.chip:hover{border-color:#b9c6da}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;background:#eef2f7;color:#475569}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.8}
+.pill.ok{color:var(--ok);background:var(--oks)}.pill.bad{color:var(--bad);background:var(--bads)}.pill.warn{color:var(--warn);background:var(--warns)}.pill.acc{background:var(--accs);color:var(--acct)}
+/* --- bảng --- */
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--mute);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--soft)}
+thead th:first-child{border-top-left-radius:8px}thead th:last-child{border-top-right-radius:8px}
+td{padding:11px 10px;border-bottom:1px solid var(--line2);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.click{cursor:pointer}tr.click:hover td{background:#f5f8ff}
+.small{font-size:12.5px;color:var(--mute)}.mono{font-variant-numeric:tabular-nums}
+td b.mono{color:var(--acct)}
+.empty{padding:32px;text-align:center;color:var(--mute)}
+@media(max-width:640px){.stack thead{display:none}.stack tr{display:grid;padding:10px 0;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:2px 0 2px 7.5em;text-align:left!important}
+  .stack td::before{content:attr(data-l);float:left;width:7em;margin-left:-7.5em;color:var(--mute);font-size:12px}.stack td:empty{display:none}}
+/* --- thành phần --- */
+.bar{display:grid;grid-template-columns:10em minmax(0,1fr) 3em;gap:10px;align-items:center;font-size:13px;margin:9px 0}
+.bar div{height:8px;background:#edf1f7;border-radius:99px;overflow:hidden}.bar div i{display:block;height:100%;background:linear-gradient(90deg,#60a5fa,#2563eb);border-radius:99px}
+.bar em{font-style:normal;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.meter{height:8px;background:#edf1f7;border-radius:99px;overflow:hidden;margin:10px 0 5px}.meter i{display:block;height:100%;background:linear-gradient(90deg,#34d399,#059669);border-radius:99px}
+.meter.exp i{background:var(--bad)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:10px 18px;margin:14px 0}
+.kv span{display:block;font-size:12px;color:var(--mute)}.kv b{font-weight:600}
+.tl{list-style:none;margin:0;padding:0 0 0 16px;border-left:2px solid var(--line)}
+.tl li{position:relative;padding:0 0 14px 12px}.tl li::before{content:"";position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #b9c6da}
+.tl li:last-child::before{background:var(--acc);border-color:var(--acc);box-shadow:0 0 0 4px #2563eb26}
+.box{border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:14px;background:#fcfdff}
+.box h3{margin-top:0}
+.total{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--acct)}
+.modal{position:fixed;inset:0;background:#0f172a73;backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;z-index:50;padding:4vh 10px;overflow-y:auto}
+.modal.open{display:flex}.modal>.card{width:min(860px,100%);position:relative;border:0;box-shadow:0 24px 60px -12px #0f172a59;padding:24px;animation:pop .18s ease-out}.modal.narrow>.card{width:min(520px,100%)}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.99)}}
+.x{position:absolute;right:10px;top:10px;width:38px;height:38px;border:0;background:transparent;font-size:22px;cursor:pointer;border-radius:10px;color:var(--mute)}.x:hover{background:var(--soft);color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);opacity:0;background:#0f172a;color:#fff;padding:12px 18px;border-radius:12px;z-index:80;transition:.25s;max-width:92vw;pointer-events:none;box-shadow:var(--sh2);font-weight:500}
+.toast.show{transform:translateX(-50%);opacity:1}.toast.err{background:#b91c1c}
+.hint{font-size:13.5px;padding:10px 13px;border-radius:10px;background:var(--accs);color:#1e3a8a;margin:6px 0;border:1px solid #d6e4ff}
+.chart{position:relative;height:260px}.chart svg{position:absolute;inset:0;width:100%;height:100%}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mute)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+/* --- đăng nhập --- */
+.login{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:#fff}
+.login .hero{background:radial-gradient(1200px 600px at 0% 0%,#3b82f6 0%,#1d4ed8 45%,#1e3a8a 100%);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.login .hero::after{content:"";position:absolute;right:-120px;bottom:-120px;width:420px;height:420px;border-radius:50%;border:60px solid #ffffff14}
+.login .hero h2{font-size:clamp(26px,3vw,38px);line-height:1.2;margin:0 0 14px;letter-spacing:-.02em}
+.login .hero p{opacity:.85;max-width:440px;margin:0}
+.login .hero ul{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:12px}
+.login .hero li{display:flex;gap:10px;align-items:center;opacity:.95}.login .hero li svg.i{background:#ffffff26;border-radius:8px;padding:6px;width:30px;height:30px}
+.login .hero .brand,.login .hero .brand small{color:#fff}.login .hero .brand i{background:#fff}.login .hero .brand i::after{background:#2563eb}
+.login form{align-self:center;justify-self:center;width:min(400px,100%);padding:24px}
+.login h1{font-size:28px}
+@media(max-width:860px){.login{grid-template-columns:minmax(0,1fr)}.login .hero{display:none}}
+.view{display:none}.view.on{display:block}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin:8px 0}
+.photos figure{margin:0;position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--soft)}
+.photos img{display:block;width:100%;height:96px;object-fit:cover;cursor:zoom-in}
+.photos figcaption{font-size:11px;padding:3px 6px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photos button{position:absolute;top:4px;right:4px;border:0;border-radius:6px;background:#0f172aaa;color:#fff;width:26px;height:26px;cursor:pointer}
+.upload{display:inline-flex;align-items:center;gap:8px;cursor:pointer}.upload input{display:none}
+@media(max-width:600px){main{padding:18px 12px 60px}.card{padding:16px}.tiles{grid-template-columns:1fr 1fr;gap:10px}
+  .tile{flex-direction:column;align-items:flex-start;gap:10px}.tile .ic{width:38px;height:38px}.tile b.long{white-space:normal}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></symbol><symbol id="i-shield-plus" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="M12 9v6M9 12h6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.6 3.3-5.5 6.5-5.5s5.8 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></symbol><symbol id="i-device" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.3"/></symbol><symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol><symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v2M11 10v7M15 12v5M19 6v11"/></symbol><symbol id="i-user-cog" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21c.6-3.8 3.4-6 7-6 1.1 0 2.1.2 3 .6"/><circle cx="18" cy="17" r="2.5"/><path d="M18 13v1.5M18 19.5V21M14 17h1.5M20.5 17H22"/></symbol><symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9.5V21h16V9.5"/><path d="M2.5 9.5 4.5 3h15l2 6.5c0 1.6-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-.9-3-2.5z"/><path d="M9.5 21v-5h5v5"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></symbol><symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 1 5-3.3l-2.7 2.7.6 2.4 2.4.6 2.7-2.7a4 4 0 0 1-5.3 5L9 18.4a2.1 2.1 0 0 1-3-3z"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol><symbol id="i-coin" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol></svg>
+
+<!-- ================= ĐĂNG NHẬP ================= -->
+<div class="login" id="loginView" hidden>
+  <div class="hero">
+    <div class="brand"><i></i><span><span class="shopname">Bảo hành điện tử</span><small>Hệ thống quản lý bảo hành</small></span></div>
+    <div><h2>Quản lý bảo hành điện tử<br>nhanh, rõ ràng, chuyên nghiệp</h2>
+      <p>Kích hoạt bảo hành khi bán hàng, tiếp nhận và theo dõi sửa chữa, báo giá, thu tiền và báo cáo – tất cả ở một nơi.</p>
+      <ul><li><svg class="i"><use href="#i-shield"/></svg>Bảo hành điện tử kèm mã QR</li><li><svg class="i"><use href="#i-wrench"/></svg>Theo dõi tiến độ sửa chữa theo thời gian thực</li><li><svg class="i"><use href="#i-bell"/></svg>Tự báo khách qua Email / SMS / Zalo</li></ul></div>
+    <small style="opacity:.7">© Hệ thống quản lý bảo hành điện tử</small>
+  </div>
+  <form id="loginForm">
+    <div class="brand" style="padding:0 0 22px"><i></i><span><span id="loginShop">Bảo hành điện tử</span><small>Đăng nhập dành cho nhân viên</small></span></div>
+    <h1>Chào mừng trở lại 👋</h1>
+    <p class="sub">Đăng nhập để tiếp tục làm việc.</p>
+    <div class="f"><label for="lu">Tên đăng nhập</label><input id="lu" autocomplete="username" required placeholder="vd: admin"></div>
+    <div class="f"><label for="lp">Mật khẩu</label><input id="lp" type="password" autocomplete="current-password" required placeholder="••••••"></div>
+    <div class="hint" id="loginErr" style="display:none;color:var(--bad);background:var(--bads);border-color:#f8caca"></div>
+    <button class="btn acc" style="width:100%;margin-top:4px">Đăng nhập</button>
+    <p class="small" style="margin:18px 0 0">Tài khoản mẫu: <b>admin</b>/admin123 · <b>tiepnhan</b>/123456 · <b>ktv1</b>/123456</p>
+    <a href="/tra-cuu#tai-khoan" class="btn ghost" style="width:100%;margin-top:18px;text-decoration:none;white-space:normal;text-align:center;line-height:1.35;padding:10px 14px">Tôi là khách hàng → Tra cứu bảo hành</a>
+    <p class="small" style="margin:6px 0 0;text-align:center">Tài khoản khách mẫu: 0903123456/123456 · 0934567890/123456</p>
+  </form>
+</div>
+
+<!-- ================= ỨNG DỤNG ================= -->
+<div class="shell" id="appView" hidden>
+  <aside id="side"></aside>
+  <div>
+    <div class="top">
+      <div class="row"><button class="btn ghost sm menu-btn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button><b id="pageTitle"></b></div>
+      <div class="who"><div class="nm"><div class="avatar" id="meAv"></div><span><b id="meName"></b><small id="meRole"></small></span></div>
+        <button class="btn ghost sm" id="pwBtn">Đổi mật khẩu</button><button class="btn ghost sm" id="logoutBtn">Đăng xuất</button></div>
+    </div>
+    <main id="main"></main>
+  </div>
+</div>
+
+<div class="modal" id="modal"><div class="card" id="modalBody"></div></div>
+<div class="modal narrow" id="modal2"><div class="card" id="modal2Body"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;const t=c.closest('table');c.dataset.l=t&&t.rows[0]?t.rows[0].cells[i]?.textContent||'':''}}).observe(document,{childList:true,subtree:true});
+</script>
+<script>
+{
+/* =================== TIỆN ÍCH =================== */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const h = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fd = d => d ? String(d).slice(0,10).split('-').reverse().join('/') : '';
+const fdt = d => d ? fd(d) + ' ' + String(d).slice(11,16) : '';
+const money = n => Number(n || 0).toLocaleString('vi-VN') + ' đ';
+const num = n => Number(n || 0).toLocaleString('vi-VN');
+const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const plusDays = n => { const d = new Date(); d.setDate(d.getDate() + n); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+let META = null, ME = null, BADGES = {}, SHOP = '';
+
+async function api(path, opt = {}) {
+  const res = await fetch(path, {method: opt.method || 'GET', credentials: 'same-origin',
+    headers: {'Content-Type': 'application/json', 'X-App': '1'}, body: opt.body ? JSON.stringify(opt.body) : undefined});
+  const data = await res.json().catch(() => ({error: 'Phản hồi không hợp lệ từ máy chủ'}));
+  if (res.status === 401 && path !== '/api/login' && path !== '/api/me') { showLogin(); throw new Error(data.error); }
+  if (!res.ok) throw new Error(data.error || ('Lỗi ' + res.status));
+  return data;
+}
+const post = (p, b) => api(p, {method: 'POST', body: b || {}});
+let toastT;
+function toast(msg, err) { const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(toastT); toastT = setTimeout(() => t.className = 'toast', 3400); }
+const fail = e => toast(e.message, true);
+const formData = f => { const o = {}; for (const el of f.elements) { if (!el.name) continue; o[el.name] = el.type === 'checkbox' ? el.checked : el.value; } return o; };
+function openModal(html, which = 'modal') { const m = $('#' + which); $('#' + which + 'Body').innerHTML = '<button class="x" data-close aria-label="Đóng">×</button>' + html; m.classList.add('open'); return $('#' + which + 'Body'); }
+function closeModal(which = 'modal') { $('#' + which).classList.remove('open'); }
+document.addEventListener('click', e => { const c = e.target.closest('[data-close]'); if (c) c.closest('.modal').classList.remove('open'); });
+$$('.modal').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('open'); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { const o = $$('.modal.open'); if (o.length) o[o.length - 1].classList.remove('open'); } });
+const is = (...roles) => ME && roles.includes(ME.role);
+async function printDoc(kind, id) {
+  const w = window.open('', '_blank');
+  try { const r = await api(`/api/print-link?kind=${kind}&id=${id}`); if (w) w.location = r.url + '&auto=1'; else location.href = r.url; }
+  catch (e) { if (w) w.close(); fail(e); }
+}
+function opts(list, sel, blank) { return (blank != null ? `<option value="">${h(blank)}</option>` : '') + list.map(o => `<option value="${o.id}" ${String(o.id) === String(sel) ? 'selected' : ''}>${h(o.label)}</option>`).join(''); }
+const optCache = {};
+async function options(key, fresh) { if (fresh || !optCache[key]) optCache[key] = await api('/api/options/' + key); return optCache[key]; }
+function statusPill(t) {
+  const c = t.status === 'READY' ? 'acc' : t.status === 'RETURNED' ? 'ok' : (t.status === 'REJECTED' || t.status === 'CANCELLED') ? 'bad' : '';
+  return `<span class="pill ${c}">${h(t.status_label || META.statuses[t.status])}</span>` + (t.overdue ? ' <span class="pill bad">Quá hẹn</span>' : '')
+    + (t.quote_status === 'PENDING' ? ' <span class="pill warn">Chờ duyệt giá</span>' : '');
+}
+function wPill(w) { if (!w.active) return '<span class="pill bad">Hết hạn</span>'; if (w.days_left <= 30) return `<span class="pill warn">Còn ${w.days_left} ngày</span>`; return '<span class="pill ok">Còn hạn</span>'; }
+/** Nút cần bấm 2 lần để xác nhận (không dùng hộp thoại confirm của trình duyệt). */
+function confirmBtn(btn) { if (!btn) return true; if (btn.dataset.sure === '1') return true; btn.dataset.sure = '1'; btn.dataset.label = btn.textContent; btn.textContent = 'Bấm lần nữa để xác nhận'; setTimeout(() => { btn.dataset.sure = ''; btn.textContent = btn.dataset.label; }, 4000); return false; }
+const debounce = (fn, ms = 250) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
+/* =================== ĐĂNG NHẬP =================== */
+function showLogin() {
+  $('#appView').hidden = true; $('#loginView').hidden = false; closeModal(); closeModal('modal2');
+  api('/api/public/shop').then(s => { if (s.name) { $('#loginShop').textContent = s.name; $$('.shopname').forEach(x => x.textContent = s.name); } }).catch(() => {});
+  setTimeout(() => $('#lu').focus(), 50);
+}
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault(); $('#loginErr').style.display = 'none';
+  try { await post('/api/login', {username: $('#lu').value, password: $('#lp').value}); $('#lp').value = ''; await boot(); }
+  catch (err) { $('#loginErr').textContent = err.message; $('#loginErr').style.display = 'block'; }
+});
+$('#logoutBtn').onclick = async () => { await post('/api/logout').catch(() => {}); ME = null; showLogin(); };
+$('#pwBtn').onclick = () => {
+  const b = openModal(`<h2>Đổi mật khẩu</h2><form id="pwF">
+    <div class="f"><label class="req" for="po">Mật khẩu hiện tại</label><input id="po" name="old_password" type="password" required autocomplete="current-password"></div>
+    <div class="f"><label class="req" for="pn">Mật khẩu mới (ít nhất 6 ký tự)</label><input id="pn" name="new_password" type="password" minlength="6" required autocomplete="new-password"></div>
+    <div class="f"><label class="req" for="pn2">Nhập lại mật khẩu mới</label><input id="pn2" type="password" required autocomplete="new-password"></div>
+    <button class="btn acc">Lưu</button></form>`, 'modal2');
+  $('#pwF', b).onsubmit = async e => { e.preventDefault(); if ($('#pn').value !== $('#pn2').value) return toast('Mật khẩu nhập lại không khớp', true);
+    try { await post('/api/password', formData(e.target)); closeModal('modal2'); toast('Đã đổi mật khẩu'); } catch (err) { fail(err); } };
+};
+
+/* =================== ĐIỀU HƯỚNG =================== */
+const VIEWS = {};
+function nav() {
+  const A = ['ADMIN'], AR = ['ADMIN','RECEPTION'], ALL = ['ADMIN','RECEPTION','TECHNICIAN'];
+  return [
+    ['', [['tong-quan','Tổng quan',ALL],['tra-cuu','Tra cứu',ALL],['phieu','Phiếu bảo hành',ALL,'open'],['kich-hoat','Kích hoạt bảo hành',AR],['bao-hanh','Danh sách bảo hành',ALL],['yeu-cau','Yêu cầu online',ALL,'req']]],
+    ['Danh mục', [['dm-customer','Khách hàng',ALL],['dm-product','Sản phẩm / Model',ALL],['dm-brand','Hãng sản xuất',ALL],['dm-service_center','Trung tâm BH hãng',ALL],['dm-category','Loại sản phẩm',ALL]]],
+    ['Kho', [['dm-part','Linh kiện',ALL,'low'],['the-kho','Thẻ kho',['ADMIN','TECHNICIAN']]]],
+    ['Quản trị', [['bao-cao','Báo cáo thống kê',A],['dm-user','Người dùng',A],['cai-dat','Thông tin cửa hàng',A],['thong-bao','Thông báo cho khách',AR,'ntf'],['sao-luu','Sao lưu dữ liệu',A],['nhat-ky','Nhật ký hệ thống',A]]]
+  ].map(([g, items]) => [g, items.filter(i => i[2].includes(ME.role))]).filter(g => g[1].length);
+}
+const NAV_ICON = {'tong-quan':'home','tra-cuu':'search','phieu':'clipboard','kich-hoat':'shield-plus','bao-hanh':'shield','yeu-cau':'inbox',
+  'dm-customer':'users','dm-product':'device','dm-brand':'tag','dm-service_center':'building','dm-category':'grid','dm-part':'box','the-kho':'list',
+  'bao-cao':'chart','dm-user':'user-cog','cai-dat':'store','thong-bao':'bell','sao-luu':'database','nhat-ky':'history'};
+const icon = (n, cls = '') => `<svg class="i ${cls}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+function renderSide() {
+  $('#side').innerHTML = `<div class="brand"><i></i><span>Bảo hành điện tử<small>${h(SHOP || 'Quản lý bảo hành')}</small></span></div>` + nav().map(([g, items]) =>
+    (g ? `<div class="navg">${g}</div>` : '') + items.map(i => `<a href="#${i[0]}" data-v="${i[0]}">${icon(NAV_ICON[i[0]] || 'grid')}<span>${i[1]}</span>${i[3] && BADGES[i[3]] ? `<em>${BADGES[i[3]]}</em>` : ''}</a>`).join('')).join('');
+  markNav();
+}
+function markNav() { const v = location.hash.slice(1); $$('#side a').forEach(a => a.classList.toggle('on', a.dataset.v === v)); }
+async function refreshBadges() { try { const d = await api('/api/dashboard'); BADGES = {open: d.open_tickets, low: d.low_stock, req: d.new_requests, ntf: d.notify_failed}; renderSide(); } catch (e) {} }
+$('#menuBtn').onclick = () => $('#side').classList.toggle('open');
+$('#side').addEventListener('click', e => { if (e.target.closest('a')) $('#side').classList.remove('open'); });
+function route() {
+  if (!ME) return;
+  let v = location.hash.slice(1);
+  const allowed = nav().flatMap(g => g[1].map(i => i[0]));
+  if (!allowed.includes(v)) { v = 'tong-quan'; history.replaceState(null, '', '#tong-quan'); }
+  markNav();
+  const label = nav().flatMap(g => g[1]).find(i => i[0] === v)[1];
+  $('#pageTitle').textContent = label; document.title = label + ' · Quản lý bảo hành';
+  const main = $('#main');
+  main.innerHTML = '<div class="empty">Đang tải…</div>';
+  const fn = v.startsWith('dm-') ? () => VIEWS.catalog(v.slice(3)) : VIEWS[v];
+  Promise.resolve(fn()).catch(fail);
+}
+window.addEventListener('hashchange', route);
+
+async function boot() {
+  try { META = await api('/api/meta'); } catch (e) { showLogin(); return; }
+  ME = META.user;
+  $('#meName').textContent = ME.fullName; $('#meRole').textContent = ME.roleLabel; $('#meAv').textContent = (ME.fullName.trim().split(/\s+/).pop() || '?')[0].toUpperCase();
+  $('#loginView').hidden = true; $('#appView').hidden = false;
+  try { SHOP = (await api('/api/public/shop')).name || ''; } catch (e) {}
+  renderSide(); refreshBadges(); route();
+}
+const entity = key => META.entities.find(e => e.key === key);
+
+/* =================== TỔNG QUAN =================== */
+VIEWS['tong-quan'] = async () => {
+  const d = await api('/api/dashboard');
+  BADGES = {open: d.open_tickets, low: d.low_stock, req: d.new_requests, ntf: d.notify_failed}; renderSide();
+  const tiles = [
+    ['Phiếu đang xử lý', d.open_tickets, 'phieu', 'OPEN', false, 'clipboard', ''],
+    ['Quá hẹn trả khách', d.overdue_tickets, 'phieu', 'OVERDUE', d.overdue_tickets > 0, 'clock', 'bad'],
+    ['Sửa xong – chờ khách nhận', d.ready_tickets, 'phieu', 'READY', false, 'check', 'ok'],
+    ['Báo giá chờ khách duyệt', d.pending_quotes, 'phieu', 'QUOTE', false, 'coin', 'warn'],
+  ];
+  if (is('TECHNICIAN')) tiles.unshift(['Phiếu của tôi', d.my_tickets, 'phieu', 'MINE', false, 'wrench', 'vio']);
+  tiles.push(['Yêu cầu online mới', d.new_requests, 'yeu-cau', '', false, 'inbox', 'vio']);
+  tiles.push(['Bảo hành còn hạn', d.active_warranties, 'bao-hanh', 'active', false, 'shield', 'ok'], ['Sắp hết hạn (≤ 30 ngày)', d.expiring_soon, 'bao-hanh', 'expiring', false, 'alert', 'warn'],
+    ['Linh kiện sắp hết', d.low_stock, 'dm-part', '', d.low_stock > 0, 'box', 'bad']);
+  if (is('ADMIN')) tiles.push(['Doanh thu dịch vụ tháng này', money(d.month_revenue), 'bao-cao', '', false, 'chart', '']);
+  const max = Math.max(1, ...Object.values(d.by_status));
+  $('#main').innerHTML = `<h1>Xin chào, ${h(ME.fullName.split(' ').pop())} 👋</h1><p class="sub">Hôm nay ${fd(d.today)} · ${d.month_received} phiếu nhận trong tháng · ${d.total_warranties} sản phẩm đã kích hoạt bảo hành</p>
+    <div class="grid tiles">${tiles.map((t, i) => `<div class="card tile ${t[4] ? 'hot' : ''}" data-i="${i}" tabindex="0"><div class="ic ${t[6]}">${icon(t[5])}</div><div><b class="${typeof t[1] === 'number' ? '' : 'long'}">${typeof t[1] === 'number' ? num(t[1]) : t[1]}</b><span>${t[0]}</span></div></div>`).join('')}</div>
+    <div class="grid two" style="margin-top:12px">
+      <div class="card"><div class="head" style="margin:0 0 6px"><h2 style="margin:0">Cần xử lý</h2>${is('ADMIN','RECEPTION') ? '<button class="btn acc sm" id="qRecv">' + icon('plus') + 'Tiếp nhận máy</button>' : ''}</div>
+        ${d.todo.length ? `<div class="tbl"><table><tbody>${d.todo.map(t => `<tr class="click" data-id="${t.id}"><td><b class="mono">${h(t.code)}</b><div class="small">${h(t.product_name)}</div></td>
+          <td>${statusPill(t)}<div class="small">${todoHint(t)}</div></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Không có việc tồn đọng.</div>'}</div>
+      <div class="card"><h2>Phiếu theo trạng thái</h2>${Object.entries(d.by_status).map(([k, v]) => `<div class="bar"><span>${h(META.statuses[k])}</span><div><i style="width:${v / max * 100}%"></i></div><em>${v}</em></div>`).join('')}</div>
+    </div>`;
+  $$('.tile').forEach(el => el.onclick = el.onkeydown = e => { if (e.type === 'keydown' && e.key !== 'Enter') return; const t = tiles[el.dataset.i]; FILTER[t[2]] = t[3]; location.hash = t[2]; });
+  $$('#main tr[data-id]').forEach(r => r.onclick = () => openTicket(r.dataset.id));
+  const q = $('#qRecv'); if (q) q.onclick = () => openReceive();
+};
+function todoHint(t) {
+  if (t.quote_status === 'PENDING') return 'Gọi khách duyệt giá: ' + h(t.customer_phone) + ' · ' + money(t.total);
+  if (t.status === 'READY') return 'Gọi khách nhận máy: ' + h(t.customer_phone);
+  if (t.status === 'REJECTED') return 'Chờ trả máy cho khách';
+  if (t.status === 'RECEIVED') return t.technician_name ? 'Chờ ' + h(t.technician_name) + ' kiểm tra' : 'Chưa phân công kỹ thuật viên';
+  return 'Hẹn trả ' + fd(t.due_date) + (t.technician_name ? ' · ' + h(t.technician_name) : '');
+}
+const FILTER = {phieu: 'OPEN', 'bao-hanh': ''};
+
+/* =================== TRA CỨU =================== */
+VIEWS['tra-cuu'] = () => {
+  $('#main').innerHTML = `<h1>Tra cứu bảo hành</h1><p class="sub">Nhập Serial/IMEI, số điện thoại khách, mã bảo hành, mã phiếu hoặc số hóa đơn sửa chữa.</p>
+    <form class="row" id="lkF" style="max-width:720px"><input id="lkQ" style="flex:1;font-size:17px;min-height:50px" placeholder="vd: 356789104523871 hoặc 0903123456" autocomplete="off"><button class="btn acc" style="min-height:50px">Tra cứu</button></form>
+    <div id="lkR" style="margin-top:18px"></div>`;
+  $('#lkQ').focus();
+  $('#lkF').onsubmit = async e => {
+    e.preventDefault(); const q = $('#lkQ').value.trim(); if (!q) return;
+    try {
+      const res = await api('/api/lookup?q=' + encodeURIComponent(q));
+      $('#lkR').innerHTML = res.length ? res.map(w => `<div class="card" style="margin-bottom:12px">${warrantyBlock(w)}</div>`).join('')
+        : `<div class="card empty">Không tìm thấy bảo hành cho “${h(q)}”.${is('ADMIN','RECEPTION') ? '<br><a href="#kich-hoat">Kích hoạt bảo hành mới</a>' : ''}</div>`;
+      bindWarrantyBlock($('#lkR'));
+    } catch (err) { fail(err); }
+  };
+};
+function warrantyBlock(w) {
+  const total = Math.max(1, new Date(w.expiry_date) - new Date(w.purchase_date));
+  const used = Math.min(1, Math.max(0, (Date.now() - new Date(w.purchase_date)) / total));
+  const ts = w.tickets || [], open = ts.some(t => !['RETURNED','CANCELLED'].includes(t.status));
+  return `<div class="row" style="justify-content:space-between"><h2 style="margin:0">${h(w.product_name)}</h2>${wPill(w)}</div>
+    <div class="small">Serial <b>${h(w.serial)}</b> · Mã BH ${h(w.code)} · ${h(w.brand_name)} · ${h(w.category_name)}</div>
+    <div class="meter ${w.active ? '' : 'exp'}"><i style="width:${used * 100}%"></i></div>
+    <div class="row small" style="justify-content:space-between"><span>Mua ${fd(w.purchase_date)}</span><span>${w.active ? 'Còn ' + w.days_left + ' ngày' : 'Đã hết hạn ' + (-w.days_left) + ' ngày'}</span><span>Hết hạn ${fd(w.expiry_date)}</span></div>
+    <div class="kv"><div><span>Khách hàng</span><b>${h(w.customer_name)}</b></div><div><span>Điện thoại</span><b>${h(w.customer_phone)}</b></div>
+      <div><span>Hóa đơn bán</span><b>${h(w.invoice_no || '–')}</b></div><div><span>Thời hạn</span><b>${w.months} tháng</b></div>
+      <div><span>Địa chỉ khách</span><b>${h(w.customer_address || '—')}</b></div><div><span>Email khách</span><b>${h(w.customer_email || '—')}</b></div></div>
+    ${(w.extensions || []).length ? `<h3>Gói bảo hành mở rộng</h3><div class="tbl"><table><thead><tr><th>Mã</th><th>Ngày mua</th><th class="r">Thêm</th><th>Hạn cũ → mới</th><th class="r">Giá</th><th>Người bán</th></tr></thead><tbody>
+      ${w.extensions.map(e => `<tr><td class="mono">${h(e.code)}</td><td>${fd(e.created_at)}</td><td class="r">+${e.months} tháng</td><td>${fd(e.old_expiry)} → <b>${fd(e.new_expiry)}</b></td><td class="r">${money(e.price)}</td><td>${h(e.user_name)}</td></tr>`).join('')}</tbody></table></div>` : ''}
+    <h3>Lịch sử bảo hành (${ts.length})</h3>
+    ${ts.length ? `<div class="tbl"><table class="stack"><thead><tr><th>Mã phiếu</th><th>Lỗi</th><th>Ngày nhận</th><th>Trạng thái</th></tr></thead><tbody>${ts.map(t => `<tr class="click" data-tid="${t.id}"><td class="mono">${h(t.code)}</td><td>${h(t.issue)}</td><td>${fd(t.received_at)}</td><td>${statusPill(t)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="small">Chưa có lần bảo hành nào.</p>'}
+    <div class="row" style="margin-top:10px">${!open && is('ADMIN','RECEPTION') ? `<button class="btn acc sm" data-recv="${h(w.serial)}">Tiếp nhận máy này</button>` : ''}
+      <button class="btn ghost sm" data-cert="${w.id}">In phiếu bảo hành điện tử</button>
+      ${w.active && is('ADMIN','RECEPTION') ? `<button class="btn ghost sm" data-ext="${w.id}">Bán gói bảo hành mở rộng</button>` : ''}
+      ${is('ADMIN') && !ts.length ? `<button class="btn danger sm" data-delw="${w.id}">Xóa bảo hành</button>` : ''}</div>`;
+}
+function bindWarrantyBlock(root, after) {
+  $$('[data-tid]', root).forEach(r => r.onclick = () => openTicket(r.dataset.tid));
+  $$('[data-recv]', root).forEach(b => b.onclick = () => openReceive(b.dataset.recv));
+  $$('[data-cert]', root).forEach(b => b.onclick = () => printDoc('bao-hanh', b.dataset.cert));
+  $$('[data-ext]', root).forEach(b => b.onclick = () => extendDialog(b.dataset.ext, after));
+  $$('[data-delw]', root).forEach(b => b.onclick = async () => {
+    if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Bấm lần nữa để xóa'; return; }
+    try { await api('/api/warranties/' + b.dataset.delw, {method: 'DELETE'}); toast('Đã xóa bảo hành'); closeModal(); (after || route)(); } catch (e) { fail(e); }
+  });
+}
+
+function extendDialog(wid, after) {
+  const b = openModal(`<h2>Bán gói bảo hành mở rộng</h2><p class="sub">Cộng thêm thời hạn vào hạn bảo hành hiện tại. Chỉ áp dụng cho máy còn hạn.</p><form id="exF">
+    <div class="chips">${[[6,'Gói Bạc 6 tháng'],[12,'Gói Vàng 12 tháng'],[24,'Gói Kim cương 24 tháng']].map(([m, l]) => `<button type="button" class="chip" data-m="${m}">${l}</button>`).join('')}</div>
+    <div class="cols"><div class="f"><label class="req" for="exM">Số tháng thêm</label><input id="exM" name="months" type="number" min="1" max="36" required value="12"></div>
+      <div class="f"><label class="req" for="exP">Giá gói (đ)</label><input id="exP" name="price" inputmode="numeric" required value="0"></div></div>
+    <div class="f"><label for="exH">Hình thức thanh toán</label><select id="exH" name="method"><option value="">— Chọn (khi giá > 0) —</option>${Object.entries(META.pay_methods).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
+    <div class="f"><label for="exN">Ghi chú</label><input id="exN" name="note"></div>
+    <div class="row"><button class="btn acc">Xác nhận bán gói</button><label class="row" style="margin:0;font-weight:400"><input type="checkbox" id="exPr" checked> In lại phiếu bảo hành</label></div></form>`, 'modal2');
+  $$('[data-m]', b).forEach(c => c.onclick = () => { $('#exM', b).value = c.dataset.m; $('#exN', b).value = c.textContent; $$('[data-m]', b).forEach(x => x.classList.toggle('on', x === c)); });
+  $('#exF', b).onsubmit = async e => {
+    e.preventDefault();
+    const f = formData(e.target); f.price = String(f.price).replace(/[.,\s]/g, '');
+    try { const w = await post(`/api/warranties/${wid}/extend`, f); closeModal('modal2'); toast('Đã gia hạn đến ' + fd(w.expiry_date)); if ($('#exPr', b).checked) printDoc('bao-hanh', wid);
+      const m = $('#modal.open #modalBody'); if (m) { m.innerHTML = '<button class="x" data-close aria-label="Đóng">×</button>' + warrantyBlock(w); bindWarrantyBlock(m, after); } else if (after) after(); }
+    catch (err) { fail(err); }
+  };
+}
+
+/* =================== PHIẾU BẢO HÀNH =================== */
+VIEWS['phieu'] = async () => {
+  const chips = [['OPEN','Đang xử lý'],['OVERDUE','Quá hẹn'],['QUOTE','Chờ duyệt giá']];
+  if (is('TECHNICIAN')) chips.unshift(['MINE','Của tôi']);
+  chips.push(['', 'Tất cả'], ...Object.entries(META.statuses));
+  $('#main').innerHTML = `<div class="head"><div><h1>Phiếu bảo hành</h1><p class="sub" style="margin:0">Máy khách gửi tại cửa hàng và tiến độ xử lý.</p></div>
+    ${is('ADMIN','RECEPTION') ? '<button class="btn acc" id="recvBtn">+ Tiếp nhận máy</button>' : ''}</div>
+    <div class="chips" id="tCh">${chips.map(([k, v]) => `<button class="chip ${k === FILTER.phieu ? 'on' : ''}" data-k="${k}">${h(v)}</button>`).join('')}</div>
+    <input id="tQ" placeholder="Tìm mã phiếu, serial, tên, SĐT, kỹ thuật viên…" style="max-width:420px;margin-bottom:10px">
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã phiếu</th><th>Sản phẩm</th><th>Khách hàng</th><th>Nhận / Hẹn</th><th>Kỹ thuật viên</th><th class="r">Chi phí</th><th>Trạng thái</th></tr></thead><tbody id="tB"></tbody></table></div></div>`;
+  const load = async () => {
+    const list = await api(`/api/tickets?status=${FILTER.phieu}&q=${encodeURIComponent($('#tQ').value)}`);
+    $('#tB').innerHTML = list.length ? list.map(t => `<tr class="click" data-id="${t.id}">
+      <td><b class="mono">${h(t.code)}</b>${t.in_warranty ? '' : '<div><span class="pill warn">Ngoài BH</span></div>'}</td>
+      <td>${h(t.product_name)}<div class="small">${h(t.serial)}</div></td><td>${h(t.customer_name)}<div class="small">${h(t.customer_phone)}</div></td>
+      <td class="mono">${fd(t.received_at)}<div class="small">Hẹn ${fd(t.due_date)}</div></td><td>${h(t.technician_name || '—')}</td>
+      <td class="r">${t.total ? money(t.total) : '—'}</td><td>${statusPill(t)}</td></tr>`).join('') : '<tr><td colspan="7" class="empty">Không có phiếu nào.</td></tr>';
+    $$('#tB tr[data-id]').forEach(r => r.onclick = () => openTicket(r.dataset.id));
+  };
+  $$('#tCh .chip').forEach(c => c.onclick = () => { FILTER.phieu = c.dataset.k; $$('#tCh .chip').forEach(x => x.classList.toggle('on', x === c)); load().catch(fail); });
+  $('#tQ').oninput = debounce(() => load().catch(fail));
+  const rb = $('#recvBtn'); if (rb) rb.onclick = () => openReceive();
+  VIEWS._reloadTickets = load;
+  await load();
+};
+
+async function openReceive(serial) {
+  const techs = await api('/api/technicians');
+  const b = openModal(`<h2>Tiếp nhận máy bảo hành</h2><form id="rcF">
+    <div class="f"><label class="req" for="rs">Số Serial / IMEI</label><input id="rs" name="serial" required autocomplete="off" value="${h(serial || '')}"><div id="rsChk"></div></div>
+    <div class="f"><label class="req" for="ri">Lỗi khách báo</label><textarea id="ri" name="issue" required></textarea></div>
+    <div class="cols"><div class="f"><label for="ra">Phụ kiện kèm theo</label><input id="ra" name="accessories" placeholder="Máy, sạc, hộp…"></div>
+      <div class="f"><label for="rc">Tình trạng ngoại quan</label><input id="rc" name="condition" placeholder="Trầy, móp…"></div>
+      <div class="f"><label for="rd">Ngày hẹn trả</label><input id="rd" name="due_date" type="date" value="${plusDays(7)}" min="${today()}"></div>
+      <div class="f"><label for="rt">Phân công kỹ thuật viên</label><select id="rt" name="technician_id">${opts(techs, '', '— Chưa phân công —')}</select></div></div>
+    <div class="row"><button class="btn acc">Tạo phiếu</button><label class="row" style="margin:0;font-weight:400"><input type="checkbox" id="rp" checked> In phiếu tiếp nhận</label></div></form>`);
+  const chk = async () => {
+    const s = $('#rs', b).value.trim(), box = $('#rsChk', b);
+    if (s.length < 3) { box.innerHTML = ''; return; }
+    const r = await api('/api/serial?s=' + encodeURIComponent(s)).catch(() => ({found: false}));
+    if (!r.found) { box.innerHTML = '<div class="hint" style="color:var(--bad)">Serial chưa được kích hoạt bảo hành tại cửa hàng.</div>'; return; }
+    const w = r.warranty, open = (w.tickets || []).find(t => !['RETURNED','CANCELLED'].includes(t.status));
+    box.innerHTML = `<div class="hint"><b>${h(w.product_name)}</b> – ${h(w.customer_name)} (${h(w.customer_phone)})<br>${wPill(w)} hết hạn ${fd(w.expiry_date)}${w.active ? '' : ' · <b>Sửa có tính phí, cần báo giá</b>'}
+      ${open ? `<br><span style="color:var(--bad)">Đang có phiếu chưa đóng: ${h(open.code)}</span>` : ''}</div>`;
+  };
+  $('#rs', b).oninput = debounce(chk, 300); if (serial) chk(); else $('#rs', b).focus();
+  $('#rcF', b).onsubmit = async e => {
+    e.preventDefault();
+    try { const t = await post('/api/tickets', formData(e.target)); toast('Đã tạo phiếu ' + t.code); if ($('#rp', b).checked) printDoc('tiep-nhan', t.id);
+      refreshBadges(); openTicket(t.id); if (location.hash === '#phieu' && VIEWS._reloadTickets) VIEWS._reloadTickets(); }
+    catch (err) { fail(err); }
+  };
+}
+
+async function openTicket(id) {
+  let t;
+  try { t = await api('/api/tickets/' + id); } catch (e) { return fail(e); }
+  const a = t.actions, w = t.warranty;
+  const reload = async () => { await openTicket(id); refreshBadges(); if (location.hash === '#phieu' && VIEWS._reloadTickets) VIEWS._reloadTickets().catch(() => {}); else if (location.hash === '#tong-quan') route(); };
+  const parts = t.parts.length ? `<div class="tbl"><table><thead><tr><th>Linh kiện</th><th class="r">SL</th><th class="r">Đơn giá</th><th class="r">Thành tiền</th>${a.edit_cost ? '<th></th>' : ''}</tr></thead><tbody>
+    ${t.parts.map(p => `<tr><td>${h(p.name)}<div class="small">${h(p.code)}</div></td><td class="r">${p.qty}</td><td class="r">${money(p.unit_price)}</td>
+    <td class="r">${p.charged ? money(p.amount) : '<span class="pill ok">Miễn phí BH</span>'}</td>${a.edit_cost ? `<td class="r"><button class="btn ghost sm" data-rmp="${p.id}">Bỏ</button></td>` : ''}</tr>`).join('')}</tbody></table></div>` : '<p class="small">Chưa dùng linh kiện.</p>';
+  const nextChips = a.next.map((s, i) => `<button type="button" class="chip ${i === 0 ? 'on' : ''}" data-s="${s}">${h(META.statuses[s])}</button>`).join('');
+  const b = openModal(`
+    <div class="small">PHIẾU BẢO HÀNH</div><h2 style="font-size:24px;margin:2px 0 6px">${h(t.code)}</h2>
+    <div class="row">${statusPill(t)} ${t.in_warranty ? '<span class="pill ok">Trong bảo hành</span>' : '<span class="pill warn">Ngoài bảo hành – tính phí</span>'}
+      ${!t.in_warranty ? `<span class="pill">${h(t.quote_label)}</span>` : ''}</div>
+    <div class="kv"><div><span>Sản phẩm</span><b>${h(t.product_name)}</b></div><div><span>Serial / IMEI</span><b>${h(t.serial)}</b></div>
+      <div><span>Khách hàng</span><b>${h(t.customer_name)}</b></div><div><span>Điện thoại</span><b>${h(t.customer_phone)}</b></div>
+      <div><span>Địa chỉ khách</span><b>${h(t.customer_address || '—')}</b></div><div><span>Email khách</span><b>${h(t.customer_email || '—')}</b></div>
+      <div><span>Ngày nhận</span><b>${fdt(t.received_at)}</b></div><div><span>Hẹn trả</span><b>${fd(t.due_date)}</b></div>
+      <div><span>Hạn bảo hành</span><b>${fd(w.expiry_date)}</b></div><div><span>Kỹ thuật viên</span><b>${h(t.technician_name || '—')}</b></div>
+      <div><span>Nhân viên nhận</span><b>${h(t.received_by_name || '—')}</b></div><div><span>Phụ kiện</span><b>${h(t.accessories || '—')}</b></div>
+      <div><span>Ngoại quan</span><b>${h(t.condition_note || '—')}</b></div>${t.service_center_name ? `<div><span>Gửi hãng</span><b>${h(t.service_center_name)}</b></div>` : ''}
+      ${t.invoice_no ? `<div><span>Hóa đơn sửa chữa</span><b>${h(t.invoice_no)}</b></div>` : ''}</div>
+    <p style="margin:6px 0"><span class="small">Lỗi khách báo</span><br>${h(t.issue)}</p>
+    ${t.review ? `<div class="box" style="background:#fffdf6;border-color:#fde7b0;margin-top:8px"><div class="row" style="justify-content:space-between"><b>Khách đánh giá</b>${starStr(t.review.stars)}</div>${t.review.comment ? `<div style="margin-top:4px">${h(t.review.comment)}</div>` : ''}<div class="small">${fdt(t.review.updated_at || t.review.created_at)}</div></div>` : ''}
+    ${t.diagnosis ? `<p style="margin:6px 0"><span class="small">Kết luận kỹ thuật</span><br>${h(t.diagnosis)}</p>` : ''}
+
+    <div class="box"><div class="row" style="justify-content:space-between"><h3>Chi phí</h3><span class="total">${money(t.total)}</span></div>
+      ${parts}
+      <div class="small" style="margin-top:6px">Tiền công: <b>${money(t.labor_cost)}</b> · Linh kiện tính phí: <b>${money(t.parts_charged)}</b> · Linh kiện miễn phí BH: <b>${money(t.parts_free)}</b></div>
+      ${a.edit_cost ? `<form class="row" id="apF" style="margin-top:10px"><select name="part_id" id="apP" style="flex:1 1 240px"><option value="">Đang tải linh kiện…</option></select>
+          <input name="qty" type="number" min="1" value="1" style="width:80px"><button class="btn sm">Thêm linh kiện</button></form>
+        <form class="cols" id="lcF" style="margin-top:10px"><div class="f"><label for="lc1">Tiền công (đ)${t.in_warranty ? ' – trong BH = 0' : ''}</label><input id="lc1" name="labor_cost" inputmode="numeric" value="${t.labor_cost}" ${t.in_warranty ? 'readonly' : ''}></div>
+          <div class="f"><label for="lc2">Kết luận kỹ thuật</label><input id="lc2" name="diagnosis" value="${h(t.diagnosis)}"></div><div><button class="btn sm">Lưu chi phí & kết luận</button></div></form>` : ''}
+      <div class="row" style="margin-top:8px">${a.send_quote ? '<button class="btn acc sm" id="sqB">Gửi báo giá cho khách</button>' : ''}
+        ${a.decide_quote ? `<span class="small">Khách quyết định báo giá ${money(t.total)}:</span><button class="btn acc sm" id="qyB">Khách đồng ý</button><button class="btn danger sm" id="qnB">Khách từ chối</button>` : ''}</div>
+    </div>
+
+    ${a.next.length ? `<form class="box" id="stF"><h3>Cập nhật tiến độ</h3><div class="chips" id="stC">${nextChips}</div>
+      <div id="stX"></div><div class="f"><label for="stN">Ghi chú</label><input id="stN" name="note" placeholder="Kết quả kiểm tra, lý do…"></div>
+      <button class="btn acc">Lưu cập nhật</button></form>` : ''}
+    ${a.assign ? `<form class="box row" id="asF"><label for="asT" style="margin:0">Phân công kỹ thuật viên</label><select id="asT" name="technician_id" style="flex:1 1 200px"></select><button class="btn sm">Phân công</button></form>` : ''}
+    ${a.pay ? `<form class="box" id="pyF"><h3>Thu tiền & trả máy</h3><div class="row" style="justify-content:space-between"><span>Số tiền khách phải trả</span><span class="total">${money(t.total)}</span></div>
+      ${t.total > 0 ? `<div class="f"><label class="req" for="pyM">Hình thức thanh toán</label><select id="pyM" name="method" required><option value="">— Chọn —</option>${Object.entries(META.pay_methods).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>` : '<p class="small">Không thu phí.</p>'}
+      <div class="f"><label for="pyN">Ghi chú</label><input id="pyN" name="note"></div><button class="btn acc">${t.total > 0 ? 'Thu tiền & trả máy' : 'Trả máy cho khách'}</button></form>` : ''}
+
+    <div class="box"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Ảnh tình trạng máy</h3>
+      ${a.photos ? `<label class="btn ghost sm upload">+ Thêm ảnh<input type="file" id="phI" accept="image/jpeg,image/png,image/webp" multiple></label>` : ''}</div>
+      <div class="photos" id="phG"><span class="small">Đang tải…</span></div></div>
+    ${a.cancel ? `<form class="box row" id="cxF"><input name="note" id="cxN" placeholder="Lý do hủy phiếu (bắt buộc)" style="flex:1 1 260px"><button class="btn danger sm">Hủy phiếu</button></form>` : ''}
+
+    <h3>Tiến trình xử lý</h3><ul class="tl">${t.history.map(x => `<li><b>${h(x.status_label)}</b> <span class="small">${fdt(x.time)}${x.user_name ? ' · ' + h(x.user_name) : ''}</span>${x.note ? `<div>${h(x.note)}</div>` : ''}</li>`).join('')}</ul>
+    <div class="row" style="margin-top:10px"><button class="btn ghost sm" data-pr="tiep-nhan">In phiếu tiếp nhận</button>
+      ${['READY','REJECTED','RETURNED'].includes(t.status) ? '<button class="btn ghost sm" data-pr="tra-may">In phiếu trả máy / hóa đơn</button>' : ''}</div>`);
+
+  $$('[data-pr]', b).forEach(x => x.onclick = () => printDoc(x.dataset.pr, id));
+  const act = async (p, msg) => { try { await p; await reload(); if (msg) toast(msg); } catch (e) { fail(e); } };
+  if (a.edit_cost) {
+    options('part', true).then(list => { const sel = $('#apP', b); if (sel) sel.innerHTML = opts(list, '', '— Chọn linh kiện —'); });
+    $('#apF', b).onsubmit = e => { e.preventDefault(); const f = formData(e.target); if (!f.part_id) return toast('Chọn linh kiện', true); act(post(`/api/tickets/${id}/parts`, f)); };
+    $('#lcF', b).onsubmit = e => { e.preventDefault(); act(post(`/api/tickets/${id}/cost`, formData(e.target)), 'Đã lưu chi phí'); };
+    $$('[data-rmp]', b).forEach(x => x.onclick = () => act(api(`/api/tickets/${id}/parts/${x.dataset.rmp}`, {method: 'DELETE'})));
+  }
+  if ($('#sqB', b)) $('#sqB', b).onclick = () => act(post(`/api/tickets/${id}/quote`), 'Đã gửi báo giá');
+  if ($('#qyB', b)) $('#qyB', b).onclick = () => act(post(`/api/tickets/${id}/quote-decision`, {approve: true}));
+  if ($('#qnB', b)) $('#qnB', b).onclick = () => act(post(`/api/tickets/${id}/quote-decision`, {approve: false}));
+  if (a.next.length) {
+    let chosen = a.next[0];
+    const extra = async () => {
+      const x = $('#stX', b);
+      if (chosen === 'SENT_TO_VENDOR') { const sc = await options('service_center'); x.innerHTML = `<div class="f"><label class="req" for="stS">Trung tâm bảo hành hãng</label><select id="stS" name="service_center_id" required>${opts(sc, '', '— Chọn —')}</select></div>`; }
+      else if (['REPAIRING','WAITING_PARTS','SENT_TO_VENDOR','DIAGNOSING'].includes(chosen)) x.innerHTML = `<div class="f"><label for="stD">Đổi ngày hẹn trả (không bắt buộc)</label><input id="stD" name="due_date" type="date" min="${today()}"></div>`;
+      else x.innerHTML = '';
+      $('#stN', b).placeholder = ['REJECTED','CANCELLED'].includes(chosen) ? 'Bắt buộc ghi lý do' : 'Kết quả kiểm tra, ghi chú…';
+    };
+    extra();
+    $$('#stC .chip', b).forEach(c => c.onclick = () => { chosen = c.dataset.s; $$('#stC .chip', b).forEach(y => y.classList.toggle('on', y === c)); extra(); });
+    $('#stF', b).onsubmit = e => { e.preventDefault(); act(post(`/api/tickets/${id}/status`, {...formData(e.target), status: chosen}), 'Đã cập nhật: ' + META.statuses[chosen]); };
+  }
+  if (a.assign) {
+    api('/api/technicians').then(list => { $('#asT', b).innerHTML = opts(list, t.technician_id, '— Chọn —'); });
+    $('#asF', b).onsubmit = e => { e.preventDefault(); act(post(`/api/tickets/${id}/assign`, formData(e.target)), 'Đã phân công'); };
+  }
+  const loadPhotos = async () => {
+    const list = await api(`/api/tickets/${id}/photos`).catch(() => []);
+    $('#phG', b).innerHTML = list.length ? list.map(p => `<figure><img src="/api/photos/${p.id}" alt="${h(p.original_name)}" data-full="/api/photos/${p.id}" loading="lazy">
+      <figcaption title="${h(p.original_name)} · ${h(p.user_name)}">${h(p.note || p.original_name)}</figcaption>
+      ${is('ADMIN') || p.uploaded_by === ME.id ? `<button type="button" data-delp="${p.id}" aria-label="Xóa ảnh">×</button>` : ''}</figure>`).join('')
+      : '<span class="small">Chưa có ảnh. Nên chụp mặt trước, mặt sau và các vết trầy khi nhận máy.</span>';
+    $$('[data-full]', b).forEach(i => i.onclick = () => window.open(i.dataset.full, '_blank'));
+    $$('[data-delp]', b).forEach(x => x.onclick = async () => { if (x.dataset.sure !== '1') { x.dataset.sure = '1'; x.textContent = '?'; return; }
+      try { await api('/api/photos/' + x.dataset.delp, {method: 'DELETE'}); loadPhotos(); } catch (e) { fail(e); } });
+  };
+  loadPhotos();
+  if ($('#phI', b)) $('#phI', b).onchange = async e => {
+    const files = [...e.target.files]; let ok = 0; const bad = [];
+    for (const f of files) {
+      if (f.size > 8 * 1024 * 1024) { bad.push(f.name + ' (quá 8 MB)'); continue; }
+      const res = await fetch(`/api/tickets/${id}/photos`, {method: 'POST', credentials: 'same-origin',
+        headers: {'X-App': '1', 'X-File-Name': encodeURIComponent(f.name), 'Content-Type': 'application/octet-stream'}, body: f});
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) bad.push(f.name + ' (' + (d.error || 'lỗi') + ')'); else ok++;
+    }
+    if (bad.length) toast((ok ? 'Đã thêm ' + ok + ' ảnh. ' : '') + 'Không tải được: ' + bad.join('; '), true);
+    else if (ok) toast('Đã thêm ' + ok + ' ảnh');
+    e.target.value = ''; loadPhotos();
+  };
+  if (a.cancel) $('#cxF', b).onsubmit = e => { e.preventDefault(); if (!$('#cxN', b).value.trim()) return toast('Vui lòng ghi lý do hủy phiếu', true);
+    if (!confirmBtn(e.submitter)) return; act(post(`/api/tickets/${id}/cancel`, formData(e.target)), 'Đã hủy phiếu'); };
+  if (a.pay) $('#pyF', b).onsubmit = async e => {
+    e.preventDefault();
+    try { await post(`/api/tickets/${id}/pay`, formData(e.target)); toast('Đã trả máy cho khách'); printDoc('tra-may', id); await reload(); } catch (err) { fail(err); }
+  };
+}
+
+/* =================== KÍCH HOẠT BẢO HÀNH =================== */
+VIEWS['kich-hoat'] = async () => {
+  const products = await api('/api/catalog/product');
+  $('#main').innerHTML = `<h1>Kích hoạt bảo hành điện tử</h1><p class="sub">Thực hiện ngay khi bán hàng – khách không cần giữ phiếu giấy, tra cứu bằng serial hoặc SĐT.</p>
+    <div id="acD"></div>
+    <form class="card" id="acF" style="max-width:720px">
+      <h3 style="margin-top:0">Sản phẩm</h3>
+      <div class="f"><label class="req" for="ap">Sản phẩm / Model</label><select id="ap" name="product_id" required><option value="">— Chọn sản phẩm —</option>
+        ${products.map(p => `<option value="${p.id}" data-m="${p.default_months}">${h(p.brand_name)} · ${h(p.name)} (${h(p.model_code)})</option>`).join('')}</select></div>
+      <div class="cols"><div class="f"><label class="req" for="as">Số Serial / IMEI</label><input id="as" name="serial" required autocomplete="off"></div>
+        <div class="f"><label for="ai">Số hóa đơn bán</label><input id="ai" name="invoice_no"></div>
+        <div class="f"><label class="req" for="ad">Ngày mua</label><input id="ad" name="purchase_date" type="date" value="${today()}" max="${today()}" required></div>
+        <div class="f"><label for="am">Thời hạn bảo hành (tháng)</label><input id="am" name="months" type="number" min="1" max="120" placeholder="Theo sản phẩm"></div></div>
+      <h3>Khách hàng</h3>
+      <div class="f"><label class="req" for="cp">Số điện thoại</label><input id="cp" name="customer_phone" inputmode="tel" required autocomplete="off"><div id="cpI"></div></div>
+      <div id="newC"><div class="cols"><div class="f"><label class="req" for="cn">Họ tên khách (khách mới)</label><input id="cn" name="customer_name"></div>
+        <div class="f"><label for="ce">Email</label><input id="ce" name="customer_email" type="email"></div></div>
+        <div class="f"><label for="ca">Địa chỉ</label><input id="ca" name="customer_address"></div></div>
+      <div class="f"><label for="an">Ghi chú</label><input id="an" name="note"></div>
+      <div class="row"><button class="btn acc">Kích hoạt bảo hành</button><label class="row" style="margin:0;font-weight:400"><input type="checkbox" id="acP" checked> In phiếu bảo hành điện tử</label></div>
+    </form>`;
+  $('#ap').onchange = e => { const m = e.target.selectedOptions[0]?.dataset.m; $('#am').placeholder = m ? m + ' (theo sản phẩm)' : 'Theo sản phẩm'; };
+  $('#cp').oninput = debounce(async () => {
+    const p = $('#cp').value.replace(/[\s.-]/g, '');
+    if (p.length < 10) { $('#cpI').innerHTML = ''; $('#newC').hidden = false; return; }
+    const r = await api('/api/customer-by-phone?phone=' + encodeURIComponent(p)).catch(() => ({found: false}));
+    $('#newC').hidden = r.found;
+    $('#cpI').innerHTML = r.found ? `<div class="hint">Khách hàng cũ: <b>${h(r.customer.name)}</b>${r.customer.address ? ' · ' + h(r.customer.address) : ''}</div>` : '<div class="hint">Khách hàng mới – nhập họ tên bên dưới.</div>';
+  }, 300);
+  $('#acF').onsubmit = async e => {
+    e.preventDefault();
+    try {
+      const w = await post('/api/warranties', formData(e.target));
+      $('#acD').innerHTML = `<div class="card" style="margin-bottom:12px;max-width:720px;border-left:4px solid var(--acc)"><div class="small">Đã kích hoạt bảo hành điện tử</div>
+        <h2 style="font-size:22px;margin:4px 0">${h(w.code)}</h2><div>${h(w.product_name)} · Serial <b>${h(w.serial)}</b> · ${h(w.customer_name)}</div>
+        <div class="small">Bảo hành ${w.months} tháng, đến hết ngày ${fd(w.expiry_date)}.</div>
+        <button class="btn ghost sm" style="margin-top:8px" id="acPr">In phiếu bảo hành điện tử</button></div>`;
+      $('#acPr').onclick = () => printDoc('bao-hanh', w.id);
+      if ($('#acP').checked) printDoc('bao-hanh', w.id);
+      e.target.reset(); $('#ad').value = today(); $('#cpI').innerHTML = ''; $('#newC').hidden = false;
+      toast('Kích hoạt thành công ' + w.code); window.scrollTo({top: 0, behavior: 'smooth'});
+    } catch (err) { fail(err); }
+  };
+};
+
+/* =================== DANH SÁCH BẢO HÀNH =================== */
+VIEWS['bao-hanh'] = async () => {
+  const chips = [['', 'Tất cả'], ['active', 'Còn hạn'], ['expiring', 'Sắp hết hạn'], ['expired', 'Hết hạn']];
+  $('#main').innerHTML = `<div class="head"><div><h1>Danh sách bảo hành</h1><p class="sub" style="margin:0">Tất cả sản phẩm đã kích hoạt bảo hành tại cửa hàng.</p></div>
+    ${is('ADMIN','RECEPTION') ? '<a class="btn acc" href="#kich-hoat" style="text-decoration:none;display:inline-flex;align-items:center">+ Kích hoạt</a>' : ''}</div>
+    <div class="chips" id="wCh">${chips.map(([k, v]) => `<button class="chip ${k === FILTER['bao-hanh'] ? 'on' : ''}" data-k="${k}">${v}</button>`).join('')}</div>
+    <input id="wQ" placeholder="Tìm serial, mã BH, tên khách, SĐT, sản phẩm, hóa đơn…" style="max-width:420px;margin-bottom:10px">
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã BH</th><th>Sản phẩm / Serial</th><th>Khách hàng</th><th>Ngày mua</th><th>Hết hạn</th><th>Tình trạng</th></tr></thead><tbody id="wB"></tbody></table></div></div>
+    <p class="small" id="wN"></p>`;
+  const load = async () => {
+    const list = await api(`/api/warranties?filter=${FILTER['bao-hanh']}&q=${encodeURIComponent($('#wQ').value)}`);
+    $('#wN').textContent = list.length + ' bảo hành';
+    $('#wB').innerHTML = list.length ? list.map(w => `<tr class="click" data-id="${w.id}"><td class="mono">${h(w.code)}</td>
+      <td>${h(w.product_name)}<div class="small">${h(w.serial)}</div></td><td>${h(w.customer_name)}<div class="small">${h(w.customer_phone)}</div></td>
+      <td class="mono">${fd(w.purchase_date)}</td><td class="mono">${fd(w.expiry_date)}</td><td>${wPill(w)}</td></tr>`).join('') : '<tr><td colspan="6" class="empty">Không có bảo hành nào.</td></tr>';
+    $$('#wB tr[data-id]').forEach(r => r.onclick = async () => {
+      try { const w = await api('/api/warranties/' + r.dataset.id); const b = openModal(warrantyBlock(w)); bindWarrantyBlock(b, load); } catch (e) { fail(e); }
+    });
+  };
+  $$('#wCh .chip').forEach(c => c.onclick = () => { FILTER['bao-hanh'] = c.dataset.k; $$('#wCh .chip').forEach(x => x.classList.toggle('on', x === c)); load().catch(fail); });
+  $('#wQ').oninput = debounce(() => load().catch(fail));
+  await load();
+};
+
+/* =================== DANH MỤC (dùng chung) =================== */
+function cell(r, c) {
+  const v = r[c.name];
+  if (c.format === 'money') return `<td class="r">${money(v)}</td>`;
+  if (c.format === 'int') return `<td class="r">${num(v)}</td>`;
+  if (c.format === 'bool') return `<td>${v ? '<span class="pill ok">Có</span>' : '<span class="pill bad">Không</span>'}</td>`;
+  if (c.format === 'flag') return `<td>${v ? '<span class="pill bad">Sắp hết</span>' : ''}</td>`;
+  return `<td>${h(v)}</td>`;
+}
+VIEWS.catalog = async key => {
+  const d = entity(key);
+  const isPart = key === 'part';
+  $('#main').innerHTML = `<div class="head"><div><h1>${h(d.title)}</h1>${d.hint ? `<p class="sub" style="margin:0">${h(d.hint)}</p>` : ''}</div>
+    <div class="row">${isPart && is('ADMIN','TECHNICIAN') ? '<a class="btn ghost" href="#the-kho" style="text-decoration:none;display:inline-flex;align-items:center">Thẻ kho</a>' : ''}
+    ${d.canWrite ? '<button class="btn acc" id="cAdd">+ Thêm mới</button>' : ''}</div></div>
+    <input id="cQ" placeholder="Tìm kiếm…" style="max-width:420px;margin-bottom:10px">
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr>${d.columns.map(c => `<th class="${['money','int'].includes(c.format) ? 'r' : ''}">${h(c.label)}</th>`).join('')}${isPart && is('ADMIN') ? '<th></th>' : ''}</tr></thead><tbody id="cB"></tbody></table></div></div>
+    <p class="small" id="cN"></p>`;
+  const load = async () => {
+    const list = await api(`/api/catalog/${key}?q=${encodeURIComponent($('#cQ').value)}`);
+    $('#cN').textContent = list.length + ' dòng' + (d.canWrite ? ' · bấm vào một dòng để sửa' : '');
+    $('#cB').innerHTML = list.length ? list.map(r => `<tr class="${d.canWrite ? 'click' : ''}" data-id="${r.id}">${d.columns.map(c => cell(r, c)).join('')}
+      ${isPart && is('ADMIN') ? `<td class="r" style="white-space:nowrap"><button class="btn ghost sm" data-in="${r.id}">Nhập</button> <button class="btn ghost sm" data-adj="${r.id}" data-stock="${r.stock}">Kiểm kê</button></td>` : ''}</tr>`).join('')
+      : `<tr><td colspan="${d.columns.length + 1}" class="empty">Chưa có dữ liệu.</td></tr>`;
+    if (d.canWrite) $$('#cB tr[data-id]').forEach(tr => tr.onclick = e => { if (!e.target.closest('button')) editEntity(key, tr.dataset.id, load); });
+    $$('[data-in]').forEach(x => x.onclick = () => stockDialog('in', x.dataset.in, list.find(r => r.id == x.dataset.in), load));
+    $$('[data-adj]').forEach(x => x.onclick = () => stockDialog('adjust', x.dataset.adj, list.find(r => r.id == x.dataset.adj), load));
+  };
+  $('#cQ').oninput = debounce(() => load().catch(fail));
+  if ($('#cAdd')) $('#cAdd').onclick = () => editEntity(key, 0, load);
+  await load();
+};
+async function editEntity(key, id, after) {
+  const d = entity(key);
+  const rec = id ? await api(`/api/catalog/${key}/${id}`) : {};
+  const refs = {};
+  for (const f of d.fields) if (f.type === 'REF') refs[f.ref] = await options(f.ref, true);
+  const field = f => {
+    if (f.createOnly && id) return '';
+    const v = id ? rec[f.name] : (f.default ?? '');
+    const lab = `<label class="${f.required ? 'req' : ''}" for="e_${f.name}">${h(f.label)}</label>`;
+    let input;
+    switch (f.type) {
+      case 'TEXTAREA': input = `<textarea id="e_${f.name}" name="${f.name}">${h(v)}</textarea>`; break;
+      case 'REF': input = `<select id="e_${f.name}" name="${f.name}" ${f.required ? 'required' : ''}>${opts(refs[f.ref], v, f.required ? '— Chọn —' : '— Không —')}</select>`; break;
+      case 'ENUM': input = `<select id="e_${f.name}" name="${f.name}">${Object.entries(f.options).map(([k, l]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${h(l)}</option>`).join('')}</select>`; break;
+      case 'BOOL': return `<div class="f"><label class="row" style="font-weight:500"><input type="checkbox" id="e_${f.name}" name="${f.name}" ${(id ? v : f.default === 'true') ? 'checked' : ''}> ${h(f.label)}</label></div>`;
+      case 'PASSWORD': input = `<input id="e_${f.name}" name="${f.name}" type="password" autocomplete="new-password" ${id ? '' : 'required'} placeholder="${id ? 'Để trống nếu không đổi' : 'Ít nhất 6 ký tự'}">`; break;
+      case 'INT': case 'MONEY': input = `<input id="e_${f.name}" name="${f.name}" inputmode="numeric" value="${h(v)}" ${f.required ? 'required' : ''}>`; break;
+      case 'PHONE': input = `<input id="e_${f.name}" name="${f.name}" inputmode="tel" value="${h(v)}" ${f.required ? 'required' : ''}>`; break;
+      case 'EMAIL': input = `<input id="e_${f.name}" name="${f.name}" type="email" value="${h(v)}">`; break;
+      default: input = `<input id="e_${f.name}" name="${f.name}" value="${h(v)}" ${f.required ? 'required' : ''}>`;
+    }
+    return `<div class="f">${lab.replace(' (để trống nếu không đổi)', '')}${input}</div>`;
+  };
+  const b = openModal(`<h2>${id ? 'Sửa' : 'Thêm'} ${h(d.title.toLowerCase())}</h2><form id="eF">${d.fields.map(field).join('')}
+    <div class="row" style="justify-content:space-between"><button class="btn acc">Lưu</button>${id && d.canDelete ? '<button type="button" class="btn danger" id="eDel">Xóa</button>' : ''}</div></form>`, 'modal2');
+  $('#eF', b).onsubmit = async e => {
+    e.preventDefault();
+    try { await api(`/api/catalog/${key}${id ? '/' + id : ''}`, {method: id ? 'PUT' : 'POST', body: formData(e.target)}); closeModal('modal2'); toast('Đã lưu'); delete optCache[key]; after(); refreshBadges(); }
+    catch (err) { fail(err); }
+  };
+  const del = $('#eDel', b);
+  if (del) del.onclick = async () => {
+    if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Bấm lần nữa để xóa'; return; }
+    try { await api(`/api/catalog/${key}/${id}`, {method: 'DELETE'}); closeModal('modal2'); toast('Đã xóa'); delete optCache[key]; after(); } catch (err) { fail(err); }
+  };
+}
+function stockDialog(kind, partId, p, after) {
+  const b = openModal(kind === 'in'
+    ? `<h2>Nhập kho</h2><p class="sub">${h(p.code)} – ${h(p.name)} · tồn hiện tại <b>${p.stock}</b> ${h(p.unit)}</p><form id="sF">
+      <div class="cols"><div class="f"><label class="req" for="sq">Số lượng nhập</label><input id="sq" name="qty" type="number" min="1" required></div>
+      <div class="f"><label for="sc">Giá nhập mới (để trống = giữ)</label><input id="sc" name="cost_price" inputmode="numeric" placeholder="${num(p.cost_price)}"></div></div>
+      <div class="f"><label for="sn">Ghi chú / nhà cung cấp</label><input id="sn" name="note"></div><button class="btn acc">Nhập kho</button></form>`
+    : `<h2>Kiểm kê</h2><p class="sub">${h(p.code)} – ${h(p.name)} · tồn trên hệ thống <b>${p.stock}</b> ${h(p.unit)}</p><form id="sF">
+      <div class="f"><label class="req" for="sa">Số tồn thực tế</label><input id="sa" name="actual" type="number" min="0" required></div>
+      <div class="f"><label class="req" for="sn">Lý do chênh lệch</label><input id="sn" name="note" required></div><button class="btn acc">Cập nhật tồn kho</button></form>`, 'modal2');
+  $('#sF', b).onsubmit = async e => {
+    e.preventDefault();
+    try { await post('/api/inventory/' + kind, {...formData(e.target), part_id: partId}); closeModal('modal2'); toast(kind === 'in' ? 'Đã nhập kho' : 'Đã cập nhật tồn kho'); after(); refreshBadges(); }
+    catch (err) { fail(err); }
+  };
+}
+
+/* =================== THẺ KHO =================== */
+VIEWS['the-kho'] = async () => {
+  const parts = await options('part', true);
+  $('#main').innerHTML = `<h1>Thẻ kho</h1><p class="sub">Lịch sử nhập, xuất, hoàn kho và kiểm kê linh kiện.</p>
+    <select id="kP" style="max-width:420px;margin-bottom:10px">${opts(parts, '', 'Tất cả linh kiện')}</select>
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Thời gian</th><th>Linh kiện</th><th>Loại</th><th class="r">Số lượng</th><th>Phiếu</th><th>Người thực hiện</th><th>Ghi chú</th></tr></thead><tbody id="kB"></tbody></table></div></div>`;
+  const load = async () => {
+    const list = await api('/api/inventory/movements?part_id=' + $('#kP').value);
+    $('#kB').innerHTML = list.length ? list.map(m => `<tr><td class="mono">${fdt(m.time)}</td><td>${h(m.name)}<div class="small">${h(m.code)}</div></td><td>${h(m.type_label)}</td>
+      <td class="r" style="color:${m.qty < 0 ? 'var(--bad)' : 'var(--ok)'}">${m.qty > 0 ? '+' : ''}${m.qty}</td><td class="mono">${h(m.ticket_code || '')}</td><td>${h(m.user_name)}</td><td>${h(m.note)}</td></tr>`).join('')
+      : '<tr><td colspan="7" class="empty">Chưa có giao dịch.</td></tr>';
+  };
+  $('#kP').onchange = () => load().catch(fail);
+  await load();
+};
+
+/* =================== BÁO CÁO =================== */
+VIEWS['bao-cao'] = async () => {
+  const y = new Date().getFullYear(), m = new Date().getMonth();
+  const presets = [['12 tháng gần nhất', '', ''], ['Năm nay', y + '-01-01', today()], ['Năm trước', (y - 1) + '-01-01', (y - 1) + '-12-31'],
+    ['Tháng này', `${y}-${String(m + 1).padStart(2, '0')}-01`, today()]];
+  $('#main').innerHTML = `<div class="head"><div><h1>Báo cáo thống kê</h1><p class="sub" style="margin:0" id="rP"></p></div>
+    <form class="row" id="rF"><input type="date" name="from" id="rFr" style="width:auto"><span>→</span><input type="date" name="to" id="rTo" style="width:auto"><button class="btn sm">Xem</button><a class="btn acc sm" id="rX" style="text-decoration:none;display:inline-flex;align-items:center">Xuất Excel</a></form></div>
+    <div class="chips">${presets.map((p, i) => `<button class="chip" data-p="${i}">${p[0]}</button>`).join('')}</div><div id="rB"><div class="empty">Đang tải…</div></div>`;
+  const load = async (from, to) => {
+    const r = await api(`/api/reports?from=${from || ''}&to=${to || ''}`);
+    $('#rFr').value = r.from; $('#rTo').value = r.to;
+    $('#rX').href = `/api/reports/export?from=${r.from}&to=${r.to}`;
+    $('#rP').textContent = `Từ ${fd(r.from)} đến ${fd(r.to)} · phiếu tính theo ngày nhận, doanh thu theo ngày trả máy`;
+    const s = r.summary;
+    const tiles = [['Máy kích hoạt BH', num(s.warranties_sold)], ['Phiếu tiếp nhận', num(s.received)], ['Phiếu đã trả khách', num(s.returned)],
+      ['Doanh thu dịch vụ', money(s.revenue)], ['Thời gian xử lý TB', s.avg_days + ' ngày'], ['Tỷ lệ còn bảo hành', s.received ? Math.round(s.in_warranty * 100 / s.received) + '%' : '—']];
+    const maxRate = Math.max(1, ...r.by_brand.map(b => b.rate));
+    $('#rB').innerHTML = `<div class="grid tiles">${tiles.map((t, i) => { const [ic, c] = [['shield-plus',''],['clipboard','vio'],['check','ok'],['coin','warn'],['clock',''],['shield','ok'],['chart','vio']][i] || ['chart',''];
+      return `<div class="card tile" style="cursor:default"><div class="ic ${c}">${icon(ic)}</div><div><b class="${String(t[1]).length > 9 ? 'long' : ''}">${t[1]}</b><span>${t[0]}</span></div></div>`; }).join('')}</div>
+      <div class="card" style="margin-top:12px"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Phiếu và doanh thu theo tháng</h2>
+        <div class="legend"><span><i style="background:#2563eb"></i>Phiếu nhận</span><span><i style="background:#93c5fd"></i>Phiếu trả</span><span><i style="background:#f59e0b"></i>Doanh thu</span></div></div>
+        <div class="chart" id="rC"><svg></svg></div></div>
+      <div class="grid two" style="margin-top:12px">
+        <div class="card"><h2>Tỷ lệ phải bảo hành theo hãng</h2><p class="small" style="margin-top:-6px">Số phiếu trong kỳ / tổng số máy đã kích hoạt của hãng</p>
+          ${r.by_brand.map(b => `<div class="bar" style="grid-template-columns:6em minmax(0,1fr) 7.5em"><span>${h(b.brand)}</span><div><i style="width:${b.rate / maxRate * 100}%;background:var(--acc)"></i></div><em>${b.rate}% <span class="small">(${b.tickets}/${b.sold})</span></em></div>`).join('') || '<div class="empty">Không có dữ liệu</div>'}</div>
+        <div class="card"><h2>Model phải bảo hành nhiều</h2><div class="tbl"><table><thead><tr><th>Sản phẩm</th><th>Hãng</th><th class="r">Phiếu</th></tr></thead><tbody>
+          ${r.top_models.map(p => `<tr><td>${h(p.product)}<div class="small">${h(p.model_code)}</div></td><td>${h(p.brand)}</td><td class="r">${p.tickets}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">Không có dữ liệu</td></tr>'}</tbody></table></div></div>
+        <div class="card"><h2>Năng suất kỹ thuật viên</h2><div class="tbl"><table><thead><tr><th>Kỹ thuật viên</th><th class="r">Được giao</th><th class="r">Hoàn thành</th><th class="r">Đang xử lý</th><th class="r">TB ngày</th></tr></thead><tbody>
+          ${r.by_technician.map(t => `<tr><td>${h(t.technician)}</td><td class="r">${t.assigned}</td><td class="r">${t.completed}</td><td class="r">${t.in_progress}</td><td class="r">${t.avg_days ?? '—'}</td></tr>`).join('')}</tbody></table></div></div>
+        <div class="card"><h2>Linh kiện sử dụng</h2><div class="tbl"><table><thead><tr><th>Linh kiện</th><th class="r">SL</th><th class="r">Thu khách</th><th class="r">Miễn phí BH</th></tr></thead><tbody>
+          ${r.parts_usage.map(p => `<tr><td>${h(p.name)}<div class="small">${h(p.code)}</div></td><td class="r">${p.qty}</td><td class="r">${money(p.charged_value)}</td><td class="r">${money(p.free_value)}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Không có dữ liệu</td></tr>'}</tbody></table></div></div>
+      </div>
+      <div class="card" style="margin-top:12px"><h2>Cơ cấu doanh thu</h2><div class="kv"><div><span>Tiền công</span><b>${money(s.labor)}</b></div><div><span>Tiền linh kiện thu khách</span><b>${money(s.parts_revenue)}</b></div>
+        <div><span>Giá vốn linh kiện đã dùng (gồm cả BH)</span><b>${money(s.parts_cost)}</b></div><div><span>Phiếu từ chối bảo hành</span><b>${num(s.rejected)}</b></div>
+        <div><span>Gói BH mở rộng đã bán</span><b>${num(s.extensions_sold)} gói · ${money(s.extension_revenue)}</b></div><div><span>Yêu cầu bảo hành online</span><b>${num(s.requests_online)}</b></div></div></div>
+      ${reviewsCard(r.reviews)}`;
+    drawMonthly($('#rC'), r.monthly);
+  };
+  $('#rF').onsubmit = e => { e.preventDefault(); load($('#rFr').value, $('#rTo').value).catch(fail); };
+  $$('.chips .chip').forEach(c => c.onclick = () => { const p = presets[c.dataset.p]; load(p[1], p[2]).catch(fail); });
+  await load();
+};
+function drawMonthly(box, data) {
+  const svg = box.querySelector('svg');
+  const draw = () => {
+    const W = box.clientWidth, H = box.clientHeight, pl = 34, pr = 64, pt = 10, pb = 28;
+    if (!W || !data.length) return;
+    const n = data.length, gw = (W - pl - pr) / n, bw = Math.max(3, Math.min(18, gw / 3));
+    const maxC = Math.max(1, ...data.map(d => Math.max(d.received, d.returned))), maxR = Math.max(1, ...data.map(d => d.revenue));
+    const y = v => pt + (H - pt - pb) * (1 - v / maxC), yr = v => pt + (H - pt - pb) * (1 - v / maxR);
+    const ink = '#2563eb';
+    let g = '';
+    for (let i = 0; i <= 4; i++) { const v = Math.round(maxC * i / 4), yy = y(v); g += `<line x1="${pl}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="currentColor" opacity=".12"/><text x="${pl - 6}" y="${yy + 4}" text-anchor="end" font-size="11" fill="currentColor" opacity=".6">${v}</text>`; }
+    g += `<text x="${W - pr + 6}" y="${pt + 10}" font-size="11" fill="#f59e0b">${(maxR / 1e6).toFixed(1)} tr</text><text x="${W - pr + 6}" y="${H - pb}" font-size="11" fill="#f59e0b">0</text>`;
+    data.forEach((d, i) => {
+      const cx = pl + gw * i + gw / 2;
+      g += `<rect x="${cx - bw - 1}" y="${y(d.received)}" width="${bw}" height="${H - pb - y(d.received)}" fill="${ink}" rx="3"><title>${d.label}: nhận ${d.received}</title></rect>`;
+      g += `<rect x="${cx + 1}" y="${y(d.returned)}" width="${bw}" height="${H - pb - y(d.returned)}" fill="#93c5fd" rx="3"><title>${d.label}: trả ${d.returned}</title></rect>`;
+      if (W > 520 || i % 2 === 0) g += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="currentColor" opacity=".7">${d.label.slice(0, W > 700 ? 7 : 2)}</text>`;
+    });
+    const pts = data.map((d, i) => `${pl + gw * i + gw / 2},${yr(d.revenue)}`).join(' ');
+    g += `<polyline points="${pts}" fill="none" stroke="#f59e0b" stroke-width="2.5"/>` + data.map((d, i) => `<circle cx="${pl + gw * i + gw / 2}" cy="${yr(d.revenue)}" r="3.5" fill="#f59e0b"><title>${d.label}: ${money(d.revenue)}</title></circle>`).join('');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.innerHTML = g;
+  };
+  const ro = new ResizeObserver(draw); ro.observe(box); draw();
+}
+
+/* =================== YÊU CẦU ONLINE =================== */
+FILTER['yeu-cau'] = 'OPEN';
+VIEWS['yeu-cau'] = async () => {
+  const chips = [['OPEN','Cần xử lý'], ['', 'Tất cả'], ...Object.entries(META.request_labels)];
+  $('#main').innerHTML = `<h1>Yêu cầu bảo hành online</h1><p class="sub">Khách gửi từ cổng khách hàng. Hẹn lịch → khi khách mang máy tới bấm "Tiếp nhận máy" để tạo phiếu.</p>
+    <div class="chips" id="rqC">${chips.map(([k, v]) => `<button class="chip ${k === FILTER['yeu-cau'] ? 'on' : ''}" data-k="${k}">${h(v)}</button>`).join('')}</div>
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã</th><th>Khách hàng</th><th>Sản phẩm</th><th>Lỗi khách mô tả</th><th>Khách muốn</th><th>Hẹn</th><th>Trạng thái</th><th></th></tr></thead><tbody id="rqB"></tbody></table></div></div>`;
+  const load = async () => {
+    const list = await api('/api/requests?status=' + FILTER['yeu-cau']);
+    $('#rqB').innerHTML = list.length ? list.map(r => `<tr><td class="mono">${h(r.code)}<div class="small">${fdt(r.created_at)}</div></td>
+      <td>${h(r.customer_name)}<div class="small">${h(r.customer_phone)}</div></td><td>${h(r.product_name)}<div class="small">${h(r.serial)} · ${r.active ? 'còn BH' : 'hết BH'}</div></td>
+      <td>${h(r.issue)}${r.staff_note ? `<div class="small">Cửa hàng: ${h(r.staff_note)}</div>` : ''}</td><td>${fd(r.preferred_date) || '—'}</td><td>${fd(r.appointment) || '—'}</td>
+      <td><span class="pill ${r.status === 'NEW' ? 'acc' : r.status === 'CONVERTED' ? 'ok' : ['REJECTED','CANCELLED'].includes(r.status) ? 'bad' : ''}">${h(r.status_label)}</span>${r.ticket_code ? `<div class="small">${h(r.ticket_code)}</div>` : ''}</td>
+      <td style="white-space:nowrap">${['NEW','CONFIRMED'].includes(r.status) && is('ADMIN','RECEPTION') ? `<button class="btn ghost sm" data-rq="${r.id}">Xử lý</button>` : (r.ticket_id ? `<button class="btn ghost sm" data-rt="${r.ticket_id}">Mở phiếu</button>` : '')}</td></tr>`).join('')
+      : '<tr><td colspan="8" class="empty">Không có yêu cầu nào.</td></tr>';
+    $$('[data-rt]').forEach(x => x.onclick = () => openTicket(x.dataset.rt));
+    $$('[data-rq]').forEach(x => x.onclick = () => requestDialog(list.find(r => r.id == x.dataset.rq), () => { load(); refreshBadges(); }));
+  };
+  $$('#rqC .chip').forEach(c => c.onclick = () => { FILTER['yeu-cau'] = c.dataset.k; $$('#rqC .chip').forEach(x => x.classList.toggle('on', x === c)); load().catch(fail); });
+  await load();
+};
+const starStr = n => '<span style="white-space:nowrap;letter-spacing:1px"><span style="color:#f59e0b">' + '★'.repeat(n) + '</span><span style="color:#cbd5e1">' + '★'.repeat(5 - n) + '</span></span>';
+function reviewsCard(rv) {
+  if (!rv) return '';
+  const max = Math.max(1, ...rv.dist);
+  return `<div class="card" style="margin-top:12px"><div class="head" style="margin-bottom:8px"><h2 style="margin:0">Đánh giá của khách hàng</h2>
+      <span class="small">${num(rv.count)} đánh giá · ${rv.response_rate}% khách đã trả máy có đánh giá</span></div>
+    <div class="grid two"><div><div style="display:flex;gap:18px;align-items:center;margin-bottom:6px"><div style="font-size:44px;font-weight:700;line-height:1;color:var(--acct)">${rv.count ? rv.avg.toFixed(1) : '—'}</div>
+        <div>${starStr(Math.round(rv.avg))}<div class="small">trên 5 sao</div></div></div>
+      ${rv.dist.map((v, i) => `<div class="bar" style="grid-template-columns:4em minmax(0,1fr) 3em"><span>${5 - i} sao</span><div><i style="width:${v / max * 100}%;background:linear-gradient(90deg,#fbbf24,#f59e0b)"></i></div><em>${v}</em></div>`).join('')}
+      ${rv.by_technician.length ? `<h3>Theo kỹ thuật viên</h3><div class="tbl"><table><thead><tr><th>Kỹ thuật viên</th><th class="r">Đánh giá</th><th class="r">Điểm TB</th></tr></thead><tbody>
+        ${rv.by_technician.map(t => `<tr><td>${h(t.technician)}</td><td class="r">${t.n}</td><td class="r"><b>${t.avg.toFixed(1)}</b> ★</td></tr>`).join('')}</tbody></table></div>` : ''}</div>
+      <div><h3 style="margin-top:0">Nhận xét gần đây</h3>${rv.recent.length ? rv.recent.slice(0, 8).map(x => `<div style="padding:10px 0;border-top:1px solid var(--line2)">
+        <div class="row" style="justify-content:space-between">${starStr(x.stars)}<span class="small">${fd(x.created_at)} · ${h(x.code)}</span></div>
+        <div style="margin-top:3px">${x.comment ? h(x.comment) : '<span class="small">(không ghi nhận xét)</span>'}</div>
+        <div class="small">${h(x.customer)} · ${h(x.product)}${x.technician ? ' · KTV ' + h(x.technician) : ''}</div></div>`).join('') : '<div class="empty">Chưa có đánh giá trong kỳ.</div>'}</div></div></div>`;
+}
+async function requestDialog(r, after) {
+  const techs = await api('/api/technicians');
+  const b = openModal(`<h2>${h(r.code)} – ${h(r.product_name)}</h2><p class="sub">${h(r.customer_name)} · ${h(r.customer_phone)} · Serial ${h(r.serial)} · ${r.active ? 'còn bảo hành' : '<b>hết bảo hành</b>'}</p>
+    <div class="hint">${h(r.issue)}</div>
+    ${r.photos && r.photos.length ? `<div class="small" style="margin-top:8px">Ảnh khách gửi (${r.photos.length}) – sẽ tự chép vào phiếu khi tiếp nhận</div><div class="photos">${r.photos.map(p => `<figure><img src="/api/request-photos/${p.id}" alt="" data-full="/api/request-photos/${p.id}"></figure>`).join('')}</div>` : ''}
+    <form class="box" id="rq1"><h3>1. Hẹn lịch mang máy tới</h3><div class="cols"><div class="f"><label class="req" for="rqA">Ngày hẹn</label><input id="rqA" name="appointment" type="date" min="${today()}" value="${r.appointment || r.preferred_date || plusDays(1)}" required></div>
+      <div class="f"><label for="rqN">Lời nhắn cho khách</label><input id="rqN" name="note" value="${h(r.staff_note || '')}" placeholder="vd: Mang theo sạc"></div></div><button class="btn sm">${r.status === 'CONFIRMED' ? 'Đổi lịch hẹn' : 'Xác nhận & hẹn lịch'}</button></form>
+    <form class="box" id="rq2"><h3>2. Khách đã mang máy tới – tiếp nhận</h3>
+      <div class="cols"><div class="f"><label for="rqX">Ghi nhận thêm tại quầy</label><input id="rqX" name="issue"></div><div class="f"><label for="rqP">Phụ kiện kèm theo</label><input id="rqP" name="accessories"></div>
+      <div class="f"><label for="rqC2">Tình trạng ngoại quan</label><input id="rqC2" name="condition"></div><div class="f"><label for="rqD">Ngày hẹn trả</label><input id="rqD" name="due_date" type="date" value="${plusDays(7)}" min="${today()}"></div>
+      <div class="f"><label for="rqT">Phân công kỹ thuật viên</label><select id="rqT" name="technician_id">${opts(techs, '', '— Chưa phân công —')}</select></div></div>
+      <button class="btn acc sm">Tiếp nhận máy (tạo phiếu)</button></form>
+    <form class="box row" id="rq3"><input name="note" placeholder="Lý do từ chối (khách sẽ thấy)" style="flex:1 1 260px" required><button class="btn danger sm">Từ chối yêu cầu</button></form>`);
+  $$('[data-full]', b).forEach(i => i.onclick = () => window.open(i.dataset.full, '_blank'));
+  $('#rq1', b).onsubmit = async e => { e.preventDefault(); try { await post(`/api/requests/${r.id}/confirm`, formData(e.target)); closeModal(); toast('Đã hẹn lịch'); after(); } catch (err) { fail(err); } };
+  $('#rq2', b).onsubmit = async e => { e.preventDefault(); try { const res = await post(`/api/requests/${r.id}/convert`, formData(e.target)); toast('Đã tạo phiếu'); after(); openTicket(res.ticket_id); } catch (err) { fail(err); } };
+  $('#rq3', b).onsubmit = async e => { e.preventDefault(); if (!confirmBtn(e.submitter)) return; try { await post(`/api/requests/${r.id}/reject`, formData(e.target)); closeModal(); toast('Đã từ chối'); after(); } catch (err) { fail(err); } };
+}
+
+/* =================== SAO LƯU =================== */
+VIEWS['sao-luu'] = async () => {
+  $('#main').innerHTML = `<div class="head"><div><h1>Sao lưu dữ liệu</h1><p class="sub" style="margin:0">Tự động sao lưu mỗi 24 giờ (giữ 20 bản gần nhất). Mỗi bản gồm CSDL và ảnh, lưu ở thư mục data/backup.</p></div>
+    <button class="btn acc" id="bkNow">Sao lưu ngay</button></div>
+    <div class="hint">Nên chép thư mục <b>data/backup</b> sang USB hoặc Google Drive định kỳ – hỏng ổ cứng thì bản sao lưu trên cùng máy cũng mất.</div>
+    <div class="card" style="padding:4px 10px;margin-top:10px"><div class="tbl"><table class="stack"><thead><tr><th>Bản sao lưu</th><th>Loại</th><th>Thời gian</th><th class="r">Dung lượng</th><th></th></tr></thead><tbody id="bkB"></tbody></table></div></div>`;
+  const load = async () => {
+    const list = await api('/api/backups');
+    $('#bkB').innerHTML = list.length ? list.map(x => `<tr><td class="mono">${h(x.name)}</td><td>${h(x.kind)}</td><td>${fdt(x.time)}</td><td class="r">${(x.size / 1024).toFixed(0)} KB</td>
+      <td style="white-space:nowrap"><a class="btn ghost sm" style="text-decoration:none;display:inline-flex;align-items:center" href="/api/backups/${encodeURIComponent(x.name)}">Tải về</a> <button class="btn danger sm" data-rs="${h(x.name)}">Khôi phục</button></td></tr>`).join('')
+      : '<tr><td colspan="5" class="empty">Chưa có bản sao lưu nào.</td></tr>';
+    $$('[data-rs]').forEach(x => x.onclick = async () => {
+      if (x.dataset.sure !== '1') { x.dataset.sure = '1'; x.textContent = 'Toàn bộ dữ liệu sẽ quay về lúc này – bấm lần nữa'; return; }
+      x.disabled = true;
+      try { const r = await post(`/api/backups/${encodeURIComponent(x.dataset.rs)}/restore`); toast('Đã khôi phục. Trạng thái trước đó được lưu ở ' + r.safety); load(); refreshBadges(); }
+      catch (e) { fail(e); x.disabled = false; }
+    });
+  };
+  $('#bkNow').onclick = async () => { try { const r = await post('/api/backups'); toast('Đã sao lưu: ' + r.name); load(); } catch (e) { fail(e); } };
+  await load();
+};
+
+/* =================== THÔNG BÁO CHO KHÁCH =================== */
+VIEWS['thong-bao'] = async () => {
+  const admin = is('ADMIN');
+  $('#main').innerHTML = `<div class="head"><div><h1>Thông báo cho khách</h1><p class="sub" style="margin:0">Email / SMS / Zalo tự gửi khi tiếp nhận máy, có báo giá, sửa xong, hẹn lịch yêu cầu online và khi bảo hành sắp hết hạn.</p></div>
+    ${admin ? '<div class="row"><button class="btn ghost" id="nRun">Gửi ngay các tin đang chờ</button><button class="btn acc" id="nCfgBtn">Cấu hình</button></div>' : ''}</div>
+    <div id="nWarn"></div>
+    <div id="nCfg" hidden></div>
+    <div class="row" style="margin:10px 0"><input id="nQ" placeholder="Tìm theo khách, SĐT/email, mã phiếu, nội dung…" style="max-width:380px;flex:1 1 240px">
+      <select id="nS" style="max-width:200px"><option value="">Tất cả trạng thái</option><option value="PENDING">Đang chờ gửi</option><option value="SENT">Đã gửi</option><option value="FAILED">Gửi lỗi</option></select></div>
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Thời gian</th><th>Sự kiện</th><th>Kênh</th><th>Người nhận</th><th>Nội dung</th><th>Trạng thái</th><th></th></tr></thead><tbody id="nB"></tbody></table></div></div>`;
+  const load = async () => {
+    const [list, st] = await Promise.all([api('/api/notify?status=' + $('#nS').value + '&q=' + encodeURIComponent($('#nQ').value)), api('/api/notify/stats')]);
+    $('#nWarn').innerHTML = st.enabled ? `<div class="hint">Đang bật · ${num(st.PENDING)} tin chờ gửi · ${num(st.SENT)} đã gửi · ${num(st.FAILED)} lỗi</div>`
+      : `<div class="hint">Chức năng gửi thông báo đang <b>tắt</b>.${admin ? ' Bấm <b>Cấu hình</b> để bật và nhập tài khoản email / SMS / Zalo.' : ' Nhờ quản trị viên bật trong phần Cấu hình.'}</div>`;
+    $('#nB').innerHTML = list.length ? list.map(n => {
+      const pill = n.status === 'SENT' ? 'ok' : n.status === 'FAILED' ? 'bad' : 'warn';
+      const body = n.channel === 'ZALO' ? n.subject : n.body;
+      return `<tr><td class="mono" style="white-space:nowrap">${fdt(n.created_at)}</td><td>${h(n.event_label)}${n.ticket_code ? `<div class="mono muted">${h(n.ticket_code)}</div>` : ''}</td>
+        <td>${h(n.channel_label)}</td><td>${h(n.customer_name)}<div class="mono muted">${h(n.recipient)}</div></td>
+        <td style="max-width:360px">${h(body)}${n.last_error ? `<div style="color:var(--bad);font-size:12px;margin-top:3px">${h(n.last_error)}</div>` : ''}</td>
+        <td><span class="pill ${pill}">${h(n.status_label)}</span>${n.attempts > 1 ? `<div class="muted" style="font-size:12px">${n.attempts} lần thử</div>` : ''}</td>
+        <td>${n.status === 'FAILED' ? `<button class="btn ghost sm" data-rt="${n.id}">Gửi lại</button>` : ''}</td></tr>`;
+    }).join('') : '<tr><td colspan="7" class="empty">Chưa có thông báo nào.</td></tr>';
+    $$('[data-rt]').forEach(b => b.onclick = async () => { try { await post(`/api/notify/${b.dataset.rt}/retry`); toast('Đã đưa vào hàng đợi, sẽ gửi trong ít giây'); load(); refreshBadges(); } catch (e) { fail(e); } });
+  };
+  $('#nQ').oninput = debounce(() => load().catch(fail));
+  $('#nS').onchange = () => load().catch(fail);
+  if (admin) {
+    $('#nRun').onclick = async () => { try { const r = await post('/api/notify/run'); toast(`Đã xử lý ${r.sent} tin` + (r.queued ? `, thêm ${r.queued} tin nhắc hết hạn` : '')); load(); refreshBadges(); } catch (e) { fail(e); } };
+    $('#nCfgBtn').onclick = async () => {
+      const box = $('#nCfg');
+      if (!box.hidden) { box.hidden = true; return; }
+      const c = await api('/api/notify/config');
+      const groups = {};
+      c.fields.forEach(f => (groups[f.group] = groups[f.group] || []).push(f));
+      const input = f => {
+        const v = c.values[f.key] ?? '', id = 'n_' + f.key, help = f.help ? `<div class="muted" style="font-size:12px;margin-top:3px">${h(f.help)}</div>` : '';
+        if (f.type === 'BOOL') return `<div class="f"><label style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" name="${f.key}" ${v === 'true' ? 'checked' : ''} style="width:auto">${h(f.label)}</label>${help}</div>`;
+        if (f.type === 'TEXTAREA') return `<div class="f"><label for="${id}">${h(f.label)}</label><textarea id="${id}" name="${f.key}" maxlength="600" style="min-height:70px">${h(v)}</textarea>${help}</div>`;
+        if (f.type.startsWith('SELECT:')) return `<div class="f"><label for="${id}">${h(f.label)}</label><select id="${id}" name="${f.key}">${f.type.slice(7).split(',').map(o => `<option ${o === v ? 'selected' : ''}>${o}</option>`).join('')}</select>${help}</div>`;
+        return `<div class="f"><label for="${id}">${h(f.label)}</label><input id="${id}" name="${f.key}" value="${h(v)}" ${f.type === 'PASSWORD' ? 'type="password" autocomplete="new-password"' : ''}>${help}</div>`;
+      };
+      box.innerHTML = `<form class="card" id="nF" style="max-width:820px;margin-top:10px">
+        ${Object.entries(groups).map(([g, fs]) => `<h3 style="margin:14px 0 6px">${h(g)}</h3>${fs.map(input).join('')}`).join('')}
+        <div class="hint">Chỉ gửi cho khách đã đồng ý nhận thông báo khi mua hàng (Luật Bảo vệ dữ liệu cá nhân). Khách có thể tắt tin nhắc hết hạn trong cổng tra cứu → Tài khoản → Hồ sơ. SMS và Zalo chỉ gửi từ 6h đến 22h; tin ngoài giờ sẽ chờ đến 6h sáng.</div>
+        <div class="row" style="margin-top:10px"><button class="btn acc">Lưu cấu hình</button></div></form>
+        <form class="card row" id="nT" style="max-width:820px;margin-top:10px;align-items:flex-end">
+          <div class="f" style="margin:0"><label for="ntc">Gửi thử qua</label><select id="ntc" name="channel"><option value="EMAIL">Email</option><option value="SMS">SMS</option><option value="ZALO">Zalo</option></select></div>
+          <div class="f" style="margin:0;flex:1 1 220px"><label for="ntt">Tới (email hoặc số điện thoại)</label><input id="ntt" name="to" required></div>
+          <button class="btn ghost">Gửi thử</button></form>`;
+      box.hidden = false;
+      $('#nF').onsubmit = async e => { e.preventDefault(); try { await api('/api/notify/config', {method: 'PUT', body: formData(e.target)}); toast('Đã lưu cấu hình thông báo'); load(); } catch (err) { fail(err); } };
+      $('#nT').onsubmit = async e => { e.preventDefault(); const b = e.submitter; b.disabled = true; b.textContent = 'Đang gửi…';
+        try { await api('/api/notify/config', {method: 'PUT', body: formData($('#nF'))}); const r = await post('/api/notify/test', formData(e.target)); toast(r.message + ' (cấu hình đã được lưu)'); } catch (err) { fail(err); } finally { b.disabled = false; b.textContent = 'Gửi thử'; load(); refreshBadges(); } };
+    };
+  }
+  await load();
+};
+
+/* =================== CÀI ĐẶT =================== */
+VIEWS['cai-dat'] = async () => {
+  const s = await api('/api/settings');
+  $('#main').innerHTML = `<h1>Thông tin cửa hàng</h1><p class="sub">In trên phiếu tiếp nhận, phiếu trả máy và phiếu bảo hành điện tử.</p>
+    <form class="card" id="sF" style="max-width:720px">${Object.entries(META.setting_keys).map(([k, l]) => `<div class="f"><label for="s_${k}">${h(l)}${(META.setting_hints || {})[k] ? ` <span class="small" style="font-weight:400">– ${h(META.setting_hints[k])}</span>` : ''}</label>
+      ${['policy','open_hours','portal_intro'].includes(k) ? `<textarea id="s_${k}" name="${k}" style="min-height:${k === 'policy' ? 110 : 80}px">${h(s[k])}</textarea>` : `<input id="s_${k}" name="${k}" value="${h(s[k])}">`}</div>`).join('')}
+      <div class="hint">Cổng tra cứu cho khách hiện tại: <b>${h(s._portal_base)}/tra-cuu</b> – mã QR trên phiếu dẫn tới địa chỉ này. Điện thoại của khách phải cùng mạng Wi-Fi với máy chạy phần mềm (hoặc bạn nhập tên miền công khai).</div>
+      <button class="btn acc" style="margin-top:8px">Lưu</button></form>`;
+  $('#sF').onsubmit = async e => { e.preventDefault(); try { await api('/api/settings', {method: 'PUT', body: formData(e.target)}); toast('Đã lưu thông tin cửa hàng'); route(); } catch (err) { fail(err); } };
+};
+
+/* =================== NHẬT KÝ =================== */
+VIEWS['nhat-ky'] = async () => {
+  $('#main').innerHTML = `<h1>Nhật ký hệ thống</h1><p class="sub">500 thao tác gần nhất: đăng nhập, thêm/sửa/xóa, đổi trạng thái phiếu, nhập xuất kho…</p>
+    <input id="aQ" placeholder="Tìm theo thao tác, người dùng, nội dung…" style="max-width:420px;margin-bottom:10px">
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Thời gian</th><th>Người dùng</th><th>Thao tác</th><th>Nội dung</th></tr></thead><tbody id="aB"></tbody></table></div></div>`;
+  const load = async () => {
+    const list = await api('/api/audit?q=' + encodeURIComponent($('#aQ').value));
+    $('#aB').innerHTML = list.length ? list.map(a => `<tr><td class="mono" style="white-space:nowrap">${fdt(a.time)}</td><td>${h(a.user_name)}</td><td><span class="pill">${h(a.action)}</span></td><td>${h(a.detail || a.entity || '')}</td></tr>`).join('')
+      : '<tr><td colspan="4" class="empty">Không có dữ liệu.</td></tr>';
+  };
+  $('#aQ').oninput = debounce(() => load().catch(fail));
+  await load();
+};
+
+boot();
+}
+</script>
+</body>
+</html>

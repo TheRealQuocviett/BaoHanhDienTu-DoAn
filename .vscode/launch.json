@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Chạy hệ thống bảo hành (Swing + web)",
+      "request": "launch",
+      "mainClass": "vn.baohanh.Main",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "vmArgs": "-Dfile.encoding=UTF-8 --enable-native-access=ALL-UNNAMED"
+    },
+    {
+      "type": "java",
+      "name": "Chỉ chạy web (không mở Swing)",
+      "request": "launch",
+      "mainClass": "vn.baohanh.Main",
+      "args": "--no-gui --browser",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "vmArgs": "-Dfile.encoding=UTF-8 --enable-native-access=ALL-UNNAMED"
+    },
+    {
+      "type": "java",
+      "name": "Chạy kiểm thử tự động",
+      "request": "launch",
+      "mainClass": "vn.baohanh.test.KiemThu",
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "vmArgs": "-Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 --enable-native-access=ALL-UNNAMED"
+    }
+  ]
+}

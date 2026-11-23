@@ -1,0 +1,18 @@
+# Kết quả biên dịch
+bin/
+bin-test/
+*.class
+
+# Dữ liệu chạy thật: CSDL, ảnh, bản sao lưu, cấu hình email (có mật khẩu) – KHÔNG đưa lên GitHub
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Thư viện tải bằng tai-thu-vien.bat / .sh
+lib/*.jar
+
+# Hệ điều hành / trình soạn thảo
+.DS_Store
+Thumbs.db
+*.log
