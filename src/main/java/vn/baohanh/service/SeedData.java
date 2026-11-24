@@ -64,6 +64,38 @@ public final class SeedData {
         return fillAddresses(db);
     }
 
+    /** Khách mẫu có sẵn tài khoản cổng tra cứu (mật khẩu chung 123456) để demo đăng nhập. */
+    public static final String[][] SAMPLE_ACCOUNTS = {
+        {"0903123456", "Nguyễn Văn An", "iPhone 15 Pro Max (đang gửi hãng) + AirPods Pro 2, có tin nhắn"},
+        {"0912345678", "Trần Thị Bích", "Galaxy S24 Ultra – máy sửa xong, chờ nhận"},
+        {"0987654321", "Lê Hoàng Minh", "Laptop HP – hết bảo hành, đang chờ duyệt báo giá"},
+        {"0934567890", "Phạm Thu Hà", "MacBook Air (đã sửa xong, có hóa đơn) + tủ lạnh (có yêu cầu bảo hành online)"},
+        {"0978111222", "Võ Quốc Bảo", "Tivi Sony – chờ linh kiện, quá hẹn"},
+        {"0909888777", "Đặng Mỹ Linh", "Máy giặt LG – từ chối bảo hành"},
+        {"0965432100", "Bùi Thanh Tùng", "Xiaomi Redmi Note 13 – đang sửa, có phí"}};
+    public static final String SAMPLE_PASSWORD = "123456";
+
+    /** Tạo tài khoản cổng khách cho các khách mẫu chưa có tài khoản (không đổi mật khẩu khách đã tự đăng ký). */
+    static int addSampleAccounts(Database db) throws SQLException {
+        int n = 0;
+        for (String[] a : SAMPLE_ACCOUNTS) {
+            Row c = db.one("SELECT id FROM customer WHERE phone = ?", a[0]);
+            if (c == null || db.scalar("SELECT COUNT(*) FROM customer_account WHERE customer_id = ?", c.lng("id")) > 0) continue;
+            db.update("INSERT INTO customer_account (customer_id, password_hash, created_at) VALUES (?, ?, ?)",
+                    c.lng("id"), PasswordHasher.hash(SAMPLE_PASSWORD), Database.now());
+            n++;
+        }
+        return n;
+    }
+
+    /** CSDL mẫu từ bản cũ: thêm tài khoản khách mẫu một lần. */
+    public static int upgradeSampleAccounts(AppContext app) throws SQLException {
+        if ("true".equals(app.settings.get("sample_accounts_done"))) return 0;
+        app.settings.put("sample_accounts_done", "true");
+        if (app.db.scalar("SELECT COUNT(*) FROM audit_log WHERE action = 'KHỞI TẠO' AND detail = 'Tạo dữ liệu mẫu'") == 0) return 0;
+        return addSampleAccounts(app.db);
+    }
+
     private static Map<String, Object> m(Object... kv) {
         Map<String, Object> m = new LinkedHashMap<>();
         for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);
@@ -342,6 +374,8 @@ public final class SeedData {
 
         fillAddresses(db);
         app.settings.put("sample_addresses_done", "true");
+        addSampleAccounts(db);
+        app.settings.put("sample_accounts_done", "true");
 
         // Khách mẫu Phạm Thu Hà: một lần sửa đã xong (để thấy hóa đơn, phiếu in, chức năng đánh giá)
         long haMac = db.scalar("SELECT id FROM warranty WHERE serial = 'C02FK1ZQMD6M'");

@@ -65,6 +65,8 @@ public class Main {
         } else {
             int filled = SeedData.upgradeSampleData(app);
             if (filled > 0) System.out.println("Da bo sung dia chi cho " + filled + " khach hang mau.");
+            int acc = SeedData.upgradeSampleAccounts(app);
+            if (acc > 0) System.out.println("Da tao " + acc + " tai khoan khach hang mau (mat khau " + SeedData.SAMPLE_PASSWORD + ").");
         }
 
         ApiServer server;
@@ -85,6 +87,8 @@ public class Main {
         System.out.println(" Giao dien web      : " + url);
         System.out.println(" Cong tra cuu khach : " + app.settings.portalBase() + "/tra-cuu");
         System.out.println(" Tai khoan mau      : admin/admin123, tiepnhan/123456, ktv1/123456");
+        System.out.println(" Khach hang mau     : SDT 0903123456, 0912345678, 0987654321, 0934567890, 0978111222,");
+        System.out.println("   (cong tra cuu)     0909888777, 0965432100 - mat khau " + SeedData.SAMPLE_PASSWORD);
         System.out.println(" Sao luu tu dong    : " + app.backup.dir());
         System.out.println(" Nhan Ctrl+C (hoac nut Stop) de dung");
         System.out.println("==============================================================");

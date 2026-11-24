@@ -38,7 +38,19 @@ Swing và web **dùng chung một tầng nghiệp vụ và một CSDL**. Thao t�
 
 Nên đổi mật khẩu sau khi đăng nhập (nút **Đổi mật khẩu**).
 
-**Tài khoản khách hàng mẫu** (đăng nhập ở `/tra-cuu` → *Tài khoản của tôi*): `0903123456` / `123456` (Nguyễn Văn An), `0934567890` / `123456` (Phạm Thu Hà). Khách khác tự đăng ký bằng SĐT + số Serial của máy đã mua.
+**Tài khoản khách hàng mẫu** (đăng nhập ở `/tra-cuu` → *Tài khoản của tôi*, mật khẩu chung **`123456`**):
+
+| Số điện thoại | Khách hàng | Dùng để demo |
+|---|---|---|
+| `0903123456` | Nguyễn Văn An | iPhone đang gửi hãng (có tin nhắn với cửa hàng), AirPods mới tiếp nhận, có hóa đơn cũ |
+| `0912345678` | Trần Thị Bích | Galaxy S24 Ultra sửa xong, chờ nhận → thử chọn thanh toán tiền mặt / VietQR |
+| `0987654321` | Lê Hoàng Minh | Laptop HP hết bảo hành → **duyệt báo giá** online |
+| `0934567890` | Phạm Thu Hà | MacBook đã sửa xong → **xem / in hóa đơn, đánh giá sao**; tủ lạnh có yêu cầu bảo hành online |
+| `0978111222` | Võ Quốc Bảo | Tivi Sony chờ linh kiện, quá hẹn |
+| `0909888777` | Đặng Mỹ Linh | Máy giặt bị từ chối bảo hành |
+| `0965432100` | Bùi Thanh Tùng | Xiaomi đang sửa, có phí |
+
+Với CSDL mẫu tạo từ bản cũ, các tài khoản này được thêm tự động một lần khi chạy (khách đã tự đăng ký thì giữ nguyên mật khẩu của họ). Khách khác tự đăng ký bằng SĐT + số Serial của máy đã mua.
 
 **Kiểm thử tự động:** trong VS Code chọn cấu hình *Chạy kiểm thử tự động* rồi nhấn F5 (kết quả hiện ở tab **Debug Console**), hoặc nhấp đúp `run-tests.bat`. Chương trình chạy 225 kiểm thử nghiệp vụ (kể cả gửi email/SMS/Zalo qua máy chủ giả) trên một CSDL tạm, không đụng tới dữ liệu thật.
 
