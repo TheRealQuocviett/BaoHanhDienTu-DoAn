@@ -102,6 +102,13 @@ td b.mono{color:var(--acct)}
 @media(max-width:640px){.stack thead{display:none}.stack tr{display:grid;padding:10px 0;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:2px 0 2px 7.5em;text-align:left!important}
   .stack td::before{content:attr(data-l);float:left;width:7em;margin-left:-7.5em;color:var(--mute);font-size:12px}.stack td:empty{display:none}}
 /* --- thành phần --- */
+.pqGrid{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:14px;align-items:start}@media(max-width:800px){.pqGrid{grid-template-columns:1fr}}
+.pqUsers{padding:8px;display:grid;gap:4px}.pqU{all:unset;cursor:pointer;display:block;padding:10px 12px;border-radius:10px}.pqU:hover{background:var(--soft)}
+.pqU.on{background:var(--accs);box-shadow:inset 3px 0 0 var(--acc)}.pqU b{display:block}.pqU span{font-size:12.5px;color:var(--mute)}.pqU em{font-style:normal;color:var(--warn);font-weight:600}
+.pqG{margin:16px 0 4px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.pqP{display:flex;gap:12px;align-items:flex-start;padding:9px 10px;border-radius:10px;cursor:pointer;margin:0;font-weight:400}.pqP:hover{background:var(--soft)}
+.pqP input{width:18px;height:18px;margin-top:2px;flex:none;accent-color:var(--acc)}.pqP small{display:block;color:var(--mute);font-size:12.5px;margin-top:2px}.pqP.custom{background:var(--warns)}
+
 .scanB{display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap}.scanB svg.i{width:18px;height:18px}
 .inScan{display:flex;gap:8px;align-items:stretch}.inScan>input{flex:1;min-width:0}
 .scanGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:14px}
@@ -217,7 +224,7 @@ html[data-theme=dark] .light-only{background:#fff!important;color:#0f172a}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></symbol><symbol id="i-shield-plus" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="M12 9v6M9 12h6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.6 3.3-5.5 6.5-5.5s5.8 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></symbol><symbol id="i-device" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.3"/></symbol><symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol><symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v2M11 10v7M15 12v5M19 6v11"/></symbol><symbol id="i-user-cog" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21c.6-3.8 3.4-6 7-6 1.1 0 2.1.2 3 .6"/><circle cx="18" cy="17" r="2.5"/><path d="M18 13v1.5M18 19.5V21M14 17h1.5M20.5 17H22"/></symbol><symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9.5V21h16V9.5"/><path d="M2.5 9.5 4.5 3h15l2 6.5c0 1.6-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-.9-3-2.5z"/><path d="M9.5 21v-5h5v5"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></symbol><symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 1 5-3.3l-2.7 2.7.6 2.4 2.4.6 2.7-2.7a4 4 0 0 1-5.3 5L9 18.4a2.1 2.1 0 0 1-3-3z"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol><symbol id="i-coin" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17.5h2"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v10.5H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol><symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="10" rx="1.5"/><rect x="16" y="4" width="5" height="13" rx="1.5"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.5 6h11v10h-11zM13.5 9.5h4l3 3.5v3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol><symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol><symbol id="i-bug" viewBox="0 0 24 24"><rect x="7" y="8" width="10" height="13" rx="5"/><path d="M9 8V6a3 3 0 0 1 6 0v2M3 13h4M17 13h4M4 7l3 3M20 7l-3 3M4 20l3-3M20 20l-3-3M12 12v9"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></symbol><symbol id="i-shield-plus" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="M12 9v6M9 12h6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.6 3.3-5.5 6.5-5.5s5.8 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></symbol><symbol id="i-device" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.3"/></symbol><symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol><symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v2M11 10v7M15 12v5M19 6v11"/></symbol><symbol id="i-user-cog" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21c.6-3.8 3.4-6 7-6 1.1 0 2.1.2 3 .6"/><circle cx="18" cy="17" r="2.5"/><path d="M18 13v1.5M18 19.5V21M14 17h1.5M20.5 17H22"/></symbol><symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9.5V21h16V9.5"/><path d="M2.5 9.5 4.5 3h15l2 6.5c0 1.6-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-.9-3-2.5z"/><path d="M9.5 21v-5h5v5"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></symbol><symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 1 5-3.3l-2.7 2.7.6 2.4 2.4.6 2.7-2.7a4 4 0 0 1-5.3 5L9 18.4a2.1 2.1 0 0 1-3-3z"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol><symbol id="i-coin" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17.5h2"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v10.5H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol><symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="10" rx="1.5"/><rect x="16" y="4" width="5" height="13" rx="1.5"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.5 6h11v10h-11zM13.5 9.5h4l3 3.5v3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol><symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol><symbol id="i-bug" viewBox="0 0 24 24"><rect x="7" y="8" width="10" height="13" rx="5"/><path d="M9 8V6a3 3 0 0 1 6 0v2M3 13h4M17 13h4M4 7l3 3M20 7l-3 3M4 20l3-3M20 20l-3-3M12 12v9"/></symbol><symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M16 7l3 3M14 9l2 2"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol></svg>
 
 <!-- ================= ĐĂNG NHẬP ================= -->
 <div class="login" id="loginView" hidden>
@@ -297,6 +304,7 @@ document.addEventListener('click', e => { const c = e.target.closest('[data-clos
 $$('.modal').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('open'); }));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { const o = $$('.modal.open'); if (o.length) o[o.length - 1].classList.remove('open'); } });
 const is = (...roles) => ME && roles.includes(ME.role);
+const can = k => !!(META && (META.perms || []).includes(k));
 async function printDoc(kind, id) {
   const w = window.open('', '_blank');
   try { const r = await api(`/api/print-link?kind=${kind}&id=${id}`); if (w) w.location = r.url + '&auto=1'; else location.href = r.url; }
@@ -342,15 +350,15 @@ const VIEWS = {};
 function nav() {
   const A = ['ADMIN'], AR = ['ADMIN','RECEPTION'], ALL = ['ADMIN','RECEPTION','TECHNICIAN'];
   return [
-    ['', [['tong-quan','Tổng quan',ALL],['tra-cuu','Tra cứu',ALL],['phieu','Phiếu bảo hành',ALL,'open'],['kanban','Bảng công việc',ALL],['kich-hoat','Kích hoạt bảo hành',AR],['bao-hanh','Danh sách bảo hành',ALL],['yeu-cau','Yêu cầu online',ALL,'req'],['lich-hen','Lịch hẹn',ALL,'cal'],['tin-nhan','Tin nhắn khách',ALL,'msg']]],
+    ['', [['tong-quan','Tổng quan',ALL],['tra-cuu','Tra cứu',ALL],['phieu','Phiếu bảo hành',ALL,'open'],['kanban','Bảng công việc',ALL],['kich-hoat','Kích hoạt bảo hành','ACTIVATE'],['bao-hanh','Danh sách bảo hành',ALL],['yeu-cau','Yêu cầu online',ALL,'req'],['lich-hen','Lịch hẹn',ALL,'cal'],['tin-nhan','Tin nhắn khách',ALL,'msg']]],
     ['Danh mục', [['dm-customer','Khách hàng',ALL],['dm-product','Sản phẩm / Model',ALL],['dm-brand','Hãng sản xuất',ALL],['dm-service_center','Trung tâm BH hãng',ALL],['dm-category','Loại sản phẩm',ALL]]],
-    ['Kho', [['dm-part','Linh kiện',ALL,'low'],['dat-hang','Đặt hàng linh kiện',['ADMIN','TECHNICIAN'],'po'],['dm-supplier','Nhà cung cấp',['ADMIN','TECHNICIAN']],['the-kho','Thẻ kho',['ADMIN','TECHNICIAN']]]],
-    ['Quản trị', [['bao-cao','Báo cáo thống kê',A],['kpi','KPI kỹ thuật viên',['ADMIN','TECHNICIAN']],['loi','Thống kê lỗi thường gặp',['ADMIN','TECHNICIAN']],['dm-user','Người dùng',A],['cai-dat','Thông tin cửa hàng',A],['thong-bao','Thông báo cho khách',AR,'ntf'],['sao-luu','Sao lưu dữ liệu',A],['nhat-ky','Nhật ký hệ thống',A]]]
-  ].map(([g, items]) => [g, items.filter(i => i[2].includes(ME.role))]).filter(g => g[1].length);
+    ['Kho', [['dm-part','Linh kiện',ALL,'low'],['dat-hang','Đặt hàng linh kiện','PURCHASE_VIEW','po'],['dm-supplier','Nhà cung cấp','PURCHASE_VIEW'],['the-kho','Thẻ kho','STOCK_VIEW']]],
+    ['Quản trị', [['bao-cao','Báo cáo thống kê','REPORTS'],['kpi','KPI kỹ thuật viên','KPI'],['loi','Thống kê lỗi thường gặp','FAULTS'],['dm-user','Người dùng',A],['phan-quyen','Phân quyền chi tiết',A],['cai-dat','Thông tin cửa hàng','SETTINGS'],['thong-bao','Thông báo cho khách','NOTIFY_VIEW','ntf'],['sao-luu','Sao lưu dữ liệu','BACKUP'],['nhat-ky','Nhật ký hệ thống','AUDIT']]]
+  ].map(([g, items]) => [g, items.filter(i => typeof i[2] === 'string' ? can(i[2]) : i[2].includes(ME.role))]).filter(g => g[1].length);
 }
 const NAV_ICON = {'tong-quan':'home','tra-cuu':'search','phieu':'clipboard','kanban':'board','kich-hoat':'shield-plus','bao-hanh':'shield','yeu-cau':'inbox','lich-hen':'calendar','tin-nhan':'chat',
   'dm-customer':'users','dm-product':'device','dm-brand':'tag','dm-service_center':'building','dm-category':'grid','dm-part':'box','the-kho':'list','dat-hang':'truck','dm-supplier':'building','kpi':'trophy','loi':'bug',
-  'bao-cao':'chart','dm-user':'user-cog','cai-dat':'store','thong-bao':'bell','sao-luu':'database','nhat-ky':'history'};
+  'bao-cao':'chart','dm-user':'user-cog','cai-dat':'store','thong-bao':'bell','sao-luu':'database','nhat-ky':'history','phan-quyen':'key'};
 const icon = (n, cls = '') => `<svg class="i ${cls}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 function renderSide() {
   $('#side').innerHTML = `<div class="brand"><i></i><span>Bảo hành điện tử<small>${h(SHOP || 'Quản lý bảo hành')}</small></span></div>` + nav().map(([g, items]) =>
@@ -410,12 +418,12 @@ VIEWS['tong-quan'] = async () => {
   tiles.push(['Yêu cầu online mới', d.new_requests, 'yeu-cau', '', false, 'inbox', 'vio']);
   tiles.push(['Bảo hành còn hạn', d.active_warranties, 'bao-hanh', 'active', false, 'shield', 'ok'], ['Sắp hết hạn (≤ 30 ngày)', d.expiring_soon, 'bao-hanh', 'expiring', false, 'alert', 'warn'],
     ['Linh kiện sắp hết', d.low_stock, 'dm-part', '', d.low_stock > 0, 'box', 'bad']);
-  if (is('ADMIN')) tiles.push(['Doanh thu dịch vụ tháng này', money(d.month_revenue), 'bao-cao', '', false, 'chart', '']);
+  if (can('REPORTS')) tiles.push(['Doanh thu dịch vụ tháng này', money(d.month_revenue), 'bao-cao', '', false, 'chart', '']);
   const max = Math.max(1, ...Object.values(d.by_status));
   $('#main').innerHTML = `<h1>Xin chào, ${h(ME.fullName.split(' ').pop())} 👋</h1><p class="sub">Hôm nay ${fd(d.today)} · ${d.month_received} phiếu nhận trong tháng · ${d.total_warranties} sản phẩm đã kích hoạt bảo hành</p>
     <div class="grid tiles">${tiles.map((t, i) => `<div class="card tile ${t[4] ? 'hot' : ''}" data-i="${i}" tabindex="0"><div class="ic ${t[6]}">${icon(t[5])}</div><div><b class="${typeof t[1] === 'number' ? '' : 'long'}">${typeof t[1] === 'number' ? num(t[1]) : t[1]}</b><span>${t[0]}</span></div></div>`).join('')}</div>
     <div class="grid two" style="margin-top:12px">
-      <div class="card"><div class="head" style="margin:0 0 6px"><h2 style="margin:0">Cần xử lý</h2>${is('ADMIN','RECEPTION') ? '<button class="btn acc sm" id="qRecv">' + icon('plus') + 'Tiếp nhận máy</button>' : ''}</div>
+      <div class="card"><div class="head" style="margin:0 0 6px"><h2 style="margin:0">Cần xử lý</h2>${can('RECEIVE') ? '<button class="btn acc sm" id="qRecv">' + icon('plus') + 'Tiếp nhận máy</button>' : ''}</div>
         ${d.todo.length ? `<div class="tbl"><table><tbody>${d.todo.map(t => `<tr class="click" data-id="${t.id}"><td><b class="mono">${h(t.code)}</b><div class="small">${h(t.product_name)}</div></td>
           <td>${statusPill(t)}<div class="small">${todoHint(t)}</div></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Không có việc tồn đọng.</div>'}</div>
       <div class="card"><h2>Phiếu theo trạng thái</h2>${Object.entries(d.by_status).map(([k, v]) => `<div class="bar"><span>${h(META.statuses[k])}</span><div><i style="width:${v / max * 100}%"></i></div><em>${v}</em></div>`).join('')}</div>
@@ -444,7 +452,7 @@ VIEWS['tra-cuu'] = () => {
     try {
       const res = await api('/api/lookup?q=' + encodeURIComponent(q));
       $('#lkR').innerHTML = res.length ? res.map(w => `<div class="card" style="margin-bottom:12px">${warrantyBlock(w)}</div>`).join('')
-        : `<div class="card empty">Không tìm thấy bảo hành cho “${h(q)}”.${is('ADMIN','RECEPTION') ? '<br><a href="#kich-hoat">Kích hoạt bảo hành mới</a>' : ''}</div>`;
+        : `<div class="card empty">Không tìm thấy bảo hành cho “${h(q)}”.${can('ACTIVATE') ? '<br><a href="#kich-hoat">Kích hoạt bảo hành mới</a>' : ''}</div>`;
       bindWarrantyBlock($('#lkR'));
     } catch (err) { fail(err); }
   };
@@ -464,10 +472,10 @@ function warrantyBlock(w) {
       ${w.extensions.map(e => `<tr><td class="mono">${h(e.code)}</td><td>${fd(e.created_at)}</td><td class="r">+${e.months} tháng</td><td>${fd(e.old_expiry)} → <b>${fd(e.new_expiry)}</b></td><td class="r">${money(e.price)}</td><td>${h(e.user_name)}</td></tr>`).join('')}</tbody></table></div>` : ''}
     <h3>Lịch sử bảo hành (${ts.length})</h3>
     ${ts.length ? `<div class="tbl"><table class="stack"><thead><tr><th>Mã phiếu</th><th>Lỗi</th><th>Ngày nhận</th><th>Trạng thái</th></tr></thead><tbody>${ts.map(t => `<tr class="click" data-tid="${t.id}"><td class="mono">${h(t.code)}</td><td>${h(t.issue)}</td><td>${fd(t.received_at)}</td><td>${statusPill(t)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="small">Chưa có lần bảo hành nào.</p>'}
-    <div class="row" style="margin-top:10px">${!open && is('ADMIN','RECEPTION') ? `<button class="btn acc sm" data-recv="${h(w.serial)}">Tiếp nhận máy này</button>` : ''}
+    <div class="row" style="margin-top:10px">${!open && can('RECEIVE') ? `<button class="btn acc sm" data-recv="${h(w.serial)}">Tiếp nhận máy này</button>` : ''}
       <button class="btn ghost sm" data-cert="${w.id}">In phiếu bảo hành điện tử</button>
-      ${w.active && is('ADMIN','RECEPTION') ? `<button class="btn ghost sm" data-ext="${w.id}">Bán gói bảo hành mở rộng</button>` : ''}
-      ${is('ADMIN') && !ts.length ? `<button class="btn danger sm" data-delw="${w.id}">Xóa bảo hành</button>` : ''}</div>`;
+      ${w.active && can('EXTEND') ? `<button class="btn ghost sm" data-ext="${w.id}">Bán gói bảo hành mở rộng</button>` : ''}
+      ${can('DELETE_WARRANTY') && !ts.length ? `<button class="btn danger sm" data-delw="${w.id}">Xóa bảo hành</button>` : ''}</div>`;
 }
 function bindWarrantyBlock(root, after) {
   $$('[data-tid]', root).forEach(r => r.onclick = () => openTicket(r.dataset.tid));
@@ -504,7 +512,7 @@ VIEWS['phieu'] = async () => {
   if (is('TECHNICIAN')) chips.unshift(['MINE','Của tôi']);
   chips.push(['', 'Tất cả'], ...Object.entries(META.statuses));
   $('#main').innerHTML = `<div class="head"><div><h1>Phiếu bảo hành</h1><p class="sub" style="margin:0">Máy khách gửi tại cửa hàng và tiến độ xử lý.</p></div>
-    ${is('ADMIN','RECEPTION') ? '<button class="btn acc" id="recvBtn">+ Tiếp nhận máy</button>' : ''}</div>
+    ${can('RECEIVE') ? '<button class="btn acc" id="recvBtn">+ Tiếp nhận máy</button>' : ''}</div>
     <div class="chips" id="tCh">${chips.map(([k, v]) => `<button class="chip ${k === FILTER.phieu ? 'on' : ''}" data-k="${k}">${h(v)}</button>`).join('')}</div>
     <input id="tQ" placeholder="Tìm mã phiếu, serial, tên, SĐT, kỹ thuật viên…" style="max-width:420px;margin-bottom:10px">
     <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã phiếu</th><th>Sản phẩm</th><th>Khách hàng</th><th>Nhận / Hẹn</th><th>Kỹ thuật viên</th><th class="r">Chi phí</th><th>Trạng thái</th></tr></thead><tbody id="tB"></tbody></table></div></div>`;
@@ -736,7 +744,7 @@ VIEWS['kich-hoat'] = async () => {
 VIEWS['bao-hanh'] = async () => {
   const chips = [['', 'Tất cả'], ['active', 'Còn hạn'], ['expiring', 'Sắp hết hạn'], ['expired', 'Hết hạn']];
   $('#main').innerHTML = `<div class="head"><div><h1>Danh sách bảo hành</h1><p class="sub" style="margin:0">Tất cả sản phẩm đã kích hoạt bảo hành tại cửa hàng.</p></div>
-    ${is('ADMIN','RECEPTION') ? '<a class="btn acc" href="#kich-hoat" style="text-decoration:none;display:inline-flex;align-items:center">+ Kích hoạt</a>' : ''}</div>
+    ${can('ACTIVATE') ? '<a class="btn acc" href="#kich-hoat" style="text-decoration:none;display:inline-flex;align-items:center">+ Kích hoạt</a>' : ''}</div>
     <div class="chips" id="wCh">${chips.map(([k, v]) => `<button class="chip ${k === FILTER['bao-hanh'] ? 'on' : ''}" data-k="${k}">${v}</button>`).join('')}</div>
     <input id="wQ" placeholder="Tìm serial, mã BH, tên khách, SĐT, sản phẩm, hóa đơn…" style="max-width:420px;margin-bottom:10px">
     <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã BH</th><th>Sản phẩm / Serial</th><th>Khách hàng</th><th>Ngày mua</th><th>Hết hạn</th><th>Tình trạng</th></tr></thead><tbody id="wB"></tbody></table></div></div>
@@ -769,17 +777,17 @@ VIEWS.catalog = async key => {
   const d = entity(key);
   const isPart = key === 'part';
   $('#main').innerHTML = `<div class="head"><div><h1>${h(d.title)}</h1>${d.hint ? `<p class="sub" style="margin:0">${h(d.hint)}</p>` : ''}</div>
-    <div class="row">${isPart && is('ADMIN','TECHNICIAN') ? '<a class="btn ghost" href="#the-kho" style="text-decoration:none;display:inline-flex;align-items:center">Thẻ kho</a>' : ''}
+    <div class="row">${isPart && can('STOCK_VIEW') ? '<a class="btn ghost" href="#the-kho" style="text-decoration:none;display:inline-flex;align-items:center">Thẻ kho</a>' : ''}
     ${d.canWrite && ['customer','product','part'].includes(key) ? `<button class="btn ghost" id="cImp">${icon('upload')}&nbsp;Nhập Excel</button>` : ''}
     ${d.canWrite ? '<button class="btn acc" id="cAdd">+ Thêm mới</button>' : ''}</div></div>
     <input id="cQ" placeholder="Tìm kiếm…" style="max-width:420px;margin-bottom:10px">
-    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr>${d.columns.map(c => `<th class="${['money','int'].includes(c.format) ? 'r' : ''}">${h(c.label)}</th>`).join('')}${isPart && is('ADMIN') ? '<th></th>' : ''}</tr></thead><tbody id="cB"></tbody></table></div></div>
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr>${d.columns.map(c => `<th class="${['money','int'].includes(c.format) ? 'r' : ''}">${h(c.label)}</th>`).join('')}${isPart && can('STOCK') ? '<th></th>' : ''}</tr></thead><tbody id="cB"></tbody></table></div></div>
     <p class="small" id="cN"></p>`;
   const load = async () => {
     const list = await api(`/api/catalog/${key}?q=${encodeURIComponent($('#cQ').value)}`);
     $('#cN').textContent = list.length + ' dòng' + (d.canWrite ? ' · bấm vào một dòng để sửa' : '');
     $('#cB').innerHTML = list.length ? list.map(r => `<tr class="${d.canWrite ? 'click' : ''}" data-id="${r.id}">${d.columns.map(c => cell(r, c)).join('')}
-      ${isPart && is('ADMIN') ? `<td class="r" style="white-space:nowrap"><button class="btn ghost sm" data-in="${r.id}">Nhập</button> <button class="btn ghost sm" data-adj="${r.id}" data-stock="${r.stock}">Kiểm kê</button></td>` : ''}</tr>`).join('')
+      ${isPart && can('STOCK') ? `<td class="r" style="white-space:nowrap"><button class="btn ghost sm" data-in="${r.id}">Nhập</button> <button class="btn ghost sm" data-adj="${r.id}" data-stock="${r.stock}">Kiểm kê</button></td>` : ''}</tr>`).join('')
       : `<tr><td colspan="${d.columns.length + 1}" class="empty">Chưa có dữ liệu.</td></tr>`;
     if (d.canWrite) $$('#cB tr[data-id]').forEach(tr => tr.onclick = e => { if (!e.target.closest('button')) editEntity(key, tr.dataset.id, load); });
     $$('[data-in]').forEach(x => x.onclick = () => stockDialog('in', x.dataset.in, list.find(r => r.id == x.dataset.in), load));
@@ -938,7 +946,7 @@ VIEWS['yeu-cau'] = async () => {
       <td>${h(r.customer_name)}<div class="small">${h(r.customer_phone)}</div></td><td>${h(r.product_name)}<div class="small">${h(r.serial)} · ${r.active ? 'còn BH' : 'hết BH'}</div></td>
       <td>${h(r.issue)}${r.staff_note ? `<div class="small">Cửa hàng: ${h(r.staff_note)}</div>` : ''}</td><td>${fd(r.preferred_date) || '—'}</td><td>${fd(r.appointment) || '—'}</td>
       <td><span class="pill ${r.status === 'NEW' ? 'acc' : r.status === 'CONVERTED' ? 'ok' : ['REJECTED','CANCELLED'].includes(r.status) ? 'bad' : ''}">${h(r.status_label)}</span>${r.ticket_code ? `<div class="small">${h(r.ticket_code)}</div>` : ''}</td>
-      <td style="white-space:nowrap">${['NEW','CONFIRMED'].includes(r.status) && is('ADMIN','RECEPTION') ? `<button class="btn ghost sm" data-rq="${r.id}">Xử lý</button>` : (r.ticket_id ? `<button class="btn ghost sm" data-rt="${r.ticket_id}">Mở phiếu</button>` : '')}</td></tr>`).join('')
+      <td style="white-space:nowrap">${['NEW','CONFIRMED'].includes(r.status) && can('REQUESTS') ? `<button class="btn ghost sm" data-rq="${r.id}">Xử lý</button>` : (r.ticket_id ? `<button class="btn ghost sm" data-rt="${r.ticket_id}">Mở phiếu</button>` : '')}</td></tr>`).join('')
       : '<tr><td colspan="8" class="empty">Không có yêu cầu nào.</td></tr>';
     $$('[data-rt]').forEach(x => x.onclick = () => openTicket(x.dataset.rt));
     $$('[data-rq]').forEach(x => x.onclick = () => requestDialog(list.find(r => r.id == x.dataset.rq), () => { load(); refreshBadges(); }));
@@ -1007,7 +1015,7 @@ VIEWS['sao-luu'] = async () => {
 const PO_PILL = {DRAFT: '', ORDERED: 'warn', RECEIVED: 'ok', CANCELLED: 'bad'};
 let PO_FILTER = '';
 VIEWS['dat-hang'] = async () => {
-  const admin = is('ADMIN');
+  const admin = can('PURCHASE');
   $('#main').innerHTML = `<div class="head"><div><h1>Đặt hàng linh kiện</h1><p class="sub" style="margin:0">Linh kiện dưới mức tồn tối thiểu được gợi ý sẵn số lượng. Nhận hàng sẽ tự cộng tồn kho và ghi thẻ kho.</p></div></div>
     <div class="card" id="poS"><div class="empty">Đang tải…</div></div>
     <div class="head" style="margin-top:20px"><h2 style="margin:0">Đơn đặt hàng</h2><div class="chips" style="margin:0">${[['', 'Tất cả'], ...Object.entries(META.po_status || {})].map(([k, v]) => `<button class="chip ${PO_FILTER === k ? 'on' : ''}" data-pf="${k}">${h(v)}</button>`).join('')}</div></div>
@@ -1046,7 +1054,7 @@ VIEWS['dat-hang'] = async () => {
 };
 async function poDialog(id) {
   let o; try { o = await api('/api/purchase/' + id); } catch (e) { return fail(e); }
-  const admin = is('ADMIN'), open = ['DRAFT', 'ORDERED'].includes(o.status);
+  const admin = can('PURCHASE'), open = ['DRAFT', 'ORDERED'].includes(o.status);
   const b = openModal(`<div class="small">ĐƠN ĐẶT HÀNG</div><h2 style="font-size:24px;margin:2px 0 6px">${h(o.code)}</h2>
     <div class="row"><span class="pill ${PO_PILL[o.status]}">${h(o.status_label)}</span></div>
     <div class="kv"><div><span>Nhà cung cấp</span><b>${h(o.supplier_name)}</b></div><div><span>Liên hệ</span><b>${h(o.supplier_contact || '–')} · ${h(o.supplier_phone || '')}</b></div>
@@ -1256,7 +1264,7 @@ VIEWS['loi'] = async () => {
   $('#main').innerHTML = `<div class="head"><div><h1>Thống kê lỗi thường gặp</h1><p class="sub" style="margin:0">Model nào hay hỏng, lỗi gì nhiều, linh kiện nào thay nhiều nhất – tính theo ngày nhận máy.</p></div>
     <div class="row"><div class="chips" style="margin:0"><button class="chip" data-fp="m">Tháng này</button><button class="chip" data-fp="q">3 tháng</button><button class="chip" data-fp="y12">12 tháng</button><button class="chip" data-fp="y">Năm nay</button></div>
       <input type="date" id="fF" value="${FLT.from}" style="width:auto"><input type="date" id="fT" value="${FLT.to}" style="width:auto"><button class="btn ghost sm" id="fGo">Xem</button>
-      ${is('ADMIN') ? `<a class="btn ghost sm" id="fX" href="/api/reports/export?from=${FLT.from}&to=${FLT.to}" style="text-decoration:none;display:inline-flex;align-items:center">Xuất Excel</a>` : ''}</div></div>
+      ${can('REPORTS') ? `<a class="btn ghost sm" id="fX" href="/api/reports/export?from=${FLT.from}&to=${FLT.to}" style="text-decoration:none;display:inline-flex;align-items:center">Xuất Excel</a>` : ''}</div></div>
     <div id="fB"><div class="empty">Đang tải…</div></div>`;
   const set = (f, t) => { FLT.from = isoD(f); FLT.to = isoD(t); VIEWS['loi'](); };
   $$('[data-fp]').forEach(c => c.onclick = () => ({m: () => set(new Date(y, mo, 1), now), q: () => set(new Date(y, mo - 2, 1), now),
@@ -1287,6 +1295,36 @@ VIEWS['loi'] = async () => {
     <div class="card" style="padding:4px 10px"><h2 style="margin:12px 6px">Máy phải sửa lại nhiều lần</h2><div class="tbl"><table class="stack"><thead><tr><th>Serial</th><th>Sản phẩm</th><th>Khách hàng</th><th class="r">Số lần</th><th>Lỗi qua các lần</th></tr></thead><tbody>
       ${d.repeats.map(r => `<tr><td data-l="Serial"><b class="mono">${h(r.serial)}</b><div class="small">${h(r.codes)}</div></td><td data-l="Sản phẩm">${h(r.product)}</td><td data-l="Khách">${h(r.customer)}<div class="small">${h(r.phone)}</div></td>
         <td class="r" data-l="Số lần"><b style="color:var(--bad)">${r.times}</b></td><td data-l="Lỗi">${h(r.issues)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Không có máy nào phải sửa lại – tốt!</td></tr>'}</tbody></table></div></div>`;
+};
+
+/* =================== PHÂN QUYỀN CHI TIẾT =================== */
+let PQ_SEL = null;
+VIEWS['phan-quyen'] = async () => {
+  let m; try { m = await api('/api/permissions'); } catch (e) { return fail(e); }
+  if (!m.users.length) { $('#main').innerHTML = '<h1>Phân quyền chi tiết</h1><div class="card empty">Chưa có tài khoản Tiếp nhận / Kỹ thuật viên nào.</div>'; return; }
+  if (!m.users.some(u => u.id === PQ_SEL)) PQ_SEL = m.users[0].id;
+  const u = m.users.find(x => x.id === PQ_SEL), tech = u.role === 'TECHNICIAN';
+  const groups = [...new Set(m.perms.map(p => p.group))];
+  $('#main').innerHTML = `<div class="head"><div><h1>Phân quyền chi tiết</h1><p class="sub" style="margin:0">Bật / tắt từng chức năng cho từng tài khoản. Quản lý luôn có mọi quyền. Thay đổi có hiệu lực ngay, không cần đăng nhập lại.</p></div></div>
+    <div class="pqGrid">
+      <div class="card pqUsers">${m.users.map(x => `<button type="button" class="pqU ${x.id === PQ_SEL ? 'on' : ''}" data-pu="${x.id}"><b>${h(x.full_name)}</b>${x.active ? '' : ' <span class="pill bad">Đã khóa</span>'}
+        <span>${h(x.role_label)} · ${h(x.username)}${x.custom_count ? ` · <em>${x.custom_count} quyền riêng</em>` : ''}</span></button>`).join('')}</div>
+      <form class="card" id="pqF"><div class="head" style="margin:0 0 6px"><h2 style="margin:0">${h(u.full_name)} <span class="small">– ${h(u.role_label)}</span></h2>
+          <div class="row"><button type="button" class="btn ghost sm" id="pqR">Về mặc định của vai trò</button><button class="btn acc sm">Lưu thay đổi</button></div></div>
+        ${groups.map(g => `<div class="pqG">${h(g)}</div>` + m.perms.filter(p => p.group === g).map(p => { const c = u.perms[p.key], def = tech ? p.technician : p.reception;
+          return `<label class="pqP ${c.custom ? 'custom' : ''}"><input type="checkbox" name="${p.key}" ${c.allowed ? 'checked' : ''}><span><b>${h(p.label)}</b>${c.custom ? ' <span class="pill warn">đã chỉnh riêng</span>' : ''}
+            <small>${h(p.hint)} · Mặc định của vai trò: ${def ? 'có' : 'không'}</small></span></label>`; }).join('')).join('')}
+      </form></div>`;
+  $$('[data-pu]').forEach(b => b.onclick = () => { PQ_SEL = +b.dataset.pu; VIEWS['phan-quyen'](); });
+  $('#pqF').onsubmit = async e => {
+    e.preventDefault();
+    const body = {}; $$('#pqF input[type=checkbox]').forEach(x => body[x.name] = x.checked);
+    try { await api('/api/permissions/' + u.id, {method: 'PUT', body}); toast('Đã lưu quyền cho ' + u.full_name); VIEWS['phan-quyen'](); } catch (err) { fail(err); }
+  };
+  $('#pqR').onclick = async e => {
+    if (!confirmBtn(e.target)) return;
+    try { await post(`/api/permissions/${u.id}/reset`); toast('Đã về quyền mặc định'); VIEWS['phan-quyen'](); } catch (err) { fail(err); }
+  };
 };
 
 /* =================== BẢNG CÔNG VIỆC (KANBAN) =================== */
@@ -1403,7 +1441,7 @@ VIEWS['tin-nhan'] = async () => {
 
 /* =================== THÔNG BÁO CHO KHÁCH =================== */
 VIEWS['thong-bao'] = async () => {
-  const admin = is('ADMIN');
+  const admin = can('NOTIFY_CONFIG');
   $('#main').innerHTML = `<div class="head"><div><h1>Thông báo cho khách</h1><p class="sub" style="margin:0">Email / SMS / Zalo tự gửi khi tiếp nhận máy, có báo giá, sửa xong, hẹn lịch yêu cầu online và khi bảo hành sắp hết hạn.</p></div>
     ${admin ? '<div class="row"><button class="btn ghost" id="nRun">Gửi ngay các tin đang chờ</button><button class="btn acc" id="nCfgBtn">Cấu hình</button></div>' : ''}</div>
     <div id="nWarn"></div>

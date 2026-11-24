@@ -37,7 +37,7 @@ public class RequestsView extends MainFrame.View {
         CustomerService.REQUEST_LABELS.forEach((k, v) -> filter.addItem(new Ui.Item(k, v)));
         filter.addActionListener(e -> refresh());
         table = Ui.table(model, this::handle);
-        boolean office = ctx.user().is(Role.ADMIN, Role.RECEPTION);
+        boolean office = vn.baohanh.model.Perm.REQUESTS.allows(ctx.user());
         add(Ui.header("Yêu cầu bảo hành online", "Khách gửi từ cổng khách hàng. Hẹn lịch → khách mang máy tới thì bấm Tiếp nhận để tạo phiếu.",
                 office ? Ui.primary("Xử lý yêu cầu đã chọn", () -> { Row r = Ui.selected(table, model); if (r == null) Ui.info(this, "Chọn một yêu cầu"); else handle(r); })
                        : new JLabel()), BorderLayout.NORTH);
@@ -58,7 +58,7 @@ public class RequestsView extends MainFrame.View {
 
     private void handle(Row r) {
         if (!r.isNull("ticket_id")) { TicketDialog.open(ctx, r.lng("ticket_id")); return; }
-        if (!List.of("NEW", "CONFIRMED").contains(r.str("status")) || !user().is(Role.ADMIN, Role.RECEPTION)) {
+        if (!List.of("NEW", "CONFIRMED").contains(r.str("status")) || !vn.baohanh.model.Perm.REQUESTS.allows(user())) {
             Ui.info(this, r.str("code") + ": " + r.str("status_label") + (r.str("staff_note").isEmpty() ? "" : "\n" + r.str("staff_note")));
             return;
         }

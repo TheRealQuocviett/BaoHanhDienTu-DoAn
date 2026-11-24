@@ -23,7 +23,7 @@ public class AuditService {
 
     /** Xem nhật ký (chỉ quản lý). */
     public List<Row> list(User u, String q, int limit) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.AUDIT);
         String like = "%" + (q == null ? "" : q.trim()) + "%";
         return db.query("SELECT a.id, a.time, COALESCE(u.full_name, '(hệ thống)') AS user_name, a.action, a.entity, "
                 + "a.entity_id, a.detail FROM audit_log a LEFT JOIN app_user u ON u.id = a.user_id "

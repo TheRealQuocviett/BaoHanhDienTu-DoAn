@@ -47,7 +47,7 @@ public class ReportService {
 
     /** Toàn bộ báo cáo trong một lần gọi (giao diện hiển thị nhiều bảng/biểu đồ). */
     public Row full(User u, Period p) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.REPORTS);
         Row r = new Row();
         r.put("from", p.from().toString());
         r.put("to", p.to().toString());
@@ -258,7 +258,7 @@ public class ReportService {
      * Quản lý xem cả bảng; kỹ thuật viên xem bảng xếp hạng nhưng chỉ thấy tiền của chính mình.
      */
     public Row technicianKpi(User u, Period p) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
+        Auth.need(u, vn.baohanh.model.Perm.KPI);
         boolean admin = u.is(Role.ADMIN);
         long ratePct = parseLong(settingValue("kpi_commission_rate"), 10);
         long bonus = parseLong(settingValue("kpi_bonus_per_ticket"), 20000);

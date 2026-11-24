@@ -50,7 +50,7 @@ public class PrintService {
     public String link(User u, String kind, long id) {
         if (u == null) throw new AppException(401, "Vui lòng đăng nhập");
         if (!List.of("tiep-nhan", "tra-may", "bao-hanh", "dat-hang").contains(kind)) throw new AppException("Mẫu phiếu không hợp lệ");
-        if ("dat-hang".equals(kind)) vn.baohanh.service.Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
+        if ("dat-hang".equals(kind)) vn.baohanh.service.Auth.need(u, vn.baohanh.model.Perm.PURCHASE_VIEW);
         long exp = System.currentTimeMillis() + LINK_TTL_MS;
         return "/in/" + kind + "/" + id + "?exp=" + exp + "&sig=" + sign(kind + ":" + id + ":" + exp);
     }

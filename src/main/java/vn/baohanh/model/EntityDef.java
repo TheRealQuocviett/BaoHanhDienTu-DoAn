@@ -92,10 +92,21 @@ public class EntityDef {
         return null;
     }
 
-    public boolean canWrite(Role r) { for (Role x : writeRoles) if (x == r) return true; return false; }
-    public boolean canDelete(Role r) { for (Role x : deleteRoles) if (x == r) return true; return false; }
+    /** Quyền chi tiết quyết định ai được thêm/sửa/xóa (null = theo vai trò writeRoles/deleteRoles). */
+    public Perm perm;
 
-    public Map<String, Object> toMap(Role viewer) {
+    public boolean canWrite(User u) {
+        if (perm != null) return perm.allows(u);
+        for (Role x : writeRoles) if (x == u.role()) return true;
+        return false;
+    }
+    public boolean canDelete(User u) {
+        if (perm != null) return perm.allows(u);
+        for (Role x : deleteRoles) if (x == u.role()) return true;
+        return false;
+    }
+
+    public Map<String, Object> toMap(User viewer) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("key", key);
         m.put("title", title);

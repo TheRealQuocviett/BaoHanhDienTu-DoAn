@@ -41,6 +41,12 @@ public class Auth {
         if (roles.length > 0 && !u.is(roles)) throw AppException.forbidden();
     }
 
+    /** Kiểm tra quyền chi tiết theo chức năng (quản lý có thể bật/tắt cho từng tài khoản). */
+    public static void need(User u, vn.baohanh.model.Perm p) {
+        if (u == null) throw new AppException(401, "Vui lòng đăng nhập");
+        if (!p.allows(u)) throw new AppException(403, "Tài khoản của bạn chưa được cấp quyền: " + p.label.toLowerCase());
+    }
+
     public User login(String username, String password) throws SQLException {
         String key = username == null ? "" : username.trim().toLowerCase();
         if (key.isEmpty() || password == null || password.isEmpty())

@@ -202,6 +202,9 @@ public class ApiServer {
         post("/api/purchase/(\\d+)/order", r -> app.purchases.markOrdered(r.user, r.id(1)));
         post("/api/purchase/(\\d+)/cancel", r -> app.purchases.cancel(r.user, r.id(1), Json.str(r.body, "note")));
         post("/api/purchase/(\\d+)/receive", r -> app.purchases.receive(r.user, r.id(1), r.body));
+        get("/api/permissions", true, r -> app.permissions.matrix(r.user));
+        put("/api/permissions/(\\d+)", r -> app.permissions.save(r.user, r.id(1), r.body));
+        post("/api/permissions/(\\d+)/reset", r -> app.permissions.reset(r.user, r.id(1)));
         get("/api/reports/faults", true, r -> app.faults.report(r.user, ReportService.period(r.q("from"), r.q("to"))));
 
         // ---------- Quét mã vạch ----------
@@ -341,7 +344,7 @@ public class ApiServer {
         get("/api/notify/stats", true, r -> app.notify.stats(r.user));
         post("/api/notify/(\\d+)/retry", r -> { app.notify.retry(r.user, r.id(1)); return Map.of("ok", true); });
         post("/api/notify/run", r -> {
-            vn.baohanh.service.Auth.require(r.user, vn.baohanh.model.Role.ADMIN);
+            vn.baohanh.service.Auth.need(r.user, vn.baohanh.model.Perm.NOTIFY_CONFIG);
             int scanned = app.notify.scanExpiring();
             return Map.of("queued", scanned, "sent", app.notify.processDue());
         });
@@ -365,6 +368,7 @@ public class ApiServer {
     private Map<String, Object> meta(User u) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("user", u.toMap());
+        m.put("perms", vn.baohanh.model.Perm.of(u));
         Map<String, Object> st = new LinkedHashMap<>();
         for (TicketStatus s : TicketStatus.values()) st.put(s.name(), s.getLabel());
         m.put("statuses", st);
@@ -380,7 +384,7 @@ public class ApiServer {
         m.put("setting_selects", SettingService.SELECTS);
         m.put("request_labels", CustomerService.REQUEST_LABELS);
         List<Object> ents = new ArrayList<>();
-        for (EntityDef d : app.catalog.all()) ents.add(d.toMap(u.role()));
+        for (EntityDef d : app.catalog.all()) ents.add(d.toMap(u));
         m.put("entities", ents);
         return m;
     }
@@ -429,7 +433,11 @@ public class ApiServer {
             if (result instanceof Binary b) sendBytes(ex, 200, b.contentType(), b.data());
             else sendJson(ex, 200, result);
         } catch (AppException e) {
-            sendJson(ex, e.getStatus(), Map.of("error", e.getMessage()));
+            String msg = e.getMessage();
+            String p = ex.getRequestURI().getPath();
+            if ((p.startsWith("/api/kh/") || p.startsWith("/api/public/")) && "en".equalsIgnoreCase(ex.getRequestHeaders().getFirst("X-Lang")))
+                msg = vn.baohanh.util.I18n.en(msg);
+            sendJson(ex, e.getStatus(), Map.of("error", msg));
         } catch (IllegalArgumentException e) {
             sendJson(ex, 400, Map.of("error", String.valueOf(e.getMessage())));
         } catch (java.sql.SQLException e) {

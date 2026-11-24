@@ -38,7 +38,7 @@ public class TicketsView extends MainFrame.View {
 
         JTable t = Ui.table(model, r -> TicketDialog.open(ctx, r.lng("id")));
         add(Ui.header("Phiếu bảo hành", "Nhấp đúp vào một phiếu để xem và xử lý.",
-                ctx.user().is(Role.ADMIN, Role.RECEPTION) ? Ui.primary("+ Tiếp nhận máy", () -> ReceiveDialog.open(ctx, null)) : new JLabel()),
+                vn.baohanh.model.Perm.RECEIVE.allows(ctx.user()) ? Ui.primary("+ Tiếp nhận máy", () -> ReceiveDialog.open(ctx, null)) : new JLabel()),
                 BorderLayout.NORTH);
         JPanel center = new JPanel(new BorderLayout(0, 8));
         center.setOpaque(false);

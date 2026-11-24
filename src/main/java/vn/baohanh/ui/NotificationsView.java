@@ -42,7 +42,7 @@ public class NotificationsView extends MainFrame.View {
 
     public NotificationsView(Ui.Ctx ctx) {
         super(ctx);
-        boolean admin = ctx.user().is(Role.ADMIN);
+        boolean admin = vn.baohanh.model.Perm.NOTIFY_CONFIG.allows(ctx.user());
         List<Component> right = new java.util.ArrayList<>();
         right.add(Ui.button("Gửi lại tin lỗi đã chọn", this::retry));
         if (admin) {

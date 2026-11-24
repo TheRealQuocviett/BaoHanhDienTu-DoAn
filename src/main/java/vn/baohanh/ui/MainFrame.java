@@ -70,7 +70,11 @@ public class MainFrame extends JFrame {
         protected User user() { return ctx.user(); }
     }
 
-    private record Nav(String key, String label, Role[] roles, Supplier<View> factory) {}
+    private record Nav(String key, String label, Role[] roles, vn.baohanh.model.Perm perm, Supplier<View> factory) {
+        Nav(String key, String label, Role[] roles, Supplier<View> factory) { this(key, label, roles, null, factory); }
+        Nav(String key, String label, vn.baohanh.model.Perm perm, Supplier<View> factory) { this(key, label, null, perm, factory); }
+        boolean allowed(User u) { return perm != null ? perm.allows(u) : u.is(roles); }
+    }
 
 
     private final class NavItem extends JLabel {
@@ -135,7 +139,7 @@ public class MainFrame extends JFrame {
                 new Nav("tra-cuu", "Tra cứu", all, () -> new LookupView(ctx)),
                 new Nav("phieu", "Phiếu bảo hành", all, () -> new TicketsView(ctx)),
                 new Nav("kanban", "Bảng công việc", all, () -> new KanbanView(ctx)),
-                new Nav("kich-hoat", "Kích hoạt bảo hành", ar, () -> new ActivateView(ctx)),
+                new Nav("kich-hoat", "Kích hoạt bảo hành", vn.baohanh.model.Perm.ACTIVATE, () -> new ActivateView(ctx)),
                 new Nav("bao-hanh", "Danh sách bảo hành", all, () -> new WarrantiesView(ctx)),
                 new Nav("yeu-cau", "Yêu cầu online", all, () -> new RequestsView(ctx)),
                 new Nav("lich-hen", "Lịch hẹn", all, () -> new CalendarView(ctx)),
@@ -148,18 +152,19 @@ public class MainFrame extends JFrame {
                 new Nav("dm-category", "Loại sản phẩm", all, () -> new CatalogView(ctx, "category")))});
         groups.add(new Object[]{"KHO", List.of(
                 new Nav("dm-part", "Linh kiện", all, () -> new CatalogView(ctx, "part")),
-                new Nav("dat-hang", "Đặt hàng linh kiện", at, () -> new PurchaseView(ctx)),
-                new Nav("dm-supplier", "Nhà cung cấp", at, () -> new CatalogView(ctx, "supplier")),
-                new Nav("the-kho", "Thẻ kho", at, () -> new StockView(ctx)))});
+                new Nav("dat-hang", "Đặt hàng linh kiện", vn.baohanh.model.Perm.PURCHASE_VIEW, () -> new PurchaseView(ctx)),
+                new Nav("dm-supplier", "Nhà cung cấp", vn.baohanh.model.Perm.PURCHASE_VIEW, () -> new CatalogView(ctx, "supplier")),
+                new Nav("the-kho", "Thẻ kho", vn.baohanh.model.Perm.STOCK_VIEW, () -> new StockView(ctx)))});
         groups.add(new Object[]{"QUẢN TRỊ", List.of(
-                new Nav("bao-cao", "Báo cáo thống kê", a, () -> new ReportsView(ctx)),
-                new Nav("kpi", "KPI kỹ thuật viên", at, () -> new KpiView(ctx)),
-                new Nav("loi", "Thống kê lỗi thường gặp", at, () -> new FaultsView(ctx)),
+                new Nav("bao-cao", "Báo cáo thống kê", vn.baohanh.model.Perm.REPORTS, () -> new ReportsView(ctx)),
+                new Nav("kpi", "KPI kỹ thuật viên", vn.baohanh.model.Perm.KPI, () -> new KpiView(ctx)),
+                new Nav("loi", "Thống kê lỗi thường gặp", vn.baohanh.model.Perm.FAULTS, () -> new FaultsView(ctx)),
                 new Nav("dm-user", "Người dùng", a, () -> new CatalogView(ctx, "user")),
-                new Nav("cai-dat", "Thông tin cửa hàng", a, () -> new SettingsView(ctx)),
-                new Nav("thong-bao", "Thông báo cho khách", ar, () -> new NotificationsView(ctx)),
-                new Nav("sao-luu", "Sao lưu dữ liệu", a, () -> new BackupView(ctx)),
-                new Nav("nhat-ky", "Nhật ký hệ thống", a, () -> new AuditView(ctx)))});
+                new Nav("phan-quyen", "Phân quyền chi tiết", a, () -> new PermissionsView(ctx)),
+                new Nav("cai-dat", "Thông tin cửa hàng", vn.baohanh.model.Perm.SETTINGS, () -> new SettingsView(ctx)),
+                new Nav("thong-bao", "Thông báo cho khách", vn.baohanh.model.Perm.NOTIFY_VIEW, () -> new NotificationsView(ctx)),
+                new Nav("sao-luu", "Sao lưu dữ liệu", vn.baohanh.model.Perm.BACKUP, () -> new BackupView(ctx)),
+                new Nav("nhat-ky", "Nhật ký hệ thống", vn.baohanh.model.Perm.AUDIT, () -> new AuditView(ctx)))});
 
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
         side.setBackground(Ui.CARD);
@@ -174,7 +179,7 @@ public class MainFrame extends JFrame {
         Map<String, Nav> navs = new LinkedHashMap<>();
         for (Object[] g : groups) {
             @SuppressWarnings("unchecked") List<Nav> items = (List<Nav>) g[1];
-            List<Nav> allowed = items.stream().filter(n -> user.is(n.roles())).toList();
+            List<Nav> allowed = items.stream().filter(n -> n.allowed(user)).toList();
             if (allowed.isEmpty()) continue;
             if (!((String) g[0]).isEmpty()) {
                 JLabel gl = new JLabel((String) g[0]);

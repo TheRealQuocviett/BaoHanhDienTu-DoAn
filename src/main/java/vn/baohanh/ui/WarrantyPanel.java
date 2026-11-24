@@ -100,12 +100,12 @@ public final class WarrantyPanel {
 
         boolean open = ts.stream().anyMatch(t -> !List.of("RETURNED", "CANCELLED").contains(t.str("status")));
         JPanel btns = Ui.flow();
-        if (!open && ctx.user().is(Role.ADMIN, Role.RECEPTION))
+        if (!open && vn.baohanh.model.Perm.RECEIVE.allows(ctx.user()))
             btns.add(Ui.primary("Tiếp nhận máy này", () -> { ReceiveDialog.open(ctx, w.str("serial")); if (afterChange != null) afterChange.run(); }));
         btns.add(Ui.button("In phiếu bảo hành điện tử", () -> Ui.print(ctx, p, "bao-hanh", w.lng("id"))));
-        if (active && ctx.user().is(Role.ADMIN, Role.RECEPTION))
+        if (active && vn.baohanh.model.Perm.EXTEND.allows(ctx.user()))
             btns.add(Ui.button("Bán gói BH mở rộng", () -> { if (extend(ctx, p, w) && afterChange != null) afterChange.run(); }));
-        if (ctx.user().is(Role.ADMIN) && ts.isEmpty())
+        if (vn.baohanh.model.Perm.DELETE_WARRANTY.allows(ctx.user()) && ts.isEmpty())
             btns.add(Ui.danger("Xóa bảo hành", () -> {
                 if (!Ui.confirm(p, "Xóa bảo hành " + w.str("code") + "? Không thể hoàn tác.")) return;
                 if (Ui.run(p, () -> ctx.app().warranty.deleteWarranty(ctx.user(), w.lng("id")))) {

@@ -32,7 +32,7 @@ public class WarrantiesView extends MainFrame.View {
         q = Ui.search("Tìm serial, mã BH, tên, SĐT…", s -> refresh());
         JTable t = Ui.table(model, r -> WarrantyPanel.dialog(ctx, r.lng("id"), this::refresh));
         add(Ui.header("Danh sách bảo hành", "Nhấp đúp để xem chi tiết, lịch sử sửa chữa, in phiếu bảo hành.",
-                ctx.user().is(Role.ADMIN, Role.RECEPTION) ? Ui.primary("+ Kích hoạt", () -> ctx.frame().navigate("kich-hoat", null)) : new JLabel()),
+                vn.baohanh.model.Perm.ACTIVATE.allows(ctx.user()) ? Ui.primary("+ Kích hoạt", () -> ctx.frame().navigate("kich-hoat", null)) : new JLabel()),
                 BorderLayout.NORTH);
         JPanel c = new JPanel(new BorderLayout(0, 8));
         c.setOpaque(false);

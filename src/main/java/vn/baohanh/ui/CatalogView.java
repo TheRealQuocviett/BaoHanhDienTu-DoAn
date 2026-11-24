@@ -49,14 +49,14 @@ public class CatalogView extends MainFrame.View {
             cols.add(new Ui.Col(c.name(), title, k, k == Ui.Kind.TEXT ? 160 : 90));
         }
         model = new Ui.RowModel(cols);
-        boolean canWrite = def.canWrite(ctx.user().role());
+        boolean canWrite = def.canWrite(ctx.user());
         table = Ui.table(model, canWrite ? r -> edit(r.lng("id")) : null);
         q = Ui.search("Tìm kiếm…", s -> refresh());
 
         List<Component> btns = new ArrayList<>();
         if ("part".equals(key)) {
-            if (ctx.user().is(Role.ADMIN, Role.TECHNICIAN)) btns.add(Ui.button("Thẻ kho", () -> ctx.frame().navigate("the-kho", null)));
-            if (ctx.user().is(Role.ADMIN)) {
+            if (vn.baohanh.model.Perm.STOCK_VIEW.allows(ctx.user())) btns.add(Ui.button("Thẻ kho", () -> ctx.frame().navigate("the-kho", null)));
+            if (vn.baohanh.model.Perm.STOCK.allows(ctx.user())) {
                 btns.add(Ui.button("Nhập kho", () -> stock(true)));
                 btns.add(Ui.button("Kiểm kê", () -> stock(false)));
             }
@@ -144,7 +144,7 @@ public class CatalogView extends MainFrame.View {
                 ctx.frame().refreshBadges();
             }
         }), Ui.button("Hủy", d::dispose));
-        if (id != 0 && def.canDelete(user().role()))
+        if (id != 0 && def.canDelete(user()))
             btns.add(Ui.danger("Xóa", () -> {
                 if (!Ui.confirm(d, "Xóa bản ghi này? Không thể hoàn tác.")) return;
                 if (Ui.run(d, () -> ctx.app().catalog.delete(user(), def.key, id))) { d.dispose(); refresh(); }

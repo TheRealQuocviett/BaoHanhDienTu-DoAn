@@ -77,7 +77,7 @@ public class BackupService {
 
     /** Tạo bản sao lưu ngay. kind: "thu-cong" | "tu-dong" | "truoc-khoi-phuc". */
     public Row create(User u, String kind) throws SQLException, IOException {
-        if (u != null) Auth.require(u, Role.ADMIN);
+        if (u != null) Auth.need(u, vn.baohanh.model.Perm.BACKUP);
         Files.createDirectories(dir);
         String name = "sao-luu-" + LocalDateTime.now().format(STAMP) + "-" + kind + ".zip";
         for (int i = 2; Files.exists(dir.resolve(name)); i++)
@@ -132,7 +132,7 @@ public class BackupService {
     }
 
     public List<Row> list(User u) throws IOException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.BACKUP);
         List<Row> out = new ArrayList<>();
         for (Path p : files()) out.add(info(p));
         out.sort((a, b) -> b.str("name").compareTo(a.str("name")));
@@ -141,7 +141,7 @@ public class BackupService {
 
     /** Đường dẫn file sao lưu (kiểm tra tên để chống truy cập file ngoài thư mục). */
     public Path file(User u, String name) throws IOException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.BACKUP);
         if (name == null || !name.matches("sao-luu-[\\w-]+\\.zip")) throw new AppException("Tên bản sao lưu không hợp lệ");
         Path p = dir.resolve(name);
         if (!Files.isRegularFile(p)) throw AppException.notFound("bản sao lưu " + name);

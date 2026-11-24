@@ -613,6 +613,57 @@ public final class KiemThu {
                 check("File Excel báo cáo có thêm trang Nhóm lỗi / Model hay hỏng", unzipText(xl, "xl/workbook.xml").contains("Nhóm lỗi")
                         && unzipText(xl, "xl/workbook.xml").contains("Model hay hỏng"));
             }
+
+            section("21. Phân quyền chi tiết");
+            {
+                vn.baohanh.model.Perm REP = vn.baohanh.model.Perm.REPORTS, RCV = vn.baohanh.model.Perm.RECEIVE;
+                check("Mặc định: tiếp nhận không xem báo cáo, được tiếp nhận máy", !REP.allows(rec) && RCV.allows(rec));
+                check("Quản lý luôn có mọi quyền", java.util.Arrays.stream(vn.baohanh.model.Perm.values()).allMatch(x -> x.allows(admin)));
+                app.permissions.save(admin, rec.id(), m("REPORTS", true, "RECEIVE", false));
+                check("Bật báo cáo cho tiếp nhận → xem được ngay (không cần đăng nhập lại)", app.reports.full(rec, vn.baohanh.service.ReportService.period("", "")) != null);
+                expectError("Tắt tiếp nhận máy → không tạo phiếu được", "chưa được cấp quyền", () -> app.warranty.createTicket(rec, m("serial", "SNEXP2", "issue", "Thử quyền")));
+                check("Chỉ lưu phần khác mặc định (2 dòng)", db.scalar("SELECT COUNT(*) FROM user_permission WHERE user_id = ?", rec.id()) == 2);
+                Row mx = app.permissions.matrix(admin);
+                @SuppressWarnings("unchecked") Row ru = ((List<Row>) mx.get("users")).stream().filter(x -> x.lng("id") == rec.id()).findFirst().orElseThrow();
+                @SuppressWarnings("unchecked") Map<String, Row> permRow = (Map<String, Row>) ru.get("perms");
+                check("Bảng phân quyền đánh dấu quyền đã chỉnh riêng", permRow.get("REPORTS").bool("allowed") && permRow.get("REPORTS").bool("custom") && !permRow.get("ACTIVATE").bool("custom"));
+                check("Danh sách quyền gửi cho giao diện web", vn.baohanh.model.Perm.of(rec).contains("REPORTS") && !vn.baohanh.model.Perm.of(rec).contains("RECEIVE"));
+                check("Ghi nhật ký phân quyền", db.scalar("SELECT COUNT(*) FROM audit_log WHERE action = 'PHÂN QUYỀN'") >= 1);
+                app.permissions.save(admin, rec.id(), m("REPORTS", false));
+                check("Đặt lại đúng mặc định → xóa dòng riêng", db.scalar("SELECT COUNT(*) FROM user_permission WHERE user_id = ? AND perm = 'REPORTS'", rec.id()) == 0);
+                app.permissions.save(admin, tech.id(), m("CUSTOMERS", true));
+                check("Kỹ thuật viên được cấp quyền sửa khách hàng", app.catalog.def("customer").canWrite(tech));
+                new vn.baohanh.service.PermissionService(db, app.audit);
+                check("Quyền riêng được nạp lại từ CSDL khi khởi động", vn.baohanh.model.Perm.CUSTOMERS.allows(tech) && !RCV.allows(rec));
+                app.permissions.reset(admin, rec.id());
+                app.permissions.reset(admin, tech.id());
+                check("Về mặc định của vai trò", RCV.allows(rec) && !vn.baohanh.model.Perm.CUSTOMERS.allows(tech));
+                expectError("Tiếp nhận không mở được bảng phân quyền", "quyền", () -> app.permissions.matrix(rec));
+                expectError("Không phân quyền cho tài khoản Quản lý", "mọi quyền", () -> app.permissions.save(admin, admin.id(), m("REPORTS", false)));
+                expectError("Mã quyền lạ bị từ chối", "không hợp lệ", () -> app.permissions.save(admin, rec.id(), m("HACK", true)));
+            }
+
+            section("22. Cổng khách hàng song ngữ");
+            check("Dịch thông báo lỗi sang tiếng Anh", vn.baohanh.util.I18n.en("Mật khẩu hiện tại không đúng").equals("Current password is incorrect"));
+            check("Dịch thông báo có số", vn.baohanh.util.I18n.en("Mỗi yêu cầu tối đa 4 ảnh").equals("Up to 4 photos per request"));
+            check("Chưa có bản dịch → giữ nguyên", vn.baohanh.util.I18n.en("Câu lạ chưa dịch").equals("Câu lạ chưa dịch"));
+            {
+                String portal = Files.readString(Path.of("web/portal.html"));
+                java.util.regex.Matcher tm = java.util.regex.Pattern.compile("\\bT\\('((?:[^'\\\\]|\\\\.)*)'").matcher(portal);
+                List<String> missing = new ArrayList<>();
+                while (tm.find()) {
+                    String key = tm.group(1).replace("\\'", "'");
+                    if (!portal.contains("'" + tm.group(1) + "':")) missing.add(key);
+                }
+                check("Mọi câu chữ T('…') trong cổng khách đều có bản tiếng Anh" + (missing.isEmpty() ? "" : " – thiếu: " + missing), missing.isEmpty());
+                List<String> labels = new ArrayList<>();
+                for (TicketStatus st : TicketStatus.values()) labels.add(st.getLabel());
+                labels.addAll(vn.baohanh.service.CustomerService.REQUEST_LABELS.values());
+                labels.addAll(vn.baohanh.service.WarrantyService.PAY_METHODS.values());
+                for (NotificationService.Event ev : NotificationService.Event.values()) labels.add(ev.label);
+                List<String> noEn = labels.stream().filter(l -> !portal.contains("'" + l + "':")).toList();
+                check("Nhãn trạng thái / thanh toán / thông báo từ máy chủ đều có bản tiếng Anh" + (noEn.isEmpty() ? "" : " – thiếu: " + noEn), noEn.isEmpty());
+            }
         }
 
         db.close();

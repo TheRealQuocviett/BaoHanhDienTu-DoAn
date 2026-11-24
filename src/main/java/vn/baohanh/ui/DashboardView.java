@@ -47,7 +47,7 @@ public class DashboardView extends MainFrame.View {
         JPanel lh = new JPanel(new BorderLayout());
         lh.setOpaque(false);
         lh.add(Ui.bold("Cần xử lý (nhấp đúp để mở phiếu)"), BorderLayout.WEST);
-        if (ctx.user().is(Role.ADMIN, Role.RECEPTION)) lh.add(Ui.primary("+ Tiếp nhận máy", () -> ReceiveDialog.open(ctx, null)), BorderLayout.EAST);
+        if (vn.baohanh.model.Perm.RECEIVE.allows(ctx.user())) lh.add(Ui.primary("+ Tiếp nhận máy", () -> ReceiveDialog.open(ctx, null)), BorderLayout.EAST);
         left.add(lh, BorderLayout.NORTH);
         left.add(Ui.scroll(t), BorderLayout.CENTER);
 
@@ -85,7 +85,7 @@ public class DashboardView extends MainFrame.View {
             tiles.add(Ui.tile(Fmt.number(d.lng("active_warranties")), "Bảo hành còn hạn", false, () -> f.navigate("bao-hanh", "active")));
             tiles.add(Ui.tile(Fmt.number(d.lng("expiring_soon")), "Sắp hết hạn (≤ 30 ngày)", false, () -> f.navigate("bao-hanh", "expiring")));
             tiles.add(Ui.tile(Fmt.number(d.lng("low_stock")), "Linh kiện sắp hết", d.lng("low_stock") > 0, () -> f.navigate("dm-part", null)));
-            if (user().is(Role.ADMIN)) tiles.add(Ui.tile(Fmt.money(d.lng("month_revenue")), "Doanh thu dịch vụ tháng này", false, () -> f.navigate("bao-cao", null)));
+            if (vn.baohanh.model.Perm.REPORTS.allows(user())) tiles.add(Ui.tile(Fmt.money(d.lng("month_revenue")), "Doanh thu dịch vụ tháng này", false, () -> f.navigate("bao-cao", null)));
             tiles.revalidate();
             tiles.repaint();
             @SuppressWarnings("unchecked") List<Row> list = (List<Row>) d.get("todo");

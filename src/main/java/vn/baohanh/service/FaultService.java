@@ -78,7 +78,7 @@ public class FaultService {
     }
 
     public Row report(User u, Period p) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
+        Auth.need(u, vn.baohanh.model.Perm.FAULTS);
         List<Row> tickets = db.query("SELECT t.id, t.code, t.issue, COALESCE(t.diagnosis, '') AS diagnosis, t.received_at, t.in_warranty, "
                 + "w.serial, pr.id AS product_id, pr.name AS product, pr.model_code, b.name AS brand, c.name AS category "
                 + "FROM ticket t JOIN warranty w ON w.id = t.warranty_id JOIN product pr ON pr.id = w.product_id "

@@ -123,6 +123,7 @@ html[data-theme=dark] .mail .ic{background:var(--accs)}
 html[data-theme=dark] .stars button,html[data-theme=dark] .stars b{color:#3a4d70}html[data-theme=dark] .stars .on{color:#f59e0b}
 .themeBtn{position:absolute;top:22px;right:max(5vw,16px);z-index:2;width:40px;height:40px;min-height:40px;padding:0;border-radius:12px;background:#ffffff26;border:1px solid #ffffff40;box-shadow:none;font-size:18px}
 .themeBtn:hover{background:#ffffff40}
+.langBtn{right:calc(max(5vw,16px) + 50px);font-size:13px;font-weight:700;letter-spacing:.04em;color:#fff}
 </style>
 </head>
 <body>
@@ -130,7 +131,7 @@ html[data-theme=dark] .stars button,html[data-theme=dark] .stars b{color:#3a4d70
   <div class="shop"><i></i><div><span id="sn">Tra cứu bảo hành</span><small id="sa"></small></div></div>
   <h1 id="hd">Tra cứu bảo hành &amp; tiến độ sửa chữa</h1>
   <p id="hp">Nhập số Serial/IMEI in trên máy hoặc mã phiếu bảo hành (PBH-…).</p>
-  <button class="themeBtn" type="button" id="themeBtn" aria-label="Đổi giao diện sáng / tối"></button>
+  <button class="themeBtn" type="button" id="themeBtn" aria-label="Đổi giao diện sáng / tối"></button><button class="themeBtn langBtn" type="button" id="langBtn"></button>
   <nav class="tabs"><a href="#" id="tLookup" class="on">Tra cứu nhanh</a><a href="#tai-khoan" id="tAcc">Tài khoản của tôi</a><a href="#cua-hang" id="tShop">Cửa hàng</a></nav>
 </div></header>
 <main><div class="wrap">
@@ -174,21 +175,126 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const h = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fd = d => d ? String(d).slice(0,10).split('-').reverse().join('/') : '';
 const fdt = d => d ? fd(d) + ' ' + String(d).slice(11,16) : '';
-const money = n => Number(n || 0).toLocaleString('vi-VN') + ' đ';
+const money = n => Number(n || 0).toLocaleString(LANG === 'en' ? 'en-US' : 'vi-VN') + (LANG === 'en' ? ' ₫' : ' đ');
 const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
 let toastT;
+/* ---------- song ngữ Việt / Anh ---------- */
+let LANG = 'vi';
+try { LANG = localStorage.getItem('lang') || ((navigator.language || 'vi').toLowerCase().startsWith('vi') ? 'vi' : 'en'); } catch (e) {}
+if (LANG !== 'en') LANG = 'vi';
+document.documentElement.lang = LANG;
+const EN = {
+  // khung trang
+  'Tra cứu bảo hành': 'Warranty lookup', 'Tra cứu bảo hành & tiến độ sửa chữa': 'Warranty & repair status lookup',
+  'Nhập số Serial/IMEI in trên máy hoặc mã phiếu bảo hành (PBH-…).': 'Enter the serial/IMEI printed on your device or your service ticket code (PBH-…).',
+  'Tra cứu nhanh': 'Quick lookup', 'Tài khoản của tôi': 'My account', 'Cửa hàng': 'Store',
+  'vd: PBH-000019 hoặc số IMEI': 'e.g. PBH-000019 or IMEI number', 'Serial hoặc mã phiếu': 'Serial or ticket code', 'Tra cứu': 'Search',
+  'Đổi giao diện sáng / tối': 'Toggle light / dark theme',
+  'Đăng nhập': 'Sign in', 'Xem tất cả máy của bạn, duyệt báo giá sửa chữa, đặt lịch bảo hành online.': 'See all your devices, approve repair quotes and book warranty service online.',
+  'Số điện thoại': 'Phone number', 'Mật khẩu': 'Password', 'Chưa có tài khoản hoặc quên mật khẩu?': 'No account yet or forgot your password?',
+  'Đăng ký / đặt lại mật khẩu': 'Register / reset password',
+  'Nhập số điện thoại đã dùng khi mua hàng và số Serial/IMEI của một máy bạn đã mua tại cửa hàng (in trên hộp máy hoặc phiếu bảo hành).':
+    'Enter the phone number you used when buying and the serial/IMEI of a device you bought at our store (printed on the box or warranty card).',
+  'Số Serial / IMEI của máy': 'Device serial / IMEI', 'Mật khẩu mới (ít nhất 6 ký tự)': 'New password (at least 6 characters)', 'Nhập lại mật khẩu': 'Confirm password',
+  'Tạo tài khoản': 'Create account', '← Quay lại đăng nhập': '← Back to sign in',
+  'Tra cứu bảo hành · {0}': 'Warranty lookup · {0}', 'Cần hỗ trợ? Gọi {0}': 'Need help? Call {0}',
+  // tra cứu
+  'Mua {0}': 'Bought {0}', '{0} tháng': '{0} months', 'Hết hạn {0}': 'Expires {0}',
+  'Máy đã sửa xong. Quý khách vui lòng mang phiếu tiếp nhận đến cửa hàng để nhận máy.': 'Your device is ready. Please bring your receipt to the store to pick it up.',
+  'Cửa hàng đã gửi báo giá sửa chữa': 'The store has sent you a repair quote', '. Vui lòng xác nhận để cửa hàng tiến hành sửa.': '. Please confirm so we can start the repair.',
+  'Máy không thuộc diện bảo hành / không sửa. Vui lòng liên hệ cửa hàng để nhận lại máy.': 'This device is not covered / will not be repaired. Please contact the store to collect it.',
+  'Ngày hẹn trả dự kiến: <b>{0}</b>.': 'Expected ready date: <b>{0}</b>.',
+  'Phiếu {0} · nhận ngày {1}': 'Ticket {0} · received {1}', 'Phiếu {0} · nhận {1}': 'Ticket {0} · received {1}',
+  'Bảo hành miễn phí': 'Free warranty repair', 'Sửa có phí': 'Paid repair', 'Đăng nhập để duyệt báo giá online →': 'Sign in to approve the quote online →',
+  'Chi phí sửa chữa: <b>{0}</b>': 'Repair cost: <b>{0}</b>', 'Đang tra cứu…': 'Searching…', 'Không tìm thấy': 'Not found',
+  'Không có bảo hành nào khớp với “{0}”. Vui lòng kiểm tra lại số Serial/IMEI hoặc mã phiếu.': 'No warranty matches “{0}”. Please check the serial/IMEI or ticket code.',
+  'Còn bảo hành': 'Under warranty', 'Hết bảo hành': 'Out of warranty', '{0} ngày': '{0} days', 'Đã hết hạn': 'Expired',
+  'bảo hành còn lại, đến hết ngày {0}': 'of warranty left, until {0}', 'từ ngày {0}': 'since {0}',
+  'Serial / IMEI': 'Serial / IMEI', 'Hãng': 'Brand', 'Chủ máy': 'Owner', 'Điện thoại': 'Phone', 'Mã bảo hành': 'Warranty code',
+  'Lịch sử sửa chữa': 'Repair history', 'Máy chưa từng gửi bảo hành.': 'No repairs yet.',
+  // trạng thái (máy chủ gửi tiếng Việt)
+  'Đã tiếp nhận': 'Received', 'Đang kiểm tra': 'Diagnosing', 'Đã gửi hãng': 'Sent to manufacturer', 'Đang sửa chữa': 'Repairing', 'Chờ linh kiện': 'Waiting for parts',
+  'Sửa xong – chờ trả': 'Ready for pickup', 'Từ chối bảo hành': 'Warranty declined', 'Đã trả khách': 'Returned', 'Đã hủy': 'Cancelled',
+  'Chờ cửa hàng xác nhận': 'Waiting for confirmation', 'Đã hẹn lịch': 'Appointment set', 'Đã tiếp nhận máy': 'Device received', 'Cửa hàng từ chối': 'Declined by store', 'Khách đã hủy': 'Cancelled by you',
+  'Tiền mặt': 'Cash', 'Chuyển khoản': 'Bank transfer', 'Quẹt thẻ': 'Card',
+  'Có báo giá sửa chữa': 'Repair quote', 'Sửa xong – mời nhận máy': 'Ready for pickup', 'Hẹn lịch yêu cầu online': 'Appointment confirmed',
+  'Từ chối yêu cầu online': 'Request declined', 'Cửa hàng trả lời tin nhắn': 'Store replied', 'Sắp hết hạn bảo hành (30 ngày)': 'Warranty expiring (30 days)', 'Tin thử': 'Test message',
+  'Cửa hàng chưa cài đặt tài khoản ngân hàng': 'The store has not set up a bank account', 'Phiếu đã thanh toán': 'This ticket has been paid',
+  'Phiếu không phải trả tiền': 'Nothing to pay for this ticket', 'Chưa đến bước thanh toán': 'Not ready for payment yet',
+  // tài khoản
+  'Mật khẩu nhập lại không khớp': 'Passwords do not match', 'Đã tạo tài khoản': 'Account created', 'Có lỗi xảy ra': 'Something went wrong',
+  '{0} sao': '{0} stars', 'Đánh giá của bạn · {0}': 'Your review · {0}', 'Sửa đánh giá': 'Edit review', 'Bạn hài lòng với lần sửa chữa này chứ?': 'Are you happy with this repair?',
+  'Nhận xét thêm (không bắt buộc)': 'Comments (optional)', 'Gửi đánh giá': 'Send review', 'Xóa ảnh': 'Delete photo',
+  'Báo giá sửa chữa': 'Repair quote', 'Kết luận kỹ thuật: {0}': 'Diagnosis: {0}', 'Tiền công': 'Labour', 'Tổng cộng': 'Total', 'Đồng ý sửa': 'Approve repair', 'Không sửa': 'Decline',
+  'Lỗi: {0}': 'Problem: {0}', 'Đã thanh toán <b>{0}</b>': 'Paid <b>{0}</b>', 'Miễn phí': 'Free', ' · HĐ {0}': ' · Invoice {0}', 'Xem / in hóa đơn': 'View / print invoice',
+  'Thanh toán: {0}': 'Payment: {0}', 'Đã báo chuyển khoản': 'Transfer reported', 'Trả tiền mặt khi nhận': 'Pay cash at pickup',
+  'Bạn đã báo chuyển khoản lúc {0}. Cửa hàng sẽ kiểm tra và xác nhận khi bạn đến nhận máy.': 'You reported a transfer at {0}. The store will check it when you pick up your device.',
+  'Bạn chọn thanh toán tại quầy khi đến nhận máy.': 'You chose to pay at the counter when picking up.', ' Có thể đổi cách thanh toán bên dưới.': ' You can change the payment method below.',
+  'Chọn cách thanh toán:': 'Choose how to pay:', '💵 Tiền mặt khi nhận máy': '💵 Cash at pickup', '🏦 Chuyển khoản (VietQR)': '🏦 Bank transfer (VietQR)',
+  '💬 Nhắn tin với cửa hàng': '💬 Message the store', ' ({0} tin mới)': ' ({0} new)',
+  'Còn {0} ngày': '{0} days left', 'Serial {0} · Mã BH {1} · {2}': 'Serial {0} · Warranty {1} · {2}',
+  'Đã mua gói bảo hành mở rộng: {0}': 'Extended warranty purchased: {0}', '+{0} tháng ({1})': '+{0} months ({1})',
+  '📄 Phiếu bảo hành điện tử (QR)': '📄 E-warranty card (QR)', '🛠 Yêu cầu bảo hành / đặt lịch sửa': '🛠 Request service / book a repair',
+  'Yêu cầu bảo hành online': 'Online service requests', 'Cửa hàng hẹn bạn mang máy tới ngày <b>{0}</b>.': 'Please bring your device to the store on <b>{0}</b>.',
+  'Đã tạo phiếu {0}': 'Ticket {0} created', '📷 Thêm ảnh': '📷 Add photos', 'Hủy yêu cầu': 'Cancel request',
+  'Hóa đơn sửa chữa': 'Repair invoices', 'Các lần nhận lại máy tại cửa hàng. Bấm <b>Xem / in</b> để in lại hoặc lưu thành file PDF.': 'Each time you picked up a device. Click <b>View / print</b> to print again or save as PDF.',
+  'Hóa đơn {0} · ': 'Invoice {0} · ', 'Phiếu {0} · {1}': 'Ticket {0} · {1}', 'Xem / in': 'View / print', 'Chưa có hóa đơn nào.': 'No invoices yet.',
+  'Đang tải hộp thư…': 'Loading inbox…', 'Hộp thư': 'Inbox', 'Các thông báo cửa hàng đã gửi cho bạn qua email / SMS / Zalo.': 'Notifications the store sent you by email / SMS / Zalo.',
+  'Đang gửi': 'Sending', 'Đã gửi': 'Sent', '{0} qua {1}': '{0} via {1}', 'Chưa có thông báo nào.': 'No notifications yet.',
+  'Thông tin tài khoản': 'Account details', 'Email (để nhận thông báo)': 'Email (for notifications)', 'Địa chỉ': 'Address',
+  'Không nhận tin nhắc bảo hành sắp hết hạn / ưu đãi gia hạn (vẫn nhận tin về máy đang sửa)': 'Do not send warranty-expiry reminders / extension offers (you still get updates about repairs)',
+  'Lưu thông tin': 'Save', 'Đổi mật khẩu – mật khẩu hiện tại': 'Change password – current password', 'Mật khẩu mới': 'New password', 'Đổi mật khẩu': 'Change password', 'Đăng xuất': 'Sign out',
+  'Lỗi tải ảnh': 'Photo upload failed', 'Xin chào, {0}': 'Hello, {0}', 'Máy của bạn, hóa đơn, thông báo và tài khoản.': 'Your devices, invoices, notifications and account.',
+  'Máy của tôi': 'My devices', 'Hóa đơn': 'Invoices', 'Tài khoản': 'Account',
+  'Đã xác nhận đồng ý sửa': 'Repair approved', 'Bấm lần nữa để xác nhận': 'Click again to confirm', 'Đã báo không sửa': 'Repair declined', 'Bấm lần nữa để hủy': 'Click again to cancel',
+  'Đã hủy yêu cầu': 'Request cancelled', 'Đã xóa ảnh': 'Photo deleted', 'Đã thêm {0} ảnh': '{0} photo(s) added',
+  'Thanh toán <b>tại quầy khi đến nhận máy</b>, bằng tiền mặt hoặc quẹt thẻ. Nhớ mang theo phiếu hoặc báo mã phiếu.': 'Pay <b>at the counter when you pick up</b>, by cash or card. Bring your receipt or ticket code.',
+  'Chọn trả tiền mặt khi nhận máy': 'Pay cash at pickup', 'Đã báo cửa hàng: bạn trả tiền khi nhận máy': 'The store has been told you will pay at pickup',
+  'Đang tạo mã…': 'Creating code…', 'Mở app ngân hàng → Quét QR': 'Open your banking app → Scan QR', '{0} · STK <b>{1}</b>': '{0} · Account <b>{1}</b>',
+  'Số tiền <b>{0}</b> · Nội dung <b>{1}</b>': 'Amount <b>{0}</b> · Reference <b>{1}</b>', 'Tôi đã chuyển khoản': 'I have transferred',
+  'Bấm sau khi chuyển xong để cửa hàng kiểm tra. Cửa hàng xác nhận khi bạn đến nhận máy.': 'Click after transferring so the store can check. The store confirms when you pick up.',
+  '{0}. Bạn vui lòng chọn trả tiền mặt khi nhận máy.': '{0}. Please choose to pay cash at pickup.', 'Bấm lần nữa để xác nhận đã chuyển': 'Click again to confirm the transfer',
+  'Đã báo cửa hàng: bạn đã chuyển khoản': 'The store has been told you transferred',
+  'Bạn': 'You', 'Bạn có câu hỏi về máy đang gửi? Nhắn cho cửa hàng tại đây, nhân viên sẽ trả lời sớm.': 'Questions about your device? Message the store here and staff will reply soon.',
+  'Đang tải…': 'Loading…', 'Nhập tin nhắn…': 'Type a message…', 'Gửi': 'Send', 'Vui lòng chọn số sao': 'Please choose a star rating', 'Cảm ơn bạn đã đánh giá!': 'Thank you for your review!',
+  'Mô tả lỗi của máy': 'Describe the problem', 'Ngày bạn muốn mang máy tới (không bắt buộc)': 'When would you like to bring it in? (optional)',
+  'Ảnh chụp lỗi (không bắt buộc, tối đa 4 ảnh)': 'Photos of the problem (optional, up to 4)', 'Gửi yêu cầu': 'Send request', 'Đang gửi…': 'Sending…',
+  ' kèm {0} ảnh': ' with {0} photo(s)', 'Đã gửi yêu cầu{0}, cửa hàng sẽ liên hệ hẹn lịch': 'Request sent{0}. The store will contact you to set a time',
+  'Đã lưu thông tin': 'Saved', 'Đã đổi mật khẩu': 'Password changed', 'Tài khoản khách hàng': 'Customer account', 'Đăng nhập bằng số điện thoại đã dùng khi mua hàng.': 'Sign in with the phone number you used when buying.',
+  // cửa hàng
+  'Thông tin cửa hàng': 'Store information', 'Giờ mở cửa, địa chỉ, liên hệ và chính sách bảo hành.': 'Opening hours, address, contact and warranty policy.',
+  '📞 Gọi {0}': '📞 Call {0}', '💬 Nhắn tin cho cửa hàng': '💬 Message the store', '🧭 Chỉ đường': '🧭 Directions', '🕘 Giờ mở cửa': '🕘 Opening hours',
+  'Cửa hàng chưa cập nhật.': 'Not provided yet.', '📍 Địa chỉ': '📍 Address', 'Chưa cập nhật': 'Not provided yet', 'Bản đồ cửa hàng': 'Store map', '📜 Chính sách bảo hành': '📜 Warranty policy',
+  'Tra cứu bảo hành bằng số Serial/IMEI hoặc mã phiếu – không cần giữ phiếu giấy.': 'Look up your warranty by serial/IMEI or ticket code – no paper card needed.',
+  'Máy hết hạn bảo hành: cửa hàng báo giá trước, chỉ sửa khi quý khách đồng ý.': 'Out-of-warranty devices: we send a quote first and repair only with your approval.',
+  'Theo dõi tiến độ, duyệt báo giá và đặt lịch ngay trong mục <a href="#tai-khoan">Tài khoản của tôi</a>.': 'Track progress, approve quotes and book service in <a href="#tai-khoan">My account</a>.',
+  'Chuyển sang giao diện sáng': 'Switch to light theme', 'Chuyển sang giao diện tối': 'Switch to dark theme',
+};
+const T = (s, ...a) => { let r = LANG === 'en' && EN[s] != null ? EN[s] : s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; };
+/** Dịch phần chữ cố định trong HTML (chạy một lần khi mở trang). */
+function translateStatic(root) {
+  if (LANG !== 'en') return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n = w.nextNode(); n; n = w.nextNode()) {
+    const s = n.nodeValue.trim();
+    if (s && EN[s] != null) n.nodeValue = n.nodeValue.replace(s, EN[s]);
+  }
+  root.querySelectorAll('[placeholder],[aria-label],[title]').forEach(el => ['placeholder', 'aria-label', 'title'].forEach(a => {
+    const v = el.getAttribute(a); if (v && EN[v] != null) el.setAttribute(a, EN[v]); }));
+}
+
 const toast = (m, e) => { const t = $('#toast'); t.textContent = m; t.className = 'toast show' + (e ? ' err' : ''); clearTimeout(toastT); toastT = setTimeout(() => t.className = 'toast', 3500); };
 async function api(path, method, body) {
-  const res = await fetch(path, {method: method || 'GET', credentials: 'same-origin', headers: {'Content-Type': 'application/json', 'X-App': '1'}, body: body ? JSON.stringify(body) : undefined});
-  const d = await res.json().catch(() => ({error: 'Có lỗi xảy ra'}));
-  if (!res.ok) { const e = new Error(d.error || 'Có lỗi xảy ra'); e.status = res.status; throw e; }
+  const res = await fetch(path, {method: method || 'GET', credentials: 'same-origin', headers: {'Content-Type': 'application/json', 'X-App': '1', 'X-Lang': LANG}, body: body ? JSON.stringify(body) : undefined});
+  const d = await res.json().catch(() => ({error: T('Có lỗi xảy ra')}));
+  if (!res.ok) { const e = new Error(d.error || T('Có lỗi xảy ra')); e.status = res.status; throw e; }
   return d;
 }
 
 fetch('/api/public/shop').then(r => r.json()).then(s => {
-  if (s.name) { $('#sn').textContent = s.name; document.title = 'Tra cứu bảo hành · ' + s.name; }
+  if (s.name) { $('#sn').textContent = s.name; document.title = T('Tra cứu bảo hành · {0}', s.name); }
   $('#sa').textContent = [s.address, s.phone].filter(Boolean).join(' · ');
-  $('#ft').textContent = s.phone ? 'Cần hỗ trợ? Gọi ' + s.phone : '';
+  $('#ft').textContent = s.phone ? T('Cần hỗ trợ? Gọi {0}', s.phone) : '';
 }).catch(() => {});
 
 /* ---------- chung ---------- */
@@ -196,14 +302,14 @@ function meter(w) {
   const total = Math.max(1, new Date(w.expiry_date) - new Date(w.purchase_date));
   const used = Math.min(1, Math.max(0, (Date.now() - new Date(w.purchase_date)) / total));
   return `<div class="meter ${w.active ? '' : 'exp'}"><i style="width:${used * 100}%"></i></div>
-    <div class="row2"><span>Mua ${fd(w.purchase_date)}</span><span>${w.months} tháng</span><span>Hết hạn ${fd(w.expiry_date)}</span></div>`;
+    <div class="row2"><span>${T('Mua {0}', fd(w.purchase_date))}</span><span>${T('{0} tháng', w.months)}</span><span>${T('Hết hạn {0}', fd(w.expiry_date))}</span></div>`;
 }
-function steps(list) { return `<ul class="steps">${list.map((s, i) => `<li class="${i === list.length - 1 ? 'now' : ''}"><div><b>${h(s.label)}</b><small>${fdt(s.time)}</small></div></li>`).join('')}</ul>`; }
+function steps(list) { return `<ul class="steps">${list.map((s, i) => `<li class="${i === list.length - 1 ? 'now' : ''}"><div><b>${h(T(s.label))}</b><small>${fdt(s.time)}</small></div></li>`).join('')}</ul>`; }
 function ticketMsg(t) {
-  if (t.status === 'READY') return 'Máy đã sửa xong. Quý khách vui lòng mang phiếu tiếp nhận đến cửa hàng để nhận máy.';
-  if (t.quote_pending) return 'Cửa hàng đã gửi báo giá sửa chữa' + (t.total != null ? ' <b>' + money(t.total) + '</b>' : '') + '. Vui lòng xác nhận để cửa hàng tiến hành sửa.';
-  if (t.status === 'REJECTED') return 'Máy không thuộc diện bảo hành / không sửa. Vui lòng liên hệ cửa hàng để nhận lại máy.';
-  if (!['RETURNED','CANCELLED'].includes(t.status) && t.due_date) return 'Ngày hẹn trả dự kiến: <b>' + fd(t.due_date) + '</b>.';
+  if (t.status === 'READY') return T('Máy đã sửa xong. Quý khách vui lòng mang phiếu tiếp nhận đến cửa hàng để nhận máy.');
+  if (t.quote_pending) return T('Cửa hàng đã gửi báo giá sửa chữa') + (t.total != null ? ' <b>' + money(t.total) + '</b>' : '') + T('. Vui lòng xác nhận để cửa hàng tiến hành sửa.');
+  if (t.status === 'REJECTED') return T('Máy không thuộc diện bảo hành / không sửa. Vui lòng liên hệ cửa hàng để nhận lại máy.');
+  if (!['RETURNED','CANCELLED'].includes(t.status) && t.due_date) return T('Ngày hẹn trả dự kiến: <b>{0}</b>.', fd(t.due_date));
   return '';
 }
 const pillCls = s => s === 'READY' ? 'acc' : s === 'RETURNED' ? 'ok' : (s === 'REJECTED' || s === 'CANCELLED') ? 'bad' : '';
@@ -211,21 +317,21 @@ const pillCls = s => s === 'READY' ? 'acc' : s === 'RETURNED' ? 'ok' : (s === 'R
 /* ---------- tra cứu nhanh ---------- */
 function ticketCard(t) {
   const msg = ticketMsg(t);
-  return `<div class="card"><div class="status"><div><span class="muted">Phiếu ${h(t.code)} · nhận ngày ${fd(t.received_at)}</span><h2>${h(t.status_label)}</h2></div><span class="pill ${pillCls(t.status)}">${t.in_warranty ? 'Bảo hành miễn phí' : 'Sửa có phí'}</span></div>
-    ${msg ? `<div class="note">${msg}${t.quote_pending ? '<br><a href="#tai-khoan">Đăng nhập để duyệt báo giá online →</a>' : ''}</div>` : ''}
-    ${t.total != null && t.status === 'RETURNED' ? `<p class="muted">Chi phí sửa chữa: <b>${money(t.total)}</b></p>` : ''}${steps(t.steps)}</div>`;
+  return `<div class="card"><div class="status"><div><span class="muted">${T('Phiếu {0} · nhận ngày {1}', h(t.code), fd(t.received_at))}</span><h2>${h(T(t.status_label))}</h2></div><span class="pill ${pillCls(t.status)}">${t.in_warranty ? T('Bảo hành miễn phí') : T('Sửa có phí')}</span></div>
+    ${msg ? `<div class="note">${msg}${t.quote_pending ? '<br><a href="#tai-khoan">' + T('Đăng nhập để duyệt báo giá online →') + '</a>' : ''}</div>` : ''}
+    ${t.total != null && t.status === 'RETURNED' ? `<p class="muted">${T('Chi phí sửa chữa: <b>{0}</b>', money(t.total))}</p>` : ''}${steps(t.steps)}</div>`;
 }
 async function lookup(q) {
-  $('#r').innerHTML = '<div class="card muted">Đang tra cứu…</div>';
+  $('#r').innerHTML = `<div class="card muted">${T('Đang tra cứu…')}</div>`;
   try {
     const d = await api('/api/public/lookup?q=' + encodeURIComponent(q));
-    if (!d.found) { $('#r').innerHTML = `<div class="card"><h2 style="margin:0 0 6px">Không tìm thấy</h2><p class="muted" style="margin:0">Không có bảo hành nào khớp với “${h(q)}”. Vui lòng kiểm tra lại số Serial/IMEI hoặc mã phiếu.</p></div>`; return; }
+    if (!d.found) { $('#r').innerHTML = `<div class="card"><h2 style="margin:0 0 6px">${T('Không tìm thấy')}</h2><p class="muted" style="margin:0">${T('Không có bảo hành nào khớp với “{0}”. Vui lòng kiểm tra lại số Serial/IMEI hoặc mã phiếu.', h(q))}</p></div>`; return; }
     const w = d.warranty;
-    $('#r').innerHTML = `<div class="card"><div class="status"><h2>${h(w.product_name)}</h2><span class="pill ${w.active ? 'ok' : 'bad'}">${w.active ? 'Còn bảo hành' : 'Hết bảo hành'}</span></div>
-      <div class="big" ${w.active ? "" : "style=\"color:var(--bad)\""}>${w.active ? w.days_left + ' ngày' : 'Đã hết hạn'}</div><div class="muted">${w.active ? 'bảo hành còn lại, đến hết ngày ' + fd(w.expiry_date) : 'từ ngày ' + fd(w.expiry_date)}</div>
-      ${meter(w)}<div class="kv"><div><span>Serial / IMEI</span><b>${h(w.serial)}</b></div><div><span>Hãng</span><b>${h(w.brand_name)}</b></div>
-        <div><span>Chủ máy</span><b>${h(w.customer)}</b></div><div><span>Điện thoại</span><b>${h(w.phone)}</b></div><div><span>Mã bảo hành</span><b>${h(w.code)}</b></div></div></div>
-      ${w.tickets.length ? '<h2 style="margin:22px 0 10px;font-size:19px">Lịch sử sửa chữa</h2>' + w.tickets.map(ticketCard).join('') : '<p class="muted">Máy chưa từng gửi bảo hành.</p>'}`;
+    $('#r').innerHTML = `<div class="card"><div class="status"><h2>${h(w.product_name)}</h2><span class="pill ${w.active ? 'ok' : 'bad'}">${w.active ? T('Còn bảo hành') : T('Hết bảo hành')}</span></div>
+      <div class="big" ${w.active ? "" : "style=\"color:var(--bad)\""}>${w.active ? T('{0} ngày', w.days_left) : T('Đã hết hạn')}</div><div class="muted">${w.active ? T('bảo hành còn lại, đến hết ngày {0}', fd(w.expiry_date)) : T('từ ngày {0}', fd(w.expiry_date))}</div>
+      ${meter(w)}<div class="kv"><div><span>Serial / IMEI</span><b>${h(w.serial)}</b></div><div><span>${T('Hãng')}</span><b>${h(w.brand_name)}</b></div>
+        <div><span>${T('Chủ máy')}</span><b>${h(w.customer)}</b></div><div><span>${T('Điện thoại')}</span><b>${h(w.phone)}</b></div><div><span>${T('Mã bảo hành')}</span><b>${h(w.code)}</b></div></div></div>
+      ${w.tickets.length ? '<h2 style="margin:22px 0 10px;font-size:19px">' + T('Lịch sử sửa chữa') + '</h2>' + w.tickets.map(ticketCard).join('') : '<p class="muted">' + T('Máy chưa từng gửi bảo hành.') + '</p>'}`;
   } catch (e) { $('#r').innerHTML = `<div class="card" style="color:var(--bad)">${h(e.message)}</div>`; }
 }
 $('#f').addEventListener('submit', e => { e.preventDefault(); const q = $('#q').value.trim(); if (q) { history.replaceState(null, '', '#' + encodeURIComponent(q)); lookup(q); } });
@@ -241,93 +347,93 @@ $('#lf').onsubmit = async e => {
 };
 $('#rf').onsubmit = async e => {
   e.preventDefault(); $('#rerr').textContent = '';
-  if ($('#rpw').value !== $('#rpw2').value) { $('#rerr').textContent = 'Mật khẩu nhập lại không khớp'; return; }
-  try { ME = await api('/api/kh/register', 'POST', {phone: $('#rph').value, serial: $('#rse').value, password: $('#rpw').value}); toast('Đã tạo tài khoản'); renderMe(); }
+  if ($('#rpw').value !== $('#rpw2').value) { $('#rerr').textContent = T('Mật khẩu nhập lại không khớp'); return; }
+  try { ME = await api('/api/kh/register', 'POST', {phone: $('#rph').value, serial: $('#rse').value, password: $('#rpw').value}); toast(T('Đã tạo tài khoản')); renderMe(); }
   catch (err) { $('#rerr').textContent = err.message; }
 };
 
 const EV_ICON = {MESSAGE: ['💬', ''], RECEIVED: ['📥', ''], QUOTE: ['💰', 'warn'], READY: ['✅', 'ok'], REQUEST_CONFIRMED: ['📅', ''], REQUEST_REJECTED: ['⚠️', 'bad'], EXPIRING: ['⏳', 'warn']};
 let SUB = 'may', INBOX = null;
-function starsView(n) { return `<span class="stars" aria-label="${n} sao">${[1,2,3,4,5].map(i => `<b class="${i <= n ? 'on' : ''}">★</b>`).join('')}</span>`; }
+function starsView(n) { return `<span class="stars" aria-label="${T('{0} sao', n)}">${[1,2,3,4,5].map(i => `<b class="${i <= n ? 'on' : ''}">★</b>`).join('')}</span>`; }
 function reviewBox(t) {
   if (!t.can_review) return '';
-  if (t.review && !t.editing) return `<div class="review"><div class="status"><div>${starsView(t.review.stars)} <span class="muted">Đánh giá của bạn · ${fd(t.review.updated_at || t.review.created_at)}</span></div>
-    <button class="sm ghost" data-rve="${t.id}">Sửa đánh giá</button></div>${t.review.comment ? `<p style="margin:6px 0 0">${h(t.review.comment)}</p>` : ''}</div>`;
+  if (t.review && !t.editing) return `<div class="review"><div class="status"><div>${starsView(t.review.stars)} <span class="muted">${T('Đánh giá của bạn · {0}', fd(t.review.updated_at || t.review.created_at))}</span></div>
+    <button class="sm ghost" data-rve="${t.id}">${T('Sửa đánh giá')}</button></div>${t.review.comment ? `<p style="margin:6px 0 0">${h(t.review.comment)}</p>` : ''}</div>`;
   const cur = t.review ? t.review.stars : 0;
-  return `<form class="review" data-rvf="${t.id}"><b>Bạn hài lòng với lần sửa chữa này chứ?</b>
-    <div class="stars" data-val="${cur}">${[1,2,3,4,5].map(i => `<button type="button" data-s="${i}" class="${i <= cur ? 'on' : ''}" aria-label="${i} sao">★</button>`).join('')}</div>
-    <textarea placeholder="Nhận xét thêm (không bắt buộc)" maxlength="500" style="min-height:70px;margin-top:6px">${h(t.review ? t.review.comment || '' : '')}</textarea>
-    <div class="actions"><button class="sm">Gửi đánh giá</button></div></form>`;
+  return `<form class="review" data-rvf="${t.id}"><b>${T('Bạn hài lòng với lần sửa chữa này chứ?')}</b>
+    <div class="stars" data-val="${cur}">${[1,2,3,4,5].map(i => `<button type="button" data-s="${i}" class="${i <= cur ? 'on' : ''}" aria-label="${T('{0} sao', i)}">★</button>`).join('')}</div>
+    <textarea placeholder="${T('Nhận xét thêm (không bắt buộc)')}" maxlength="500" style="min-height:70px;margin-top:6px">${h(t.review ? t.review.comment || '' : '')}</textarea>
+    <div class="actions"><button class="sm">${T('Gửi đánh giá')}</button></div></form>`;
 }
 function thumbs(photos, canDelete) {
   if (!photos || !photos.length) return '';
-  return `<div class="thumbs">${photos.map(p => `<figure><img src="/api/kh/photos/${p.id}" alt="" loading="lazy" data-zoom>${canDelete ? `<button type="button" data-dp="${p.id}" aria-label="Xóa ảnh">×</button>` : ''}</figure>`).join('')}</div>`;
+  return `<div class="thumbs">${photos.map(p => `<figure><img src="/api/kh/photos/${p.id}" alt="" loading="lazy" data-zoom>${canDelete ? `<button type="button" data-dp="${p.id}" aria-label="${T('Xóa ảnh')}">×</button>` : ''}</figure>`).join('')}</div>`;
 }
 function deviceCard(d) {
   const tickets = d.tickets.map(t => {
     const msg = ticketMsg(t);
-    const quote = t.quote_pending ? `<div class="quote"><b>Báo giá sửa chữa</b>${t.diagnosis ? `<div class="muted">Kết luận kỹ thuật: ${h(t.diagnosis)}</div>` : ''}
+    const quote = t.quote_pending ? `<div class="quote"><b>${T('Báo giá sửa chữa')}</b>${t.diagnosis ? `<div class="muted">${T('Kết luận kỹ thuật: {0}', h(t.diagnosis))}</div>` : ''}
       <table>${t.parts.filter(p => p.charged).map(p => `<tr><td>${h(p.name)} × ${p.qty}</td><td>${money(p.amount)}</td></tr>`).join('')}
-      <tr><td>Tiền công</td><td>${money(t.total - t.parts.filter(p => p.charged).reduce((s, p) => s + p.amount, 0))}</td></tr>
-      <tr><td><b>Tổng cộng</b></td><td><b>${money(t.total)}</b></td></tr></table>
-      <div class="actions"><button class="sm" data-qy="${t.id}">Đồng ý sửa</button><button class="sm danger" data-qn="${t.id}">Không sửa</button></div></div>` : '';
-    return `<div class="sub-ticket"><div class="status"><div><span class="muted">Phiếu ${h(t.code)} · nhận ${fd(t.received_at)}</span><div><b>${h(t.status_label)}</b></div></div>
-      <span class="pill ${pillCls(t.status)}">${t.in_warranty ? 'Bảo hành miễn phí' : 'Sửa có phí'}</span></div>
-      <div class="muted">Lỗi: ${h(t.issue)}</div>${msg ? `<div class="note">${msg}</div>` : ''}${quote}
-      ${t.status === 'RETURNED' ? `<div class="actions" style="align-items:center"><span class="muted">${t.paid_amount ? 'Đã thanh toán <b>' + money(t.paid_amount) + '</b>' : 'Miễn phí'}${t.invoice_no ? ' · HĐ ' + h(t.invoice_no) : ''}</span>
-        <button class="sm ghost" data-print="tra-may:${t.id}">Xem / in hóa đơn</button></div>` : ''}
-      ${t.status === 'READY' && t.total > 0 && !t.quote_pending ? `<div class="paybox"><div class="status"><b>Thanh toán: ${money(t.total)}</b>
-          ${t.payment_claim ? `<span class="pill ${t.payment_claim.method === 'TRANSFER' ? 'acc' : 'ok'}">${t.payment_claim.method === 'TRANSFER' ? 'Đã báo chuyển khoản' : 'Trả tiền mặt khi nhận'}</span>` : ''}</div>
-        ${t.payment_claim ? `<p class="muted" style="margin:4px 0 0">${t.payment_claim.method === 'TRANSFER' ? 'Bạn đã báo chuyển khoản lúc ' + fdt(t.payment_claim.time) + '. Cửa hàng sẽ kiểm tra và xác nhận khi bạn đến nhận máy.' : 'Bạn chọn thanh toán tại quầy khi đến nhận máy.'} Có thể đổi cách thanh toán bên dưới.</p>` : '<p class="muted" style="margin:4px 0 0">Chọn cách thanh toán:</p>'}
-        <div class="seg"><button type="button" data-pm="CASH:${t.id}">💵 Tiền mặt khi nhận máy</button><button type="button" data-pm="TRANSFER:${t.id}">🏦 Chuyển khoản (VietQR)</button></div>
+      <tr><td>${T('Tiền công')}</td><td>${money(t.total - t.parts.filter(p => p.charged).reduce((s, p) => s + p.amount, 0))}</td></tr>
+      <tr><td><b>${T('Tổng cộng')}</b></td><td><b>${money(t.total)}</b></td></tr></table>
+      <div class="actions"><button class="sm" data-qy="${t.id}">${T('Đồng ý sửa')}</button><button class="sm danger" data-qn="${t.id}">${T('Không sửa')}</button></div></div>` : '';
+    return `<div class="sub-ticket"><div class="status"><div><span class="muted">${T('Phiếu {0} · nhận {1}', h(t.code), fd(t.received_at))}</span><div><b>${h(T(t.status_label))}</b></div></div>
+      <span class="pill ${pillCls(t.status)}">${t.in_warranty ? T('Bảo hành miễn phí') : T('Sửa có phí')}</span></div>
+      <div class="muted">${T('Lỗi: {0}', h(t.issue))}</div>${msg ? `<div class="note">${msg}</div>` : ''}${quote}
+      ${t.status === 'RETURNED' ? `<div class="actions" style="align-items:center"><span class="muted">${t.paid_amount ? T('Đã thanh toán <b>{0}</b>', money(t.paid_amount)) : T('Miễn phí')}${t.invoice_no ? T(' · HĐ {0}', h(t.invoice_no)) : ''}</span>
+        <button class="sm ghost" data-print="tra-may:${t.id}">${T('Xem / in hóa đơn')}</button></div>` : ''}
+      ${t.status === 'READY' && t.total > 0 && !t.quote_pending ? `<div class="paybox"><div class="status"><b>${T('Thanh toán: {0}', money(t.total))}</b>
+          ${t.payment_claim ? `<span class="pill ${t.payment_claim.method === 'TRANSFER' ? 'acc' : 'ok'}">${t.payment_claim.method === 'TRANSFER' ? T('Đã báo chuyển khoản') : T('Trả tiền mặt khi nhận')}</span>` : ''}</div>
+        ${t.payment_claim ? `<p class="muted" style="margin:4px 0 0">${t.payment_claim.method === 'TRANSFER' ? T('Bạn đã báo chuyển khoản lúc {0}. Cửa hàng sẽ kiểm tra và xác nhận khi bạn đến nhận máy.', fdt(t.payment_claim.time)) : T('Bạn chọn thanh toán tại quầy khi đến nhận máy.')}${T(' Có thể đổi cách thanh toán bên dưới.')}</p>` : '<p class="muted" style="margin:4px 0 0">' + T('Chọn cách thanh toán:') + '</p>'}
+        <div class="seg"><button type="button" data-pm="CASH:${t.id}">${T('💵 Tiền mặt khi nhận máy')}</button><button type="button" data-pm="TRANSFER:${t.id}">${T('🏦 Chuyển khoản (VietQR)')}</button></div>
         <div data-paypanel="${t.id}"></div></div>` : ''}
-      <div class="actions"><button class="sm ghost" data-chat="${t.id}">💬 Nhắn tin với cửa hàng${t.unread_messages ? ` <b style="color:var(--bad)">(${t.unread_messages} tin mới)</b>` : t.messages ? ` (${t.messages})` : ''}</button></div>
+      <div class="actions"><button class="sm ghost" data-chat="${t.id}">${T('💬 Nhắn tin với cửa hàng')}${t.unread_messages ? ` <b style="color:var(--bad)">${T(' ({0} tin mới)', t.unread_messages)}</b>` : t.messages ? ` (${t.messages})` : ''}</button></div>
       <div data-chatbox="${t.id}"></div>
       ${reviewBox(t)}${steps(t.steps)}</div>`;
   }).join('');
   const pending = ME.requests.some(r => r.serial === d.serial && ['NEW','CONFIRMED'].includes(r.status));
-  return `<div class="card"><div class="status"><h2>${h(d.product_name)}</h2><span class="pill ${d.active ? 'ok' : 'bad'}">${d.active ? 'Còn ' + d.days_left + ' ngày' : 'Hết bảo hành'}</span></div>
-    <div class="muted">Serial ${h(d.serial)} · Mã BH ${h(d.code)} · ${h(d.brand_name)}</div>${meter(d)}
-    ${d.extensions.length ? `<div class="note">Đã mua gói bảo hành mở rộng: ${d.extensions.map(e => '+' + e.months + ' tháng (' + fd(e.created_at) + ')').join(', ')}</div>` : ''}
-    <div class="actions"><button class="sm ghost" data-print="bao-hanh:${d.id}">📄 Phiếu bảo hành điện tử (QR)</button>
-    ${!d.open_ticket && !pending ? `<button class="sm ghost" data-req="${d.id}">🛠 Yêu cầu bảo hành / đặt lịch sửa</button>` : ''}</div><div data-form="${d.id}"></div>
-    ${tickets || '<p class="muted">Máy chưa từng gửi bảo hành.</p>'}</div>`;
+  return `<div class="card"><div class="status"><h2>${h(d.product_name)}</h2><span class="pill ${d.active ? 'ok' : 'bad'}">${d.active ? T('Còn {0} ngày', d.days_left) : T('Hết bảo hành')}</span></div>
+    <div class="muted">${T('Serial {0} · Mã BH {1} · {2}', h(d.serial), h(d.code), h(d.brand_name))}</div>${meter(d)}
+    ${d.extensions.length ? `<div class="note">${T('Đã mua gói bảo hành mở rộng: {0}', d.extensions.map(e => T('+{0} tháng ({1})', e.months, fd(e.created_at))).join(', '))}</div>` : ''}
+    <div class="actions"><button class="sm ghost" data-print="bao-hanh:${d.id}">${T('📄 Phiếu bảo hành điện tử (QR)')}</button>
+    ${!d.open_ticket && !pending ? `<button class="sm ghost" data-req="${d.id}">${T('🛠 Yêu cầu bảo hành / đặt lịch sửa')}</button>` : ''}</div><div data-form="${d.id}"></div>
+    ${tickets || '<p class="muted">' + T('Máy chưa từng gửi bảo hành.') + '</p>'}</div>`;
 }
 function requestsCard() {
   const reqs = ME.requests;
   if (!reqs.length) return '';
-  return `<div class="card"><h2 style="margin:0 0 8px;font-size:19px">Yêu cầu bảo hành online</h2>${reqs.map(r => { const open = ['NEW','CONFIRMED'].includes(r.status);
+  return `<div class="card"><h2 style="margin:0 0 8px;font-size:19px">${T('Yêu cầu bảo hành online')}</h2>${reqs.map(r => { const open = ['NEW','CONFIRMED'].includes(r.status);
     return `<div class="sub-ticket" style="margin-top:8px">
       <div class="status"><div><span class="muted">${h(r.code)} · ${fdt(r.created_at)}</span><div><b>${h(r.product_name)}</b></div></div>
-      <span class="pill ${r.status === 'CONVERTED' ? 'ok' : ['REJECTED','CANCELLED'].includes(r.status) ? 'bad' : r.status === 'CONFIRMED' ? 'acc' : ''}">${h(r.status_label)}</span></div>
+      <span class="pill ${r.status === 'CONVERTED' ? 'ok' : ['REJECTED','CANCELLED'].includes(r.status) ? 'bad' : r.status === 'CONFIRMED' ? 'acc' : ''}">${h(T(r.status_label))}</span></div>
       <div class="muted">${h(r.issue)}</div>${thumbs(r.photos, open)}
-      ${r.appointment ? `<div class="note">Cửa hàng hẹn bạn mang máy tới ngày <b>${fd(r.appointment)}</b>.${r.staff_note ? ' ' + h(r.staff_note) : ''}</div>` : (r.staff_note ? `<div class="note">${h(r.staff_note)}</div>` : '')}
-      ${r.ticket_code ? `<p class="muted">Đã tạo phiếu ${h(r.ticket_code)}</p>` : ''}
-      ${open ? `<div class="actions">${r.photos.length < 4 ? `<label class="linkbtn" style="cursor:pointer;margin:0">📷 Thêm ảnh<input type="file" accept="image/*" multiple hidden data-up="${r.id}"></label>` : ''}<button class="sm ghost" data-cr="${r.id}">Hủy yêu cầu</button></div>` : ''}</div>`; }).join('')}</div>`;
+      ${r.appointment ? `<div class="note">${T('Cửa hàng hẹn bạn mang máy tới ngày <b>{0}</b>.', fd(r.appointment))}${r.staff_note ? ' ' + h(r.staff_note) : ''}</div>` : (r.staff_note ? `<div class="note">${h(r.staff_note)}</div>` : '')}
+      ${r.ticket_code ? `<p class="muted">${T('Đã tạo phiếu {0}', h(r.ticket_code))}</p>` : ''}
+      ${open ? `<div class="actions">${r.photos.length < 4 ? `<label class="linkbtn" style="cursor:pointer;margin:0">${T('📷 Thêm ảnh')}<input type="file" accept="image/*" multiple hidden data-up="${r.id}"></label>` : ''}<button class="sm ghost" data-cr="${r.id}">${T('Hủy yêu cầu')}</button></div>` : ''}</div>`; }).join('')}</div>`;
 }
 function invoicesView() {
   const inv = ME.invoices;
-  return `<div class="card"><h2 style="margin:0 0 4px;font-size:19px">Hóa đơn sửa chữa</h2><p class="muted" style="margin:0 0 6px">Các lần nhận lại máy tại cửa hàng. Bấm <b>Xem / in</b> để in lại hoặc lưu thành file PDF.</p>
-    ${inv.length ? inv.map(i => `<div class="inv"><div><b>${h(i.product_name)}</b><div class="muted">${i.invoice_no ? 'Hóa đơn ' + h(i.invoice_no) + ' · ' : ''}Phiếu ${h(i.code)} · ${fd(i.returned_at)}${i.payment_label ? ' · ' + h(i.payment_label) : ''}</div></div>
-      <div class="row" style="display:flex;gap:10px;align-items:center"><b style="font-size:17px">${i.paid_amount ? money(i.paid_amount) : 'Miễn phí'}</b><button class="sm ghost" data-print="tra-may:${i.ticket_id}">Xem / in</button></div></div>`).join('')
-      : '<p class="muted">Chưa có hóa đơn nào.</p>'}</div>`;
+  return `<div class="card"><h2 style="margin:0 0 4px;font-size:19px">${T('Hóa đơn sửa chữa')}</h2><p class="muted" style="margin:0 0 6px">${T('Các lần nhận lại máy tại cửa hàng. Bấm <b>Xem / in</b> để in lại hoặc lưu thành file PDF.')}</p>
+    ${inv.length ? inv.map(i => `<div class="inv"><div><b>${h(i.product_name)}</b><div class="muted">${i.invoice_no ? T('Hóa đơn {0} · ', h(i.invoice_no)) : ''}${T('Phiếu {0} · {1}', h(i.code), fd(i.returned_at))}${i.payment_label ? ' · ' + h(T(i.payment_label)) : ''}</div></div>
+      <div class="row" style="display:flex;gap:10px;align-items:center"><b style="font-size:17px">${i.paid_amount ? money(i.paid_amount) : T('Miễn phí')}</b><button class="sm ghost" data-print="tra-may:${i.ticket_id}">${T('Xem / in')}</button></div></div>`).join('')
+      : '<p class="muted">' + T('Chưa có hóa đơn nào.') + '</p>'}</div>`;
 }
 function inboxView() {
-  if (INBOX === null) return '<div class="card muted">Đang tải hộp thư…</div>';
-  return `<div class="card"><h2 style="margin:0 0 4px;font-size:19px">Hộp thư</h2><p class="muted" style="margin:0 0 4px">Các thông báo cửa hàng đã gửi cho bạn qua email / SMS / Zalo.</p>
+  if (INBOX === null) return '<div class="card muted">' + T('Đang tải hộp thư…') + '</div>';
+  return `<div class="card"><h2 style="margin:0 0 4px;font-size:19px">${T('Hộp thư')}</h2><p class="muted" style="margin:0 0 4px">${T('Các thông báo cửa hàng đã gửi cho bạn qua email / SMS / Zalo.')}</p>
     ${INBOX.length ? INBOX.map(m => { const ic = EV_ICON[m.event] || ['✉️', ''];
-      return `<div class="mail"><div class="ic ${ic[1]}">${ic[0]}</div><div><div class="status"><h3>${h(m.title)}${m.ref ? ' · ' + h(m.ref) : ''}</h3><span class="muted" style="font-size:13px">${fdt(m.time)}</span></div>
-        <p>${h(m.body)}</p><div class="muted" style="font-size:12.5px;margin-top:4px">${m.pending ? 'Đang gửi' : 'Đã gửi'} qua ${h(m.channels.join(', '))}</div></div></div>`; }).join('')
-      : '<p class="muted">Chưa có thông báo nào.</p>'}</div>`;
+      return `<div class="mail"><div class="ic ${ic[1]}">${ic[0]}</div><div><div class="status"><h3>${h(T(m.title))}${m.ref ? ' · ' + h(m.ref) : ''}</h3><span class="muted" style="font-size:13px">${fdt(m.time)}</span></div>
+        <p>${h(m.body)}</p><div class="muted" style="font-size:12.5px;margin-top:4px">${T('{0} qua {1}', m.pending ? T('Đang gửi') : T('Đã gửi'), h(m.channels.join(', ')))}</div></div></div>`; }).join('')
+      : '<p class="muted">' + T('Chưa có thông báo nào.') + '</p>'}</div>`;
 }
 function accountView() {
-  return `<div class="card"><h2 style="margin:0 0 4px;font-size:19px">Thông tin tài khoản</h2><p class="muted" style="margin:0">${h(ME.name)} · ${h(ME.phone)}</p>
-      <form id="pf"><label for="pe">Email (để nhận thông báo)</label><input id="pe" type="email" value="${h(ME.email)}"><label for="pa">Địa chỉ</label><input id="pa" value="${h(ME.address)}">
-        <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin-top:10px"><input id="pnr" type="checkbox" style="width:auto;margin-top:3px" ${ME.no_reminders ? 'checked' : ''}>Không nhận tin nhắc bảo hành sắp hết hạn / ưu đãi gia hạn (vẫn nhận tin về máy đang sửa)</label>
-        <div class="actions"><button class="sm">Lưu thông tin</button></div></form>
-      <form id="pwf"><label for="po">Đổi mật khẩu – mật khẩu hiện tại</label><input id="po" type="password" autocomplete="current-password" required>
-        <label for="pn">Mật khẩu mới</label><input id="pn" type="password" minlength="6" autocomplete="new-password" required><div class="actions"><button class="sm ghost">Đổi mật khẩu</button></div></form>
-      <div class="actions"><button class="sm danger" id="lo">Đăng xuất</button></div></div>`;
+  return `<div class="card"><h2 style="margin:0 0 4px;font-size:19px">${T('Thông tin tài khoản')}</h2><p class="muted" style="margin:0">${h(ME.name)} · ${h(ME.phone)}</p>
+      <form id="pf"><label for="pe">${T('Email (để nhận thông báo)')}</label><input id="pe" type="email" value="${h(ME.email)}"><label for="pa">${T('Địa chỉ')}</label><input id="pa" value="${h(ME.address)}">
+        <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin-top:10px"><input id="pnr" type="checkbox" style="width:auto;margin-top:3px" ${ME.no_reminders ? 'checked' : ''}>${T('Không nhận tin nhắc bảo hành sắp hết hạn / ưu đãi gia hạn (vẫn nhận tin về máy đang sửa)')}</label>
+        <div class="actions"><button class="sm">${T('Lưu thông tin')}</button></div></form>
+      <form id="pwf"><label for="po">${T('Đổi mật khẩu – mật khẩu hiện tại')}</label><input id="po" type="password" autocomplete="current-password" required>
+        <label for="pn">${T('Mật khẩu mới')}</label><input id="pn" type="password" minlength="6" autocomplete="new-password" required><div class="actions"><button class="sm ghost">${T('Đổi mật khẩu')}</button></div></form>
+      <div class="actions"><button class="sm danger" id="lo">${T('Đăng xuất')}</button></div></div>`;
 }
 async function openPrint(kind, id) {
   const w = window.open('', '_blank');
@@ -337,15 +443,15 @@ async function openPrint(kind, id) {
 async function uploadPhotos(reqId, files) {
   let ok = 0, err = '';
   for (const f of [...files].slice(0, 4)) {
-    const res = await fetch(`/api/kh/requests/${reqId}/photos`, {method: 'POST', credentials: 'same-origin', headers: {'X-App': '1', 'X-File-Name': encodeURIComponent(f.name)}, body: f});
-    if (res.ok) ok++; else err = (await res.json().catch(() => ({}))).error || 'Lỗi tải ảnh';
+    const res = await fetch(`/api/kh/requests/${reqId}/photos`, {method: 'POST', credentials: 'same-origin', headers: {'X-App': '1', 'X-Lang': LANG, 'X-File-Name': encodeURIComponent(f.name)}, body: f});
+    if (res.ok) ok++; else err = (await res.json().catch(() => ({}))).error || T('Lỗi tải ảnh');
   }
   return {ok, err};
 }
 function renderMe() {
   $('#auth').hidden = true; const box = $('#me'); box.hidden = false;
-  $('#hd').textContent = 'Xin chào, ' + ME.name; $('#hp').textContent = 'Máy của bạn, hóa đơn, thông báo và tài khoản.';
-  const tabs = [['may', 'Máy của tôi', ME.unread_messages ? '💬 ' + ME.unread_messages : ME.devices.length], ['hoa-don', 'Hóa đơn', ME.invoices.length], ['hop-thu', 'Hộp thư', 0], ['tai-khoan', 'Tài khoản', 0]];
+  $('#hd').textContent = T('Xin chào, {0}', ME.name); $('#hp').textContent = T('Máy của bạn, hóa đơn, thông báo và tài khoản.');
+  const tabs = [['may', T('Máy của tôi'), ME.unread_messages ? '💬 ' + ME.unread_messages : ME.devices.length], ['hoa-don', T('Hóa đơn'), ME.invoices.length], ['hop-thu', T('Hộp thư'), 0], ['tai-khoan', T('Tài khoản'), 0]];
   let body = '';
   if (SUB === 'may') body = requestsCard() + ME.devices.map(deviceCard).join('');
   else if (SUB === 'hoa-don') body = invoicesView();
@@ -356,15 +462,15 @@ function renderMe() {
   const run = async (p, msg) => { try { ME = await p; renderMe(); if (msg) toast(msg); } catch (e) { toast(e.message, true); if (e.status === 401) logout(); } };
   $$('[data-print]', box).forEach(b => b.onclick = () => { const [k, id] = b.dataset.print.split(':'); openPrint(k, id); });
   $$('[data-zoom]', box).forEach(img => img.onclick = () => { const v = document.createElement('div'); v.className = 'imgview'; v.innerHTML = `<img src="${img.src}" alt="">`; v.onclick = () => v.remove(); document.body.append(v); });
-  $$('[data-qy]', box).forEach(b => b.onclick = () => run(api('/api/kh/quote', 'POST', {ticket_id: +b.dataset.qy, approve: true}), 'Đã xác nhận đồng ý sửa'));
-  $$('[data-qn]', box).forEach(b => b.onclick = () => { if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Bấm lần nữa để xác nhận'; return; }
-    run(api('/api/kh/quote', 'POST', {ticket_id: +b.dataset.qn, approve: false}), 'Đã báo không sửa'); });
-  $$('[data-cr]', box).forEach(b => b.onclick = () => { if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Bấm lần nữa để hủy'; return; }
-    run(api(`/api/kh/requests/${b.dataset.cr}/cancel`, 'POST'), 'Đã hủy yêu cầu'); });
-  $$('[data-dp]', box).forEach(b => b.onclick = () => run(api('/api/kh/photos/' + b.dataset.dp, 'DELETE').then(() => api('/api/kh/me')), 'Đã xóa ảnh'));
+  $$('[data-qy]', box).forEach(b => b.onclick = () => run(api('/api/kh/quote', 'POST', {ticket_id: +b.dataset.qy, approve: true}), T('Đã xác nhận đồng ý sửa')));
+  $$('[data-qn]', box).forEach(b => b.onclick = () => { if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = T('Bấm lần nữa để xác nhận'); return; }
+    run(api('/api/kh/quote', 'POST', {ticket_id: +b.dataset.qn, approve: false}), T('Đã báo không sửa')); });
+  $$('[data-cr]', box).forEach(b => b.onclick = () => { if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = T('Bấm lần nữa để hủy'); return; }
+    run(api(`/api/kh/requests/${b.dataset.cr}/cancel`, 'POST'), T('Đã hủy yêu cầu')); });
+  $$('[data-dp]', box).forEach(b => b.onclick = () => run(api('/api/kh/photos/' + b.dataset.dp, 'DELETE').then(() => api('/api/kh/me')), T('Đã xóa ảnh')));
   $$('[data-up]', box).forEach(inp => inp.onchange = async () => {
     const r = await uploadPhotos(inp.dataset.up, inp.files);
-    run(api('/api/kh/me'), r.err ? null : `Đã thêm ${r.ok} ảnh`); if (r.err) toast(r.err, true);
+    run(api('/api/kh/me'), r.err ? null : T('Đã thêm {0} ảnh', r.ok)); if (r.err) toast(r.err, true);
   });
   // Thanh toán: tiền mặt khi nhận máy hoặc chuyển khoản VietQR
   $$('[data-pm]', box).forEach(b => b.onclick = async () => {
@@ -372,34 +478,34 @@ function renderMe() {
     b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
     const send = (m, msg) => run(api(`/api/kh/tickets/${id}/payment`, 'POST', {method: m}), msg);
     if (method === 'CASH') {
-      panel.innerHTML = `<div class="note">Thanh toán <b>tại quầy khi đến nhận máy</b>, bằng tiền mặt hoặc quẹt thẻ. Nhớ mang theo phiếu hoặc báo mã phiếu.
-        <div class="actions"><button class="sm" data-cash>Chọn trả tiền mặt khi nhận máy</button></div></div>`;
-      panel.querySelector('[data-cash]').onclick = () => send('CASH', 'Đã báo cửa hàng: bạn trả tiền khi nhận máy');
+      panel.innerHTML = `<div class="note">${T('Thanh toán <b>tại quầy khi đến nhận máy</b>, bằng tiền mặt hoặc quẹt thẻ. Nhớ mang theo phiếu hoặc báo mã phiếu.')}
+        <div class="actions"><button class="sm" data-cash>${T('Chọn trả tiền mặt khi nhận máy')}</button></div></div>`;
+      panel.querySelector('[data-cash]').onclick = () => send('CASH', T('Đã báo cửa hàng: bạn trả tiền khi nhận máy'));
       return;
     }
-    panel.innerHTML = '<div class="note">Đang tạo mã…</div>';
+    panel.innerHTML = '<div class="note">' + T('Đang tạo mã…') + '</div>';
     try { const q = await api(`/api/kh/tickets/${id}/vietqr`);
       panel.innerHTML = q.available ? `<div class="note" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:#fff">
-        <div style="width:170px;flex:none">${q.svg}</div><div style="flex:1 1 200px"><b>Mở app ngân hàng → Quét QR</b><div class="muted">${h(q.bank)} · STK <b>${h(q.account)}</b>${q.holder ? '<br>' + h(q.holder) : ''}</div>
-        <div class="muted">Số tiền <b>${money(q.amount)}</b> · Nội dung <b>${h(q.info)}</b></div>
-        <div class="actions"><button class="sm" data-paid>Tôi đã chuyển khoản</button></div>
-        <div class="muted" style="font-size:13px">Bấm sau khi chuyển xong để cửa hàng kiểm tra. Cửa hàng xác nhận khi bạn đến nhận máy.</div></div></div>`
-        : `<div class="note">${h(q.reason)}. Bạn vui lòng chọn trả tiền mặt khi nhận máy.</div>`;
+        <div style="width:170px;flex:none">${q.svg}</div><div style="flex:1 1 200px"><b>${T('Mở app ngân hàng → Quét QR')}</b><div class="muted">${T('{0} · STK <b>{1}</b>', h(q.bank), h(q.account))}${q.holder ? '<br>' + h(q.holder) : ''}</div>
+        <div class="muted">${T('Số tiền <b>{0}</b> · Nội dung <b>{1}</b>', money(q.amount), h(q.info))}</div>
+        <div class="actions"><button class="sm" data-paid>${T('Tôi đã chuyển khoản')}</button></div>
+        <div class="muted" style="font-size:13px">${T('Bấm sau khi chuyển xong để cửa hàng kiểm tra. Cửa hàng xác nhận khi bạn đến nhận máy.')}</div></div></div>`
+        : `<div class="note">${T('{0}. Bạn vui lòng chọn trả tiền mặt khi nhận máy.', h(T(q.reason)))}</div>`;
       const pb = panel.querySelector('[data-paid]');
-      if (pb) pb.onclick = () => { if (pb.dataset.sure !== '1') { pb.dataset.sure = '1'; pb.textContent = 'Bấm lần nữa để xác nhận đã chuyển'; return; }
-        send('TRANSFER', 'Đã báo cửa hàng: bạn đã chuyển khoản'); };
+      if (pb) pb.onclick = () => { if (pb.dataset.sure !== '1') { pb.dataset.sure = '1'; pb.textContent = T('Bấm lần nữa để xác nhận đã chuyển'); return; }
+        send('TRANSFER', T('Đã báo cửa hàng: bạn đã chuyển khoản')); };
     } catch (e) { panel.innerHTML = ''; toast(e.message, true); } });
   // tin nhắn với cửa hàng
   $$('[data-chat]', box).forEach(b => b.onclick = async () => {
     const id = b.dataset.chat, holder = box.querySelector(`[data-chatbox="${id}"]`);
     if (holder.innerHTML) { holder.innerHTML = ''; return; }
     const draw = list => { const c = holder.querySelector('.chat');
-      c.innerHTML = list.length ? list.map(m => `<div class="bub ${m.sender === 'CUSTOMER' ? 'me' : 'cu'}">${h(m.body)}<small>${m.sender === 'CUSTOMER' ? 'Bạn' : h(m.staff_name || 'Cửa hàng')} · ${fdt(m.created_at)}</small></div>`).join('')
-        : '<span class="muted">Bạn có câu hỏi về máy đang gửi? Nhắn cho cửa hàng tại đây, nhân viên sẽ trả lời sớm.</span>';
+      c.innerHTML = list.length ? list.map(m => `<div class="bub ${m.sender === 'CUSTOMER' ? 'me' : 'cu'}">${h(m.body)}<small>${m.sender === 'CUSTOMER' ? T('Bạn') : h(m.staff_name || T('Cửa hàng'))} · ${fdt(m.created_at)}</small></div>`).join('')
+        : '<span class="muted">' + T('Bạn có câu hỏi về máy đang gửi? Nhắn cho cửa hàng tại đây, nhân viên sẽ trả lời sớm.') + '</span>';
       c.scrollTop = c.scrollHeight; };
-    holder.innerHTML = `<div class="chatwrap"><div class="chat"><span class="muted">Đang tải…</span></div>
-      <form class="chatf"><textarea placeholder="Nhập tin nhắn…" maxlength="1000" required></textarea><button class="sm">Gửi</button></form></div>`;
-    try { draw(await api(`/api/kh/tickets/${id}/messages`)); b.innerHTML = '💬 Nhắn tin với cửa hàng'; } catch (e) { toast(e.message, true); }
+    holder.innerHTML = `<div class="chatwrap"><div class="chat"><span class="muted">${T('Đang tải…')}</span></div>
+      <form class="chatf"><textarea placeholder="${T('Nhập tin nhắn…')}" maxlength="1000" required></textarea><button class="sm">${T('Gửi')}</button></form></div>`;
+    try { draw(await api(`/api/kh/tickets/${id}/messages`)); b.innerHTML = T('💬 Nhắn tin với cửa hàng'); } catch (e) { toast(e.message, true); }
     const f = holder.querySelector('form'), ta = f.querySelector('textarea');
     ta.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) f.requestSubmit(); };
     f.onsubmit = async e => { e.preventDefault(); if (!ta.value.trim()) return;
@@ -411,30 +517,30 @@ function renderMe() {
   $$('[data-rvf]', box).forEach(f => {
     const st = f.querySelector('.stars');
     st.querySelectorAll('button').forEach(b => b.onclick = () => { st.dataset.val = b.dataset.s; st.querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.s <= +b.dataset.s)); });
-    f.onsubmit = e => { e.preventDefault(); if (!+st.dataset.val) return toast('Vui lòng chọn số sao', true);
-      run(api('/api/kh/review', 'POST', {ticket_id: +f.dataset.rvf, stars: +st.dataset.val, comment: f.querySelector('textarea').value}), 'Cảm ơn bạn đã đánh giá!'); };
+    f.onsubmit = e => { e.preventDefault(); if (!+st.dataset.val) return toast(T('Vui lòng chọn số sao'), true);
+      run(api('/api/kh/review', 'POST', {ticket_id: +f.dataset.rvf, stars: +st.dataset.val, comment: f.querySelector('textarea').value}), T('Cảm ơn bạn đã đánh giá!')); };
   });
   $$('[data-req]', box).forEach(b => b.onclick = () => {
     const id = b.dataset.req, holder = box.querySelector(`[data-form="${id}"]`);
-    holder.innerHTML = `<form class="note" id="rqf${id}"><label for="ri${id}" style="margin-top:0">Mô tả lỗi của máy</label><textarea id="ri${id}" required minlength="5"></textarea>
-      <label for="rd${id}">Ngày bạn muốn mang máy tới (không bắt buộc)</label><input id="rd${id}" type="date" min="${today()}">
-      <label for="rp${id}">Ảnh chụp lỗi (không bắt buộc, tối đa 4 ảnh)</label><input id="rp${id}" type="file" accept="image/*" multiple style="padding:10px">
-      <div class="actions"><button class="sm">Gửi yêu cầu</button></div></form>`;
+    holder.innerHTML = `<form class="note" id="rqf${id}"><label for="ri${id}" style="margin-top:0">${T('Mô tả lỗi của máy')}</label><textarea id="ri${id}" required minlength="5"></textarea>
+      <label for="rd${id}">${T('Ngày bạn muốn mang máy tới (không bắt buộc)')}</label><input id="rd${id}" type="date" min="${today()}">
+      <label for="rp${id}">${T('Ảnh chụp lỗi (không bắt buộc, tối đa 4 ảnh)')}</label><input id="rp${id}" type="file" accept="image/*" multiple style="padding:10px">
+      <div class="actions"><button class="sm">${T('Gửi yêu cầu')}</button></div></form>`;
     b.hidden = true;
-    holder.querySelector('form').onsubmit = async e => { e.preventDefault(); const btn = e.submitter; btn.disabled = true; btn.textContent = 'Đang gửi…';
+    holder.querySelector('form').onsubmit = async e => { e.preventDefault(); const btn = e.submitter; btn.disabled = true; btn.textContent = T('Đang gửi…');
       try {
         let res = await api('/api/kh/requests', 'POST', {warranty_id: +id, issue: $('#ri' + id).value, preferred_date: $('#rd' + id).value});
         const files = $('#rp' + id).files; let extra = '';
-        if (files.length && res.last_request_id) { const u = await uploadPhotos(res.last_request_id, files); res = await api('/api/kh/me'); extra = u.ok ? ` kèm ${u.ok} ảnh` : ''; if (u.err) toast(u.err, true); }
-        ME = res; renderMe(); toast('Đã gửi yêu cầu' + extra + ', cửa hàng sẽ liên hệ hẹn lịch');
-      } catch (err) { toast(err.message, true); btn.disabled = false; btn.textContent = 'Gửi yêu cầu'; } };
+        if (files.length && res.last_request_id) { const u = await uploadPhotos(res.last_request_id, files); res = await api('/api/kh/me'); extra = u.ok ? T(' kèm {0} ảnh', u.ok) : ''; if (u.err) toast(u.err, true); }
+        ME = res; renderMe(); toast(T('Đã gửi yêu cầu{0}, cửa hàng sẽ liên hệ hẹn lịch', extra));
+      } catch (err) { toast(err.message, true); btn.disabled = false; btn.textContent = T('Gửi yêu cầu'); } };
     $('#ri' + id).focus();
   });
   const pf = $('#pf');
   if (pf) {
-    pf.onsubmit = e => { e.preventDefault(); run(api('/api/kh/profile', 'PUT', {email: $('#pe').value, address: $('#pa').value, no_reminders: $('#pnr').checked}), 'Đã lưu thông tin'); };
+    pf.onsubmit = e => { e.preventDefault(); run(api('/api/kh/profile', 'PUT', {email: $('#pe').value, address: $('#pa').value, no_reminders: $('#pnr').checked}), T('Đã lưu thông tin')); };
     $('#pwf').onsubmit = async e => { e.preventDefault();
-      try { await api('/api/kh/password', 'POST', {old_password: $('#po').value, new_password: $('#pn').value}); e.target.reset(); toast('Đã đổi mật khẩu'); } catch (err) { toast(err.message, true); } };
+      try { await api('/api/kh/password', 'POST', {old_password: $('#po').value, new_password: $('#pn').value}); e.target.reset(); toast(T('Đã đổi mật khẩu')); } catch (err) { toast(err.message, true); } };
     $('#lo').onclick = logout;
   }
 }
@@ -446,35 +552,39 @@ async function loadInbox() {
 async function logout() {
   await api('/api/kh/logout', 'POST').catch(() => {});
   ME = null; INBOX = null; SUB = 'may'; $('#me').hidden = true; $('#auth').hidden = false; $('#loginBox').hidden = false; $('#regBox').hidden = true;
-  $('#hd').textContent = 'Tài khoản khách hàng'; $('#hp').textContent = 'Đăng nhập bằng số điện thoại đã dùng khi mua hàng.';
+  $('#hd').textContent = T('Tài khoản khách hàng'); $('#hp').textContent = T('Đăng nhập bằng số điện thoại đã dùng khi mua hàng.');
 }
 
 /* ---------- trang cửa hàng ---------- */
 let SHOP = null;
 async function renderShop() {
-  $('#hd').textContent = 'Thông tin cửa hàng'; $('#hp').textContent = 'Giờ mở cửa, địa chỉ, liên hệ và chính sách bảo hành.';
+  $('#hd').textContent = T('Thông tin cửa hàng'); $('#hp').textContent = T('Giờ mở cửa, địa chỉ, liên hệ và chính sách bảo hành.');
   const box = $('#vShop');
-  if (!SHOP) { box.innerHTML = '<div class="card muted">Đang tải…</div>'; try { SHOP = await api('/api/public/shop-page'); } catch (e) { box.innerHTML = `<div class="card">${h(e.message)}</div>`; return; } }
+  if (!SHOP) { box.innerHTML = '<div class="card muted">' + T('Đang tải…') + '</div>'; try { SHOP = await api('/api/public/shop-page'); } catch (e) { box.innerHTML = `<div class="card">${h(e.message)}</div>`; return; } }
   const s = SHOP, q = (s.map_query || '').trim() || s.address;
   const hours = (s.open_hours || '').split('\n').map(x => x.trim()).filter(Boolean);
   box.innerHTML = `<div class="card"><h2 style="margin:0 0 6px;font-size:21px">${h(s.name)}</h2>${s.portal_intro ? `<p style="margin:0;color:#334155">${h(s.portal_intro)}</p>` : ''}
-      <div class="actions">${s.phone ? `<a class="linkbtn" href="tel:${h(s.phone.replace(/\s/g, ''))}">📞 Gọi ${h(s.phone)}</a>` : ''}${s.email ? `<a class="linkbtn" href="mailto:${h(s.email)}">✉️ ${h(s.email)}</a>` : ''}
-      ${s.social_link ? `<a class="linkbtn" href="${h(s.social_link)}" target="_blank" rel="noopener">💬 Nhắn tin cho cửa hàng</a>` : ''}
-      ${q ? `<a class="linkbtn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}" target="_blank" rel="noopener">🧭 Chỉ đường</a>` : ''}</div></div>
-    <div class="shopgrid"><div class="card"><h2 style="margin:0;font-size:17px">🕘 Giờ mở cửa</h2>${hours.length ? `<ul class="hours">${hours.map(x => `<li>${h(x)}</li>`).join('')}</ul>` : '<p class="muted">Cửa hàng chưa cập nhật.</p>'}</div>
-      <div class="card"><h2 style="margin:0;font-size:17px">📍 Địa chỉ</h2><p style="margin:8px 0 0">${h(s.address || 'Chưa cập nhật')}</p></div></div>
-    ${q ? `<div class="card" style="padding:10px"><iframe class="map" title="Bản đồ cửa hàng" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=16&output=embed"></iframe></div>` : ''}
-    <div class="card"><h2 style="margin:0 0 8px;font-size:17px">📜 Chính sách bảo hành</h2><p style="margin:0;white-space:pre-line;color:#334155">${h(s.policy || 'Cửa hàng chưa cập nhật.')}</p>
-      <ul style="margin:12px 0 0;padding-left:20px;color:#334155"><li>Tra cứu bảo hành bằng số Serial/IMEI hoặc mã phiếu – không cần giữ phiếu giấy.</li>
-      <li>Máy hết hạn bảo hành: cửa hàng báo giá trước, chỉ sửa khi quý khách đồng ý.</li><li>Theo dõi tiến độ, duyệt báo giá và đặt lịch ngay trong mục <a href="#tai-khoan">Tài khoản của tôi</a>.</li></ul></div>`;
+      <div class="actions">${s.phone ? `<a class="linkbtn" href="tel:${h(s.phone.replace(/\s/g, ''))}">${T('📞 Gọi {0}', h(s.phone))}</a>` : ''}${s.email ? `<a class="linkbtn" href="mailto:${h(s.email)}">✉️ ${h(s.email)}</a>` : ''}
+      ${s.social_link ? `<a class="linkbtn" href="${h(s.social_link)}" target="_blank" rel="noopener">${T('💬 Nhắn tin cho cửa hàng')}</a>` : ''}
+      ${q ? `<a class="linkbtn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}" target="_blank" rel="noopener">${T('🧭 Chỉ đường')}</a>` : ''}</div></div>
+    <div class="shopgrid"><div class="card"><h2 style="margin:0;font-size:17px">${T('🕘 Giờ mở cửa')}</h2>${hours.length ? `<ul class="hours">${hours.map(x => `<li>${h(x)}</li>`).join('')}</ul>` : '<p class="muted">' + T('Cửa hàng chưa cập nhật.') + '</p>'}</div>
+      <div class="card"><h2 style="margin:0;font-size:17px">${T('📍 Địa chỉ')}</h2><p style="margin:8px 0 0">${h(s.address || T('Chưa cập nhật'))}</p></div></div>
+    ${q ? `<div class="card" style="padding:10px"><iframe class="map" title="${T('Bản đồ cửa hàng')}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=16&output=embed"></iframe></div>` : ''}
+    <div class="card"><h2 style="margin:0 0 8px;font-size:17px">${T('📜 Chính sách bảo hành')}</h2><p style="margin:0;white-space:pre-line;color:#334155">${h(s.policy || T('Cửa hàng chưa cập nhật.'))}</p>
+      <ul style="margin:12px 0 0;padding-left:20px;color:#334155"><li>${T('Tra cứu bảo hành bằng số Serial/IMEI hoặc mã phiếu – không cần giữ phiếu giấy.')}</li>
+      <li>${T('Máy hết hạn bảo hành: cửa hàng báo giá trước, chỉ sửa khi quý khách đồng ý.')}</li><li>${T('Theo dõi tiến độ, duyệt báo giá và đặt lịch ngay trong mục <a href="#tai-khoan">Tài khoản của tôi</a>.')}</li></ul></div>`;
 }
 
 /* ---------- sáng / tối ---------- */
 function paintTheme() { const dark = document.documentElement.dataset.theme === 'dark'; $('#themeBtn').textContent = dark ? '☀️' : '🌙';
-  $('#themeBtn').title = dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'; }
+  $('#themeBtn').title = dark ? T('Chuyển sang giao diện sáng') : T('Chuyển sang giao diện tối'); }
 $('#themeBtn').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = t; try { localStorage.setItem('theme', t); } catch (e) {} paintTheme(); };
 paintTheme();
+$('#langBtn').textContent = LANG === 'en' ? 'VI' : 'EN';
+$('#langBtn').title = LANG === 'en' ? 'Tiếng Việt' : 'English';
+$('#langBtn').onclick = () => { try { localStorage.setItem('lang', LANG === 'en' ? 'vi' : 'en'); } catch (e) {} location.reload(); };
+translateStatic(document.body);
 
 /* ---------- điều hướng ---------- */
 async function route() {
@@ -486,9 +596,9 @@ async function route() {
   if (acc) {
     if (ME) { renderMe(); return; }
     try { ME = await api('/api/kh/me'); renderMe(); }
-    catch (e) { $('#hd').textContent = 'Tài khoản khách hàng'; $('#hp').textContent = 'Đăng nhập bằng số điện thoại đã dùng khi mua hàng.'; $('#auth').hidden = false; $('#me').hidden = true; $('#lph').focus(); }
+    catch (e) { $('#hd').textContent = T('Tài khoản khách hàng'); $('#hp').textContent = T('Đăng nhập bằng số điện thoại đã dùng khi mua hàng.'); $('#auth').hidden = false; $('#me').hidden = true; $('#lph').focus(); }
   } else {
-    $('#hd').textContent = 'Tra cứu bảo hành & tiến độ sửa chữa'; $('#hp').textContent = 'Nhập số Serial/IMEI in trên máy hoặc mã phiếu bảo hành (PBH-…).';
+    $('#hd').textContent = T('Tra cứu bảo hành & tiến độ sửa chữa'); $('#hp').textContent = T('Nhập số Serial/IMEI in trên máy hoặc mã phiếu bảo hành (PBH-…).');
     if (hash && hash !== $('#q').value) { $('#q').value = hash; lookup(hash); } else if (!hash) $('#q').focus();
   }
 }

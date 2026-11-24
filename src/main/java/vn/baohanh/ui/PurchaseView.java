@@ -33,7 +33,7 @@ public class PurchaseView extends MainFrame.View {
 
     public PurchaseView(Ui.Ctx ctx) {
         super(ctx);
-        admin = ctx.user().is(Role.ADMIN);
+        admin = vn.baohanh.model.Perm.PURCHASE.allows(ctx.user());
         poTable = Ui.table(poModel, r -> showOrder(r.lng("id")));
         add(Ui.header("Đặt hàng linh kiện", "Linh kiện dưới mức tồn tối thiểu được gợi ý sẵn. Nhận hàng sẽ tự cộng tồn kho và ghi thẻ kho.",
                 admin ? new java.awt.Component[]{Ui.primary("Tạo đơn từ gợi ý", this::createFromSuggestions)} : new java.awt.Component[0]),

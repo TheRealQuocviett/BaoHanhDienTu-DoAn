@@ -44,6 +44,7 @@ public class CatalogService {
         EntityDef d;
 
         d = new EntityDef("customer", "customer", "Khách hàng");
+        d.perm = vn.baohanh.model.Perm.CUSTOMERS;
         d.field(new Field("name", "Họ tên", Type.TEXT).req())
          .field(new Field("phone", "Số điện thoại", Type.PHONE).req())
          .field(new Field("email", "Email", Type.EMAIL))
@@ -57,6 +58,7 @@ public class CatalogService {
         add(d);
 
         d = new EntityDef("brand", "brand", "Hãng sản xuất");
+        d.perm = vn.baohanh.model.Perm.CATALOG;
         d.field(new Field("name", "Tên hãng", Type.TEXT).req())
          .field(new Field("country", "Quốc gia", Type.TEXT))
          .field(new Field("hotline", "Tổng đài bảo hành", Type.TEXT));
@@ -67,6 +69,7 @@ public class CatalogService {
         add(d);
 
         d = new EntityDef("service_center", "service_center", "Trung tâm bảo hành hãng");
+        d.perm = vn.baohanh.model.Perm.CATALOG;
         d.field(new Field("brand_id", "Hãng", Type.REF).ref("brand").req())
          .field(new Field("name", "Tên trung tâm", Type.TEXT).req())
          .field(new Field("phone", "Điện thoại", Type.TEXT))
@@ -79,6 +82,7 @@ public class CatalogService {
         add(d);
 
         d = new EntityDef("supplier", "supplier", "Nhà cung cấp linh kiện");
+        d.perm = vn.baohanh.model.Perm.PARTS;
         d.field(new Field("name", "Tên nhà cung cấp", Type.TEXT).req())
          .field(new Field("contact", "Người liên hệ", Type.TEXT))
          .field(new Field("phone", "Điện thoại", Type.TEXT))
@@ -94,6 +98,7 @@ public class CatalogService {
         add(d);
 
         d = new EntityDef("category", "category", "Loại sản phẩm");
+        d.perm = vn.baohanh.model.Perm.CATALOG;
         d.field(new Field("name", "Tên loại", Type.TEXT).req());
         d.col("name", "Tên loại").col("product_count", "Số model", "int");
         d.listSql = "SELECT c.*, (SELECT COUNT(*) FROM product p WHERE p.category_id = c.id) AS product_count FROM category c";
@@ -102,6 +107,7 @@ public class CatalogService {
         add(d);
 
         d = new EntityDef("product", "product", "Sản phẩm / Model");
+        d.perm = vn.baohanh.model.Perm.CATALOG;
         d.field(new Field("model_code", "Mã model", Type.TEXT).req())
          .field(new Field("name", "Tên sản phẩm", Type.TEXT).req())
          .field(new Field("brand_id", "Hãng", Type.REF).ref("brand").req())
@@ -117,6 +123,7 @@ public class CatalogService {
         add(d);
 
         d = new EntityDef("part", "part", "Linh kiện");
+        d.perm = vn.baohanh.model.Perm.PARTS;
         d.field(new Field("code", "Mã linh kiện", Type.TEXT).req())
          .field(new Field("name", "Tên linh kiện", Type.TEXT).req())
          .field(new Field("brand_id", "Hãng", Type.REF).ref("brand"))
@@ -221,7 +228,7 @@ public class CatalogService {
     public Row save(User u, String key, long id, Map<String, Object> in) throws SQLException {
         EntityDef d = def(key);
         Auth.require(u);
-        if (!d.canWrite(u.role())) throw AppException.forbidden();
+        if (!d.canWrite(u)) throw AppException.forbidden();
         boolean create = id == 0;
         Row before = create ? null : get(u, key, id);
 
@@ -264,7 +271,13 @@ public class CatalogService {
                 audit.log(u, create ? "THÊM" : "SỬA", d.table, newId, describe(d, in, before));
                 return newId;
             });
-            if ("user".equals(key) && !create) auth.dropSessions(id);
+            if ("user".equals(key) && !create) {
+                auth.dropSessions(id);
+                if (before != null && !before.str("role").equals(Json.str(in, "role"))) {   // đổi vai trò → quyền riêng cũ không còn ý nghĩa
+                    db.update("DELETE FROM user_permission WHERE user_id = ?", id);
+                    vn.baohanh.model.Perm.setOverrides(id, null);
+                }
+            }
             return get(u, key, savedId);
         } catch (SQLException e) {
             throw friendly(d, e);
@@ -274,7 +287,7 @@ public class CatalogService {
     public void delete(User u, String key, long id) throws SQLException {
         EntityDef d = def(key);
         Auth.require(u);
-        if (!d.canDelete(u.role())) throw AppException.forbidden();
+        if (!d.canDelete(u)) throw AppException.forbidden();
         Row before = get(u, key, id);
         if ("user".equals(key)) {
             if (id == u.id()) throw new AppException("Không thể xóa tài khoản đang đăng nhập");

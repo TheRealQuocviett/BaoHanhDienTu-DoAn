@@ -74,7 +74,7 @@ public class ImportService {
         Auth.require(u);
         spec(entity);
         EntityDef d = catalog.def(entity);
-        if (!d.canWrite(u.role())) throw AppException.forbidden();
+        if (!d.canWrite(u)) throw AppException.forbidden();
     }
 
     /** File Excel mẫu có sẵn tiêu đề cột và 2 dòng ví dụ. */

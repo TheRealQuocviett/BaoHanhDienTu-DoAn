@@ -29,7 +29,7 @@ public class InventoryService {
 
     /** Nhập thêm hàng; có thể cập nhật giá nhập mới. */
     public Row stockIn(User u, long partId, long qty, long costPrice, String note) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.STOCK);
         if (qty <= 0 || qty > 1_000_000) throw new AppException("Số lượng nhập phải lớn hơn 0");
         if (costPrice < 0) throw new AppException("Giá nhập không hợp lệ");
         return db.tx(() -> {
@@ -44,7 +44,7 @@ public class InventoryService {
 
     /** Kiểm kê: đặt lại số tồn thực tế, ghi chênh lệch. */
     public Row adjust(User u, long partId, long actual, String note) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.STOCK);
         if (actual < 0) throw new AppException("Số tồn thực tế không được âm");
         if (blank(note)) throw new AppException("Vui lòng ghi lý do điều chỉnh");
         return db.tx(() -> {
@@ -61,7 +61,7 @@ public class InventoryService {
 
     /** Thẻ kho: lịch sử nhập/xuất (partId = 0: tất cả). */
     public List<Row> movements(User u, long partId, int limit) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
+        Auth.need(u, vn.baohanh.model.Perm.STOCK_VIEW);
         List<Row> rows = db.query("SELECT m.id, m.time, pt.code, pt.name, m.qty, m.type, t.code AS ticket_code, "
                 + "COALESCE(us.full_name, '') AS user_name, m.note FROM stock_movement m JOIN part pt ON pt.id = m.part_id "
                 + "LEFT JOIN ticket t ON t.id = m.ticket_id LEFT JOIN app_user us ON us.id = m.user_id "

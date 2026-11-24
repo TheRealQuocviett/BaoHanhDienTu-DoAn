@@ -29,6 +29,7 @@ public class AppContext {
     public final FaultService faults;
     public final ImportService imports;
     public final ScanService scan;
+    public final PermissionService permissions;
 
     public AppContext(Database db, int port) {
         this.db = db;
@@ -60,5 +61,6 @@ public class AppContext {
         this.faults = new FaultService(db);
         this.imports = new ImportService(db, catalog, audit);
         this.scan = new ScanService(settings);
+        this.permissions = new PermissionService(db, audit);
     }
 }

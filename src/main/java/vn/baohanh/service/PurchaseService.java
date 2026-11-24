@@ -36,7 +36,7 @@ public class PurchaseService {
 
     /** Linh kiện cần đặt: tồn ≤ mức tối thiểu, trừ phần đang chờ về từ đơn đã đặt. Gợi ý số lượng = 2 × mức tối thiểu − tồn − đang về. */
     public List<Row> suggestions(User u) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
+        Auth.need(u, vn.baohanh.model.Perm.PURCHASE_VIEW);
         List<Row> list = db.query("SELECT p.id, p.code, p.name, p.unit, p.stock, p.min_stock, p.cost_price, COALESCE(b.name, '') AS brand_name, "
                 + "COALESCE((SELECT SUM(l.qty - l.received_qty) FROM purchase_order_line l JOIN purchase_order o ON o.id = l.po_id "
                 + "WHERE l.part_id = p.id AND o.status IN ('DRAFT','ORDERED')), 0) AS incoming, "
@@ -50,7 +50,7 @@ public class PurchaseService {
     }
 
     public List<Row> list(User u, String status) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
+        Auth.need(u, vn.baohanh.model.Perm.PURCHASE_VIEW);
         List<Row> list = db.query("SELECT o.*, s.name AS supplier_name, COALESCE(us.full_name, '') AS created_by_name, "
                 + "(SELECT COUNT(*) FROM purchase_order_line l WHERE l.po_id = o.id) AS lines, "
                 + "(SELECT COALESCE(SUM(l.qty * l.unit_cost), 0) FROM purchase_order_line l WHERE l.po_id = o.id) AS total "
@@ -62,7 +62,7 @@ public class PurchaseService {
     }
 
     public Row get(User u, long id) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
+        Auth.need(u, vn.baohanh.model.Perm.PURCHASE_VIEW);
         Row o = db.one("SELECT o.*, s.name AS supplier_name, s.phone AS supplier_phone, s.email AS supplier_email, s.address AS supplier_address, "
                 + "s.contact AS supplier_contact, COALESCE(us.full_name, '') AS created_by_name, COALESCE(ur.full_name, '') AS received_by_name "
                 + "FROM purchase_order o JOIN supplier s ON s.id = o.supplier_id LEFT JOIN app_user us ON us.id = o.created_by "
@@ -79,7 +79,7 @@ public class PurchaseService {
     /** Tạo đơn nháp. in = {supplier_id, expected_date, note, lines: [{part_id, qty, unit_cost}]} */
     @SuppressWarnings("unchecked")
     public Row create(User u, Map<String, Object> in) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.PURCHASE);
         long sup = Json.num(in, "supplier_id", 0);
         if (sup <= 0 || db.scalar("SELECT COUNT(*) FROM supplier WHERE id = ?", sup) == 0) throw new AppException("Vui lòng chọn nhà cung cấp");
         Object raw = in.get("lines");
@@ -124,7 +124,7 @@ public class PurchaseService {
 
     /** Chốt đơn: đã gửi cho nhà cung cấp. */
     public Row markOrdered(User u, long id) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.PURCHASE);
         Row o = checkStatus(id, "DRAFT");
         db.update("UPDATE purchase_order SET status = 'ORDERED', ordered_at = ? WHERE id = ?", Database.now(), id);
         audit.log(u, "ĐẶT HÀNG", "purchase_order", id, o.str("code"));
@@ -132,7 +132,7 @@ public class PurchaseService {
     }
 
     public Row cancel(User u, long id, String note) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.PURCHASE);
         Row o = checkStatus(id, "DRAFT", "ORDERED");
         db.update("UPDATE purchase_order SET status = 'CANCELLED', note = TRIM(COALESCE(note, '') || ' ' || ?) WHERE id = ?",
                 note == null || note.isBlank() ? "" : "[Hủy: " + note.trim() + "]", id);
@@ -146,7 +146,7 @@ public class PurchaseService {
      */
     @SuppressWarnings("unchecked")
     public Row receive(User u, long id, Map<String, Object> in) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.PURCHASE);
         Map<Long, Long> got = new LinkedHashMap<>();
         if (in != null && in.get("lines") instanceof List<?> lst)
             for (Object x : lst) {

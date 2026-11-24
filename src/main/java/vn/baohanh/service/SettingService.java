@@ -87,7 +87,7 @@ public class SettingService {
     }
 
     public Map<String, String> save(User u, Map<String, Object> in) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.SETTINGS);
         db.tx(() -> {
             for (String k : KEYS.keySet()) if (in.containsKey(k)) put(k, Json.str(in, k));
             audit.log(u, "SỬA", "setting", null, "Thông tin cửa hàng");

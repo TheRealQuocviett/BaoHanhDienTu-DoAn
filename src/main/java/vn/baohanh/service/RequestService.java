@@ -74,7 +74,7 @@ public class RequestService {
 
     /** Xác nhận và hẹn ngày khách mang máy tới. */
     public Row confirm(User u, long id, String appointment, String note) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.REQUESTS);
         LocalDate d;
         try { d = LocalDate.parse(appointment == null ? "" : appointment.trim()); }
         catch (Exception e) { throw new AppException("Vui lòng chọn ngày hẹn"); }
@@ -89,7 +89,7 @@ public class RequestService {
     }
 
     public Row reject(User u, long id, String note) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.REQUESTS);
         if (note == null || note.isBlank()) throw new AppException("Vui lòng ghi lý do từ chối (khách sẽ thấy)");
         Row r = get(id);
         if (!List.of("NEW", "CONFIRMED").contains(r.str("status"))) throw new AppException("Yêu cầu đã được xử lý");
@@ -102,7 +102,7 @@ public class RequestService {
 
     /** Khách đã mang máy tới: tạo phiếu bảo hành từ yêu cầu. Đầu vào giống tiếp nhận máy (trừ serial, lỗi). */
     public Row convert(User u, long id, Map<String, Object> in) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.REQUESTS);
         Row r = get(id);
         if (!List.of("NEW", "CONFIRMED").contains(r.str("status"))) throw new AppException("Yêu cầu đã được xử lý");
         Map<String, Object> t = new LinkedHashMap<>(in);

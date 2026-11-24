@@ -128,7 +128,7 @@ public class WarrantyService {
      * customer_address, invoice_no, purchase_date, months (để trống = theo sản phẩm), note.
      */
     public Row activate(User u, Map<String, Object> in) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.ACTIVATE);
         String serial = Json.str(in, "serial").toUpperCase(Locale.ROOT).replaceAll("\\s", "");
         if (serial.isEmpty()) throw new AppException("Vui lòng nhập số Serial/IMEI");
         if (serial.length() > 60) throw new AppException("Serial quá dài");
@@ -171,7 +171,7 @@ public class WarrantyService {
     }
 
     public void deleteWarranty(User u, long id) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.DELETE_WARRANTY);
         Row w = getWarranty(u, id);
         if (db.scalar("SELECT COUNT(*) FROM ticket WHERE warranty_id = ?", id) > 0)
             throw new AppException("Không thể xóa: bảo hành này đã có phiếu sửa chữa");
@@ -281,8 +281,8 @@ public class WarrantyService {
     /** Những gì người dùng được làm với phiếu (giao diện dựa vào đây để hiện/ẩn nút). */
     private Map<String, Object> actions(User u, Row t) {
         TicketStatus s = TicketStatus.valueOf(t.str("status"));
-        boolean office = u.is(Role.ADMIN, Role.RECEPTION);
-        boolean tech = u.is(Role.ADMIN, Role.TECHNICIAN);
+        boolean office = vn.baohanh.model.Perm.OFFICE.allows(u);
+        boolean tech = vn.baohanh.model.Perm.REPAIR.allows(u);
         List<Object> next = new ArrayList<>();
         for (TicketStatus n : s.next())
             if (n != TicketStatus.RETURNED && n != TicketStatus.CANCELLED && n.allowedFor(u.role())) next.add(n.name());
@@ -293,7 +293,7 @@ public class WarrantyService {
                 && List.of("NONE", "DECLINED").contains(t.str("quote_status")) && t.lng("total") > 0);
         a.put("decide_quote", office && "PENDING".equals(t.str("quote_status")) && !s.isClosed());
         a.put("assign", office && !s.isClosed());
-        a.put("pay", office && (s == TicketStatus.READY || s == TicketStatus.REJECTED));
+        a.put("pay", vn.baohanh.model.Perm.PAYMENT.allows(u) && (s == TicketStatus.READY || s == TicketStatus.REJECTED));
         a.put("cancel", office && s.canMoveTo(TicketStatus.CANCELLED));
         a.put("photos", !s.isClosed());
         a.put("print", true);
@@ -301,7 +301,7 @@ public class WarrantyService {
     }
 
     public Row createTicket(User u, Map<String, Object> in) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.RECEIVE);
         String serial = Json.str(in, "serial").trim();
         String issue = Json.str(in, "issue");
         if (issue.isEmpty()) throw new AppException("Vui lòng mô tả lỗi của máy");
@@ -405,7 +405,7 @@ public class WarrantyService {
     }
 
     private Row requireCostEditable(User u, long id) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
+        Auth.need(u, vn.baohanh.model.Perm.REPAIR);
         Row t = ticketRow(id);
         if (!TicketStatus.valueOf(t.str("status")).allowsCostEdit())
             throw new AppException("Chỉ cập nhật chi phí khi phiếu đang kiểm tra / sửa chữa / chờ linh kiện");
@@ -497,7 +497,7 @@ public class WarrantyService {
 
     /** Nhân viên ghi nhận khách đồng ý / từ chối báo giá. */
     public Row decideQuote(User u, long id, boolean approve, String note) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.OFFICE);
         applyQuoteDecision(u, id, approve, note, "");
         return getTicket(u, id);
     }
@@ -523,7 +523,7 @@ public class WarrantyService {
 
     /** Phân công kỹ thuật viên. */
     public Row assign(User u, long id, long technicianId) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.OFFICE);
         db.tx(() -> {
             Row t = ticketRow(id);
             if (TicketStatus.valueOf(t.str("status")).isClosed()) throw new AppException("Phiếu đã đóng");
@@ -603,7 +603,7 @@ public class WarrantyService {
     }
 
     public Row pay(User u, long id, Map<String, Object> in) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.PAYMENT);
         db.tx(() -> {
             Row t = ticketRow(id);
             TicketStatus s = TicketStatus.valueOf(t.str("status"));
@@ -642,7 +642,7 @@ public class WarrantyService {
      * Đầu vào: months, price, method (khi price &gt; 0), note.
      */
     public Row extend(User u, long warrantyId, Map<String, Object> in) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.EXTEND);
         int months = (int) Json.num(in, "months", 0);
         long price = Json.num(in, "price", -1);
         String method = Json.str(in, "method");

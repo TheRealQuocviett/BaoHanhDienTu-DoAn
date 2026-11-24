@@ -146,7 +146,7 @@ public class NotificationService implements Notifier {
 
     /** Cấu hình hiện tại cho giao diện (mật khẩu được che). */
     public Row getConfig(User u) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.NOTIFY_CONFIG);
         Row r = new Row();
         Map<String, String> c = config();
         for (Field f : FIELDS) {
@@ -163,7 +163,7 @@ public class NotificationService implements Notifier {
     }
 
     public Row saveConfig(User u, Map<String, Object> in) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.NOTIFY_CONFIG);
         db.tx(() -> {
             for (Field f : FIELDS) {
                 if (!in.containsKey(f.key())) continue;
@@ -402,7 +402,7 @@ public class NotificationService implements Notifier {
 
     /** Gửi tin thử ngay (không qua hàng đợi) để kiểm tra cấu hình. */
     public String sendTest(User u, String channel, String to) throws SQLException {
-        Auth.require(u, Role.ADMIN);
+        Auth.need(u, vn.baohanh.model.Perm.NOTIFY_CONFIG);
         if (!CHANNEL_LABELS.containsKey(channel)) throw new AppException("Kênh không hợp lệ");
         String recipient = to == null ? "" : to.trim();
         if ("EMAIL".equals(channel) && !EmailSender.validAddress(recipient)) throw new AppException("Email nhận không hợp lệ");
@@ -447,7 +447,7 @@ public class NotificationService implements Notifier {
     // ===================== Nhật ký =====================
 
     public List<Row> list(User u, String status, String q, Long ticketId) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.NOTIFY_VIEW);
         String like = "%" + (q == null ? "" : q.trim()) + "%";
         List<Object> p = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT n.*, COALESCE(cu.name, '') AS customer_name, COALESCE(t.code, '') AS ticket_code "
@@ -467,7 +467,7 @@ public class NotificationService implements Notifier {
 
     /** Gửi lại tin lỗi. */
     public void retry(User u, long id) throws SQLException {
-        Auth.require(u, Role.ADMIN, Role.RECEPTION);
+        Auth.need(u, vn.baohanh.model.Perm.NOTIFY_VIEW);
         int n = db.update("UPDATE notification SET status = 'PENDING', attempts = 0, next_try = ?, last_error = NULL WHERE id = ? AND status = 'FAILED'",
                 Database.now(), id);
         if (n == 0) throw new AppException("Chỉ gửi lại được tin đang ở trạng thái lỗi");

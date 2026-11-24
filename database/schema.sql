@@ -349,6 +349,19 @@ CREATE TABLE IF NOT EXISTS purchase_order_line (
 CREATE INDEX IF NOT EXISTS idx_pol_po ON purchase_order_line(po_id);
 
 -- ---------------------------------------------------------------------
+-- 7e. Phân quyền chi tiết (v8): bật / tắt từng chức năng cho từng tài khoản.
+--     Chỉ lưu các quyền KHÁC mặc định của vai trò; xóa dòng = quay về mặc định.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS user_permission (
+    user_id         INTEGER NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+    perm            TEXT NOT NULL,                         -- mã quyền, vd REPORTS
+    allowed         INTEGER NOT NULL CHECK (allowed IN (0,1)),
+    updated_at      TEXT NOT NULL,
+    updated_by      INTEGER REFERENCES app_user(id) ON DELETE SET NULL,
+    PRIMARY KEY (user_id, perm)
+);
+
+-- ---------------------------------------------------------------------
 -- 8. VIEW tiện tra cứu (dùng trong báo cáo / xem nhanh bằng DB Browser)
 -- ---------------------------------------------------------------------
 CREATE VIEW IF NOT EXISTS v_warranty AS

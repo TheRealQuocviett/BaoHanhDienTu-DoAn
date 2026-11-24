@@ -40,7 +40,7 @@ Nên đổi mật khẩu sau khi đăng nhập (nút **Đổi mật khẩu**).
 
 **Tài khoản khách hàng mẫu** (đăng nhập ở `/tra-cuu` → *Tài khoản của tôi*): `0903123456` / `123456` (Nguyễn Văn An), `0934567890` / `123456` (Phạm Thu Hà). Khách khác tự đăng ký bằng SĐT + số Serial của máy đã mua.
 
-**Kiểm thử tự động:** trong VS Code chọn cấu hình *Chạy kiểm thử tự động* rồi nhấn F5 (kết quả hiện ở tab **Debug Console**), hoặc nhấp đúp `run-tests.bat`. Chương trình chạy 205 kiểm thử nghiệp vụ (kể cả gửi email/SMS/Zalo qua máy chủ giả) trên một CSDL tạm, không đụng tới dữ liệu thật.
+**Kiểm thử tự động:** trong VS Code chọn cấu hình *Chạy kiểm thử tự động* rồi nhấn F5 (kết quả hiện ở tab **Debug Console**), hoặc nhấp đúp `run-tests.bat`. Chương trình chạy 225 kiểm thử nghiệp vụ (kể cả gửi email/SMS/Zalo qua máy chủ giả) trên một CSDL tạm, không đụng tới dữ liệu thật.
 
 Nếu bạn đã dùng phiên bản trước, CSDL được **tự nâng cấp và giữ nguyên dữ liệu**. Dữ liệu mẫu cho các chức năng mới chỉ có khi tạo CSDL mới.
 
@@ -102,6 +102,8 @@ Lần chạy đầu, phần mềm tự tạo CSDL và **dữ liệu mẫu**: 7 h
 - **Đặt hàng linh kiện từ nhà cung cấp** (menu *Kho → Đặt hàng linh kiện*, *Nhà cung cấp*): linh kiện có tồn ≤ mức tối thiểu được gợi ý sẵn số lượng (đủ lên gấp đôi mức tối thiểu, trừ phần đang về). Quản lý chọn nhà cung cấp → *Tạo đơn* → in/lưu PDF gửi nhà cung cấp → *Đánh dấu đã gửi đơn* → khi hàng về bấm *Nhận hàng & nhập kho* (sửa được số thực nhận): tồn kho tự cộng, ghi thẻ kho "Nhập theo đơn DH-…", cập nhật giá nhập. Số trên menu là số linh kiện cần đặt.
 - **KPI / hoa hồng kỹ thuật viên** (menu *KPI kỹ thuật viên*): bảng xếp hạng theo kỳ với số phiếu hoàn thành, đang xử lý, thời gian sửa trung bình, % đúng hẹn, điểm đánh giá của khách, doanh thu và hoa hồng. Hoa hồng = thưởng mỗi phiếu + % tiền công các phiếu có phí (đổi ở *Thông tin cửa hàng*). Kỹ thuật viên xem được bảng xếp hạng nhưng chỉ thấy tiền của chính mình.
 - **Chế độ tối (dark mode)**: web nhân viên và cổng khách hàng bấm nút 🌙 / ☀️ góc trên (lần đầu tự theo cài đặt của máy); ứng dụng Swing bấm nút *Giao diện tối / Giao diện sáng* trên thanh trên cùng. Lựa chọn được ghi nhớ cho lần mở sau.
+- **Phân quyền chi tiết** (menu *Quản trị → Phân quyền chi tiết*, chỉ Quản lý): chọn một tài khoản Tiếp nhận / Kỹ thuật viên rồi bật / tắt từng chức năng (23 quyền theo nhóm: tiếp nhận & bảo hành, danh mục, kho, báo cáo, quản trị). Mặc định mỗi tài khoản có quyền theo vai trò; quyền đã chỉnh riêng được đánh dấu, có nút *Về mặc định*. Thay đổi có hiệu lực ngay, kể cả với người đang đăng nhập; menu và nút trên web / Swing tự ẩn hiện theo quyền, máy chủ kiểm tra lại ở mọi thao tác. Quản lý luôn có mọi quyền để không ai tự khóa mình khỏi hệ thống.
+- **Cổng khách hàng song ngữ Việt / Anh**: nút **EN / VI** góc trên trang tra cứu; lần đầu tự chọn theo ngôn ngữ trình duyệt và ghi nhớ lựa chọn. Dịch cả giao diện, trạng thái phiếu, thông báo lỗi từ máy chủ (gửi header `X-Lang: en`). Nội dung do cửa hàng / khách nhập (tên sản phẩm, mô tả lỗi, chính sách) giữ nguyên.
 - **Quét mã vạch / IMEI khi tiếp nhận máy** (nút *Quét* cạnh ô Serial ở Tiếp nhận máy, Kích hoạt bảo hành, Tra cứu – cả web và Swing). Đọc được Code 128, Code 39 (serial, IMEI) và EAN-13; bộ giải mã viết thuần Java, không cần thư viện. Ba cách:
   - *Dùng điện thoại*: máy tính hiện mã QR, điện thoại (cùng Wi-Fi) quét QR → mở trang chụp ảnh → chụp tem mã vạch → số serial tự điền trên máy tính. Không cần cài app, chạy được qua mạng LAN thường.
   - *Camera laptop* (web, khi mở bằng `http://localhost`): bật camera, đưa mã vào khung là tự đọc.
@@ -170,6 +172,7 @@ setting (thông tin cửa hàng)
 | `ticket_message` | Tin nhắn khách ↔ cửa hàng theo phiếu, cờ đã đọc cho từng phía |
 | `supplier` | Nhà cung cấp linh kiện |
 | `purchase_order`, `purchase_order_line` | Đơn đặt hàng (Nháp → Đã đặt → Đã nhận / Đã hủy) và các dòng linh kiện, số thực nhận |
+| `user_permission` | Quyền bật / tắt riêng cho từng tài khoản (chỉ lưu phần khác mặc định của vai trò) |
 | View `v_warranty`, `v_ticket_cost` | Bảo hành kèm tên sản phẩm/khách; chi phí từng phiếu |
 
 Ràng buộc: khóa ngoại (`ON DELETE RESTRICT` chặn xóa dữ liệu đang được dùng), `UNIQUE`, `CHECK` (trạng thái, số tháng 1–120, tồn kho ≥ 0…). Các thao tác nhiều bước chạy trong **transaction**.
@@ -203,7 +206,7 @@ src/main/java/vn/baohanh/
 └── util/      Json (đọc/ghi JSON), QrCode (tạo mã QR), Xlsx (xuất Excel), Fmt
 web/index.html                  Giao diện web cho nhân viên
 web/portal.html                 Cổng khách hàng (tra cứu nhanh + tài khoản)
-src/test/java/.../KiemThu.java  Bộ kiểm thử tự động (205 kiểm thử) + MayChuGia.java (SMTP/eSMS/Zalo giả)
+src/test/java/.../KiemThu.java  Bộ kiểm thử tự động (225 kiểm thử) + MayChuGia.java (SMTP/eSMS/Zalo giả)
 database/schema.sql             Script tạo CSDL
 lib/                            Driver sqlite-jdbc + slf4j (tải bằng tai-thu-vien.bat)
 ```
@@ -236,6 +239,7 @@ Phần mềm không dùng framework ngoài nào: bộ tạo **mã QR**, file **E
 | GET | `/api/reports/faults?from=&to=` | Thống kê lỗi thường gặp |
 | POST/GET/DELETE | `/api/scan/decode`, `/api/scan/session[/{mã}]`; `/api/public/scan/{mã}[/text]`; trang `/quet/{mã}` | Quét mã vạch (ảnh, phiên quét bằng điện thoại) |
 | GET/POST | `/api/import/{customer,product,part}/template`, `/preview`, `/commit` | Nhập Excel |
+| GET/PUT/POST | `/api/permissions`, `/api/permissions/{id}`, `/api/permissions/{id}/reset` | Phân quyền chi tiết |
 
 ---
 
