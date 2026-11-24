@@ -21,7 +21,6 @@ import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
 import vn.baohanh.db.Row;
-import vn.baohanh.model.Role;
 import vn.baohanh.util.Fmt;
 
 /** Khối hiển thị một bảo hành (dùng ở Tra cứu và hộp thoại chi tiết). */

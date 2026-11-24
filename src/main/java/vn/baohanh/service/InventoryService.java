@@ -5,7 +5,6 @@ import java.util.List;
 
 import vn.baohanh.db.Database;
 import vn.baohanh.db.Row;
-import vn.baohanh.model.Role;
 import vn.baohanh.model.User;
 
 /** Kho linh kiện: nhập kho, kiểm kê (điều chỉnh), xem thẻ kho. */

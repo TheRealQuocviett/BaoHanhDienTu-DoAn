@@ -14,7 +14,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import vn.baohanh.db.Row;
-import vn.baohanh.model.Role;
 import vn.baohanh.util.Fmt;
 
 /** Đặt hàng linh kiện: gợi ý theo tồn kho, tạo đơn, đánh dấu đã đặt, nhận hàng (cộng tồn), hủy, in đơn. */

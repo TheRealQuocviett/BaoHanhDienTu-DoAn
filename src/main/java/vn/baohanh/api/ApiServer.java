@@ -49,8 +49,6 @@ public class ApiServer {
     /** Ngữ cảnh một yêu cầu. */
     private static final class Req {
         HttpExchange ex;
-        String method;
-        String path;
         Map<String, String> q;
         Matcher m;
         User user;
@@ -404,8 +402,6 @@ public class ApiServer {
 
             Req r = new Req();
             r.ex = ex;
-            r.method = method;
-            r.path = path;
             r.q = parseQuery(ex.getRequestURI().getRawQuery());
             boolean pathMatched = false;
             Route route = null;

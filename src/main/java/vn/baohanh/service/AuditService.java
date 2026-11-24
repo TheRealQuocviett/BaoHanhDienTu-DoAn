@@ -5,7 +5,6 @@ import java.util.List;
 
 import vn.baohanh.db.Database;
 import vn.baohanh.db.Row;
-import vn.baohanh.model.Role;
 import vn.baohanh.model.User;
 
 /** Nhật ký hệ thống: ai làm gì, lúc nào. */

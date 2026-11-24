@@ -23,7 +23,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import vn.baohanh.db.Row;
-import vn.baohanh.model.Role;
 
 /** Nhật ký thông báo gửi khách (email / SMS / Zalo) và cấu hình gửi. */
 public class NotificationsView extends MainFrame.View {

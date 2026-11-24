@@ -23,7 +23,6 @@ import javax.swing.WindowConstants;
 import vn.baohanh.db.Row;
 import vn.baohanh.model.EntityDef;
 import vn.baohanh.model.EntityDef.Field;
-import vn.baohanh.model.Role;
 import vn.baohanh.util.Fmt;
 
 /**

@@ -9,7 +9,6 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import vn.baohanh.model.Role;
 
 /** Danh sách bảo hành đã kích hoạt, lọc theo thời hạn. */
 public class WarrantiesView extends MainFrame.View {

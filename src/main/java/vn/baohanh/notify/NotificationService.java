@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import vn.baohanh.db.Database;
 import vn.baohanh.db.Row;
-import vn.baohanh.model.Role;
 import vn.baohanh.model.User;
 import vn.baohanh.service.AppException;
 import vn.baohanh.service.AuditService;

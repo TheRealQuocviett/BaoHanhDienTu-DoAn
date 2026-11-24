@@ -15,7 +15,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import vn.baohanh.db.Row;
-import vn.baohanh.model.Role;
 import vn.baohanh.service.CustomerService;
 import vn.baohanh.util.Fmt;
 
