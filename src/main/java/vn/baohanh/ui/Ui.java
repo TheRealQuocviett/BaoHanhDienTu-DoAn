@@ -60,25 +60,59 @@ import vn.baohanh.util.Fmt;
 public final class Ui {
     private Ui() {}
 
-    public static final Color ACCENT = new Color(0x2563EB);
-    public static final Color ACCENT_DARK = new Color(0x1D4ED8);
-    public static final Color ACCENT_SOFT = new Color(0xEAF1FF);
-    public static final Color ACCENT_TEXT = new Color(0x1E40AF);
-    public static final Color INK = new Color(0x0F172A);
-    public static final Color BG = new Color(0xF3F6FB);
-    public static final Color CARD = Color.WHITE;
-    public static final Color MUTE = new Color(0x64748B);
-    public static final Color LINE = new Color(0xE3E8F0);
-    public static final Color OK = new Color(0x059669);
-    public static final Color BAD = new Color(0xDC2626);
-    public static final Color WARN = new Color(0xB45309);
-    public static final Color AMBER = new Color(0xF59E0B);
-    public static final Color SKY = new Color(0x93C5FD);
-    public static final Color SOFT = new Color(0xF6F8FC);
+    // Bảng màu: đổi được giữa sáng / tối (lưu lựa chọn trên máy). Các màn hình luôn đọc màu từ đây.
+    public static Color ACCENT, ACCENT_DARK, ACCENT_SOFT, ACCENT_TEXT, INK, BG, CARD, MUTE, LINE, OK, BAD, WARN, AMBER, SKY, SOFT;
+    /** Viền nút, viền nút đỏ, lưới bảng, viền khi rê chuột, dòng xen kẽ, nền cột Kanban, cột Kanban khi kéo vào, ô hôm nay, chữ menu, chữ nhóm menu. */
+    public static Color BORDER, BAD_BORDER, GRID, HOVER, ALT_ROW, COLUMN, COLUMN_HOT, TODAY, NAV_TEXT, FAINT, BADGE_BG;
     /** Cặp màu (chữ, nền nhạt) cho ô số liệu. */
-    public static final Color[][] TONES = {
-            {ACCENT, ACCENT_SOFT}, {OK, new Color(0xE7F8F1)}, {WARN, new Color(0xFFF5E0)},
-            {new Color(0x7C3AED), new Color(0xF2ECFF)}, {BAD, new Color(0xFDECEC)}};
+    public static Color[][] TONES;
+    private static boolean dark;
+    private static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userRoot().node("vn/baohanh/swing");
+
+    static {
+        boolean d = false;
+        try { d = PREFS.getBoolean("dark", false); } catch (Exception ignored) { }
+        applyPalette(d);
+    }
+
+    public static boolean isDark() { return dark; }
+
+    /** Đổi chế độ sáng / tối và ghi nhớ cho lần mở sau. Cần dựng lại cửa sổ để áp dụng (MainFrame tự làm). */
+    public static void setDark(boolean on) {
+        applyPalette(on);
+        try { PREFS.putBoolean("dark", on); PREFS.flush(); } catch (Exception ignored) { }
+    }
+
+    static void applyPalette(boolean d) {
+        dark = d;
+        if (!d) {
+            ACCENT = new Color(0x2563EB); ACCENT_DARK = new Color(0x1D4ED8); ACCENT_SOFT = new Color(0xEAF1FF); ACCENT_TEXT = new Color(0x1E40AF);
+            INK = new Color(0x0F172A); BG = new Color(0xF3F6FB); CARD = Color.WHITE; MUTE = new Color(0x64748B); LINE = new Color(0xE3E8F0);
+            OK = new Color(0x059669); BAD = new Color(0xDC2626); WARN = new Color(0xB45309); AMBER = new Color(0xF59E0B); SKY = new Color(0x93C5FD);
+            SOFT = new Color(0xF6F8FC);
+            BORDER = new Color(0xD6DEEA); BAD_BORDER = new Color(0xF3B4B4); GRID = new Color(0xEEF2F7); HOVER = new Color(0xB9C9E6);
+            ALT_ROW = new Color(0xFAFBFE); COLUMN = new Color(0xEEF2F7); COLUMN_HOT = new Color(0xD6E4FF); TODAY = new Color(0xF5F8FF);
+            NAV_TEXT = new Color(0x475569); FAINT = new Color(0x94A3B8); BADGE_BG = new Color(0xEEF2F7);
+            TONES = new Color[][]{{ACCENT, ACCENT_SOFT}, {OK, new Color(0xE7F8F1)}, {WARN, new Color(0xFFF5E0)},
+                    {new Color(0x7C3AED), new Color(0xF2ECFF)}, {BAD, new Color(0xFDECEC)}};
+        } else {
+            ACCENT = new Color(0x3B82F6); ACCENT_DARK = new Color(0x2563EB); ACCENT_SOFT = new Color(0x172A4D); ACCENT_TEXT = new Color(0x93C5FD);
+            INK = new Color(0xE2E8F0); BG = new Color(0x0B1220); CARD = new Color(0x111A2E); MUTE = new Color(0x94A3B8); LINE = new Color(0x22304A);
+            OK = new Color(0x34D399); BAD = new Color(0xF87171); WARN = new Color(0xFBBF24); AMBER = new Color(0xF59E0B); SKY = new Color(0x3B5B8C);
+            SOFT = new Color(0x16213A);
+            BORDER = new Color(0x2B3B5C); BAD_BORDER = new Color(0x7F2D2D); GRID = new Color(0x1C2942); HOVER = new Color(0x3D5580);
+            ALT_ROW = new Color(0x0F182A); COLUMN = new Color(0x0F1828); COLUMN_HOT = new Color(0x1E3A66); TODAY = new Color(0x15233F);
+            NAV_TEXT = new Color(0xB6C2D4); FAINT = new Color(0x64748B); BADGE_BG = new Color(0x1A2740);
+            TONES = new Color[][]{{ACCENT, new Color(0x172A4D)}, {OK, new Color(0x0F2E25)}, {WARN, new Color(0x33270D)},
+                    {new Color(0xA78BFA), new Color(0x261D45)}, {BAD, new Color(0x3A1717)}};
+        }
+    }
+
+    /** Màu dạng #rrggbb để dùng trong nhãn HTML. */
+    public static String hex(Color c) {
+        return String.format("#%06x", c.getRGB() & 0xFFFFFF);
+    }
+
     public static final DateTimeFormatter VN_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public static String fontName = "Dialog";
@@ -89,9 +123,27 @@ public final class Ui {
     // ===================== Giao diện chung =====================
 
     public static void installTheme() {
+        clearDarkDefaults();
         try {
             String os = System.getProperty("os.name", "").toLowerCase();
-            if (os.contains("win") || os.contains("mac")) {
+            if (dark) {
+                // Giao diện của Windows/macOS không đổi được sang nền tối → dùng Nimbus với bảng màu tối
+                darkPut("control", BG);
+                darkPut("info", CARD);
+                darkPut("nimbusBase", new Color(0x1E2A44));
+                darkPut("nimbusBlueGrey", new Color(0x34445F));
+                darkPut("nimbusLightBackground", CARD);
+                darkPut("nimbusDisabledText", FAINT);
+                darkPut("nimbusSelectedText", Color.WHITE);
+                darkPut("text", INK);
+                darkPut("nimbusInfoBlue", ACCENT);
+                darkPut("nimbusAlertYellow", WARN);
+                darkPut("nimbusRed", BAD);
+                darkPut("nimbusGreen", OK);
+                darkPut("nimbusOrange", AMBER);
+                for (UIManager.LookAndFeelInfo i : UIManager.getInstalledLookAndFeels())
+                    if ("Nimbus".equals(i.getName())) { UIManager.setLookAndFeel(i.getClassName()); break; }
+            } else if (os.contains("win") || os.contains("mac")) {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());   // giao diện quen thuộc của hệ điều hành
             } else {
                 for (UIManager.LookAndFeelInfo i : UIManager.getInstalledLookAndFeels())
@@ -110,14 +162,14 @@ public final class Ui {
             if (UIManager.get(k) instanceof FontUIResource) UIManager.put(k, base);
         }
         UIManager.put("defaultFont", base);
-        UIManager.put("nimbusBase", new Color(0x7189B8));
-        UIManager.put("nimbusBlueGrey", new Color(0xC9D3E3));
+        UIManager.put("nimbusBase", dark ? new Color(0x1E2A44) : new Color(0x7189B8));
+        UIManager.put("nimbusBlueGrey", dark ? new Color(0x34445F) : new Color(0xC9D3E3));
         UIManager.put("nimbusFocus", ACCENT);
         UIManager.put("nimbusSelectionBackground", ACCENT);
         UIManager.put("nimbusSelection", ACCENT);
         UIManager.put("control", BG);
         UIManager.put("text", INK);
-        UIManager.put("Table.alternateRowColor", new Color(0xFAFBFE));
+        UIManager.put("Table.alternateRowColor", ALT_ROW);
         UIManager.put("ScrollBar.width", 12);
         UIManager.put("TextField.contentMargins", new Insets(6, 8, 6, 8));
         UIManager.put("PasswordField.contentMargins", new Insets(6, 8, 6, 8));
@@ -128,6 +180,70 @@ public final class Ui {
         UIManager.put("OptionPane.okButtonText", "OK");
         UIManager.put("FileChooser.saveButtonText", "Lưu");
         UIManager.put("FileChooser.cancelButtonText", "Hủy");
+        // Chế độ tối: các ô nhập, bảng, danh sách, hộp thoại theo bảng màu tối
+        if (dark) applyDarkDefaults();
+    }
+
+    private static final java.util.Set<Object> DARK_KEYS = new java.util.HashSet<>();
+
+    /** Ghi một giá trị chỉ dùng cho chế độ tối (để khi đổi lại sáng thì xóa đi). */
+    private static void darkPut(Object key, Object value) {
+        DARK_KEYS.add(key);
+        UIManager.put(key, value);
+    }
+
+    private static void clearDarkDefaults() {
+        for (Object k : DARK_KEYS) UIManager.put(k, null);
+        DARK_KEYS.clear();
+    }
+
+    private static void applyDarkDefaults() {
+        for (String k : new String[]{"TextField", "PasswordField", "FormattedTextField", "TextArea", "EditorPane", "TextPane", "List", "Table", "ComboBox", "Spinner"}) {
+            darkPut(k + ".background", CARD);
+            darkPut(k + ".foreground", INK);
+            darkPut(k + ".caretForeground", INK);
+        }
+        for (String k : new String[]{"Panel", "OptionPane", "Viewport", "ScrollPane", "TabbedPane", "CheckBox", "RadioButton", "Label", "ToolTip", "SplitPane"}) {
+            darkPut(k + ".background", k.equals("Viewport") || k.equals("ScrollPane") ? CARD : BG);
+            darkPut(k + ".foreground", INK);
+        }
+        darkPut("OptionPane.messageForeground", INK);
+        darkPut("Table.gridColor", GRID);
+        darkPut("TableHeader.background", SOFT);
+        darkPut("TableHeader.foreground", MUTE);
+        darkPut("Table.selectionBackground", ACCENT);
+        darkPut("Table.selectionForeground", Color.WHITE);
+        darkPut("ToolTip.background", CARD);
+        darkPut("ComboBox.selectionBackground", ACCENT);
+        darkPut("List.selectionBackground", ACCENT);
+        darkPut("List.selectionForeground", Color.WHITE);
+        darkPut("TabbedPane.foreground", INK);
+        darkPut("MenuItem.background", CARD);
+        darkPut("MenuItem.foreground", INK);
+        darkPut("PopupMenu.background", CARD);
+    }
+
+    /** Vẽ mã QR (dùng cho VietQR) trong giao diện Swing. */
+    public static JComponent qr(String text, int px) {
+        vn.baohanh.util.QrCode q = vn.baohanh.util.QrCode.encode(text);
+        int border = 2, n = q.size + border * 2;
+        JComponent c = new JComponent() {
+            private static final long serialVersionUID = 1L;
+            @Override protected void paintComponent(Graphics g) {
+                double k = (double) Math.min(getWidth(), getHeight()) / n;
+                g.setColor(Color.WHITE);
+                g.fillRect(0, 0, (int) (n * k), (int) (n * k));
+                g.setColor(Color.BLACK);
+                for (int y = 0; y < q.size; y++)
+                    for (int x = 0; x < q.size; x++)
+                        if (q.get(x, y)) g.fillRect((int) Math.floor((x + border) * k), (int) Math.floor((y + border) * k),
+                                (int) Math.ceil(k), (int) Math.ceil(k));
+            }
+        };
+        c.setPreferredSize(new Dimension(px, px));
+        c.setMinimumSize(new Dimension(px, px));
+        c.setMaximumSize(new Dimension(px, px));
+        return c;
     }
 
     /** Biểu tượng logo: ô vuông bo góc xanh với hình khiên trắng. */
@@ -182,7 +298,7 @@ public final class Ui {
 
     /** Nút trắng viền xám (vẽ giống nhau trên mọi hệ điều hành). */
     public static JButton button(String text, Runnable action) {
-        return flat(text, CARD, INK, new Color(0xD6DEEA), action);
+        return flat(text, CARD, INK, BORDER, action);
     }
 
     /** Nút chính màu xanh dương. */
@@ -193,7 +309,7 @@ public final class Ui {
     }
 
     public static JButton danger(String text, Runnable action) {
-        return flat(text, CARD, BAD, new Color(0xF3B4B4), action);
+        return flat(text, CARD, BAD, BAD_BORDER, action);
     }
 
     /** Nút bo góc tự vẽ. */
@@ -461,7 +577,7 @@ public final class Ui {
         t.setShowVerticalLines(false);
         t.setShowHorizontalLines(true);
         t.setIntercellSpacing(new Dimension(0, 1));
-        t.setGridColor(new Color(0xEEF2F7));
+        t.setGridColor(GRID);
         t.setSelectionBackground(ACCENT_SOFT);
         t.setSelectionForeground(INK);
         t.setBackground(CARD);
@@ -676,7 +792,7 @@ public final class Ui {
             p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             p.addMouseListener(new MouseAdapter() {
                 @Override public void mouseClicked(MouseEvent e) { onClick.run(); }
-                @Override public void mouseEntered(MouseEvent e) { p.border = new Color(0xB9C9E6); p.repaint(); }
+                @Override public void mouseEntered(MouseEvent e) { p.border = HOVER; p.repaint(); }
                 @Override public void mouseExited(MouseEvent e) { p.border = LINE; p.repaint(); }
             });
         }

@@ -1,0 +1,39 @@
+# Tự chạy toàn bộ kiểm thử mỗi khi đưa code lên GitHub (push) hoặc tạo pull request.
+# Kết quả xem ở tab "Actions" của kho; README hiện huy hiệu xanh/đỏ.
+name: Kiểm thử tự động
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  kiem-thu:
+    name: Biên dịch & chạy kiểm thử
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Lấy mã nguồn
+        uses: actions/checkout@v4
+
+      - name: Cài Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Tải thư viện SQLite JDBC
+        run: sh ./tai-thu-vien.sh
+
+      - name: Biên dịch toàn bộ (kể cả giao diện Swing)
+        run: |
+          mkdir -p bin
+          javac -encoding UTF-8 -Xlint:none -d bin -cp "lib/*" $(find src/main/java -name '*.java')
+
+      - name: Chạy kiểm thử
+        env:
+          TZ: Asia/Ho_Chi_Minh
+        run: |
+          rm -rf bin-test
+          javac -encoding UTF-8 -d bin-test $(find src -name '*.java')
+          java -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -cp "bin-test:lib/*" vn.baohanh.test.KiemThu

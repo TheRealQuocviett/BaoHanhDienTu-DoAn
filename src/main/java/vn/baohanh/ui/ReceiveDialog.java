@@ -51,14 +51,14 @@ public final class ReceiveDialog {
             if (s.length() < 3) { check.setText(" "); return; }
             try {
                 Row w = ctx.app().warranty.bySerial(ctx.user(), s);
-                if (w == null) { check.setText("<html><span style='color:#c4320a'>Serial chưa được kích hoạt bảo hành tại cửa hàng.</span></html>"); return; }
+                if (w == null) { check.setText("<html><span style='color:" + Ui.hex(Ui.BAD) + "'>Serial chưa được kích hoạt bảo hành tại cửa hàng.</span></html>"); return; }
                 boolean active = Boolean.TRUE.equals(w.get("active"));
                 @SuppressWarnings("unchecked") List<Row> ts = (List<Row>) w.get("tickets");
                 String open = ts.stream().filter(t -> !List.of("RETURNED", "CANCELLED").contains(t.str("status"))).map(t -> t.str("code")).findFirst().orElse(null);
                 check.setText("<html><b>" + Fmt.html(w.str("product_name")) + "</b> – " + Fmt.html(w.str("customer_name")) + " (" + w.str("customer_phone") + ")<br>"
-                        + (active ? "<span style='color:#0f7b45'>Còn bảo hành</span>" : "<span style='color:#c4320a'>Hết bảo hành – sửa có phí, cần báo giá</span>")
+                        + (active ? "<span style='color:" + Ui.hex(Ui.OK) + "'>Còn bảo hành</span>" : "<span style='color:" + Ui.hex(Ui.BAD) + "'>Hết bảo hành – sửa có phí, cần báo giá</span>")
                         + " · hết hạn " + Fmt.date(w.str("expiry_date"))
-                        + (open == null ? "" : "<br><span style='color:#c4320a'>Đang có phiếu chưa đóng: " + open + "</span>") + "</html>");
+                        + (open == null ? "" : "<br><span style='color:" + Ui.hex(Ui.BAD) + "'>Đang có phiếu chưa đóng: " + open + "</span>") + "</html>");
             } catch (Exception e) {
                 check.setText(e.getMessage());
             }
@@ -73,7 +73,7 @@ public final class ReceiveDialog {
         if (serial != null) doCheck.run();
 
         Ui.Form f = new Ui.Form();
-        f.add("Số Serial / IMEI *", sf).full(check).add("Lỗi khách báo *", new JScrollPane(issue))
+        f.add("Số Serial / IMEI *", ScanDialog.field(ctx, sf, null)).full(check).add("Lỗi khách báo *", new JScrollPane(issue))
          .add("Phụ kiện kèm theo", acc).add("Tình trạng ngoại quan", cond).add("Ngày hẹn trả (dd/MM/yyyy)", due)
          .add("Phân công kỹ thuật viên", tech).full(print);
 

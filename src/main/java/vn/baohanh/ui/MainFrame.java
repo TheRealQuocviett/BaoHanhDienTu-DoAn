@@ -72,7 +72,6 @@ public class MainFrame extends JFrame {
 
     private record Nav(String key, String label, Role[] roles, Supplier<View> factory) {}
 
-    private static final Color NAV_FG = new Color(0x475569);
 
     private final class NavItem extends JLabel {
         private static final long serialVersionUID = 1L;
@@ -83,7 +82,7 @@ public class MainFrame extends JFrame {
             super(label);
             this.key = key;
             this.base = label;
-            setForeground(NAV_FG);
+            setForeground(Ui.NAV_TEXT);
             setFont(Ui.font(Font.PLAIN, 14));
             setBorder(Ui.pad(9, 24));
             setOpaque(false);
@@ -100,7 +99,7 @@ public class MainFrame extends JFrame {
 
         void mark(boolean on) {
             this.on = on;
-            setForeground(on ? Ui.ACCENT_TEXT : NAV_FG);
+            setForeground(on ? Ui.ACCENT_TEXT : Ui.NAV_TEXT);
             setFont(Ui.font(on ? Font.BOLD : Font.PLAIN, 14));
             repaint();
         }
@@ -135,9 +134,12 @@ public class MainFrame extends JFrame {
                 new Nav("tong-quan", "Tổng quan", all, () -> new DashboardView(ctx)),
                 new Nav("tra-cuu", "Tra cứu", all, () -> new LookupView(ctx)),
                 new Nav("phieu", "Phiếu bảo hành", all, () -> new TicketsView(ctx)),
+                new Nav("kanban", "Bảng công việc", all, () -> new KanbanView(ctx)),
                 new Nav("kich-hoat", "Kích hoạt bảo hành", ar, () -> new ActivateView(ctx)),
                 new Nav("bao-hanh", "Danh sách bảo hành", all, () -> new WarrantiesView(ctx)),
-                new Nav("yeu-cau", "Yêu cầu online", all, () -> new RequestsView(ctx)))});
+                new Nav("yeu-cau", "Yêu cầu online", all, () -> new RequestsView(ctx)),
+                new Nav("lich-hen", "Lịch hẹn", all, () -> new CalendarView(ctx)),
+                new Nav("tin-nhan", "Tin nhắn khách", all, () -> new MessagesView(ctx)))});
         groups.add(new Object[]{"DANH MỤC", List.of(
                 new Nav("dm-customer", "Khách hàng", all, () -> new CatalogView(ctx, "customer")),
                 new Nav("dm-product", "Sản phẩm / Model", all, () -> new CatalogView(ctx, "product")),
@@ -146,9 +148,13 @@ public class MainFrame extends JFrame {
                 new Nav("dm-category", "Loại sản phẩm", all, () -> new CatalogView(ctx, "category")))});
         groups.add(new Object[]{"KHO", List.of(
                 new Nav("dm-part", "Linh kiện", all, () -> new CatalogView(ctx, "part")),
+                new Nav("dat-hang", "Đặt hàng linh kiện", at, () -> new PurchaseView(ctx)),
+                new Nav("dm-supplier", "Nhà cung cấp", at, () -> new CatalogView(ctx, "supplier")),
                 new Nav("the-kho", "Thẻ kho", at, () -> new StockView(ctx)))});
         groups.add(new Object[]{"QUẢN TRỊ", List.of(
                 new Nav("bao-cao", "Báo cáo thống kê", a, () -> new ReportsView(ctx)),
+                new Nav("kpi", "KPI kỹ thuật viên", at, () -> new KpiView(ctx)),
+                new Nav("loi", "Thống kê lỗi thường gặp", at, () -> new FaultsView(ctx)),
                 new Nav("dm-user", "Người dùng", a, () -> new CatalogView(ctx, "user")),
                 new Nav("cai-dat", "Thông tin cửa hàng", a, () -> new SettingsView(ctx)),
                 new Nav("thong-bao", "Thông báo cho khách", ar, () -> new NotificationsView(ctx)),
@@ -156,7 +162,7 @@ public class MainFrame extends JFrame {
                 new Nav("nhat-ky", "Nhật ký hệ thống", a, () -> new AuditView(ctx)))});
 
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
-        side.setBackground(Color.WHITE);
+        side.setBackground(Ui.CARD);
         side.setBorder(BorderFactory.createEmptyBorder(14, 0, 14, 0));
         JLabel brand = new JLabel("Bảo hành điện tử", Ui.logo(30), JLabel.LEFT);
         brand.setIconTextGap(10);
@@ -172,7 +178,7 @@ public class MainFrame extends JFrame {
             if (allowed.isEmpty()) continue;
             if (!((String) g[0]).isEmpty()) {
                 JLabel gl = new JLabel((String) g[0]);
-                gl.setForeground(new Color(0x94A3B8));
+                gl.setForeground(Ui.FAINT);
                 gl.setFont(Ui.font(Font.BOLD, 11));
                 gl.setBorder(BorderFactory.createEmptyBorder(16, 22, 6, 16));
                 side.add(gl);
@@ -200,6 +206,7 @@ public class MainFrame extends JFrame {
         JLabel who = new JLabel(user.fullName() + " · " + user.role().getLabel() + "   ");
         who.setForeground(Ui.MUTE);
         top.add(Ui.flow(who,
+                Ui.button(Ui.isDark() ? "Giao diện sáng" : "Giao diện tối", this::toggleTheme),
                 Ui.button("Mở giao diện web", () -> Ui.browse(this, webUrl)),
                 Ui.button("Đổi mật khẩu", this::changePassword),
                 Ui.button("Đăng xuất", this::logout)), BorderLayout.EAST);
@@ -248,6 +255,9 @@ public class MainFrame extends JFrame {
             badge("phieu", d.lng("open_tickets"));
             badge("dm-part", d.lng("low_stock"));
             badge("yeu-cau", d.lng("new_requests"));
+            badge("tin-nhan", d.lng("unread_messages"));
+            badge("dat-hang", d.lng("parts_to_order"));
+            badge("lich-hen", d.lng("today_events"));
             badge("thong-bao", d.lng("notify_failed"));
         } catch (Exception ignored) {
             // không quan trọng
@@ -256,7 +266,7 @@ public class MainFrame extends JFrame {
 
     private void badge(String key, long n) {
         NavItem it = navItems.get(key);
-        if (it != null) it.setText(n > 0 ? "<html>" + it.base + " &nbsp;<span style='color:#2563eb'><b>" + n + "</b></span></html>" : it.base);
+        if (it != null) it.setText(n > 0 ? "<html>" + it.base + " &nbsp;<span style='color:" + Ui.hex(Ui.ACCENT) + "'><b>" + n + "</b></span></html>" : it.base);
     }
 
     /** Làm mới trang đang mở (sau khi đóng hộp thoại). */
@@ -274,6 +284,19 @@ public class MainFrame extends JFrame {
         if (Ui.run(this, () -> ctx.app().auth.changePassword(ctx.user(), new String(o.getPassword()), new String(n1.getPassword()))))
             Ui.info(this, "Đã đổi mật khẩu");
     }
+
+    /** Đổi sáng / tối: dựng lại cửa sổ với bảng màu mới, giữ nguyên trang đang mở. */
+    private void toggleTheme() {
+        Ui.setDark(!Ui.isDark());
+        Ui.installTheme();
+        MainFrame mf = new MainFrame(ctx.app(), ctx.user(), ctx.webUrl());
+        mf.setBounds(getBounds());
+        mf.setExtendedState(getExtendedState());
+        if (current != null) mf.navigate(current, null);
+        dispose();
+        mf.setVisible(true);
+    }
+
 
     private void logout() {
         Ui.run(this, () -> ctx.app().audit.log(ctx.user(), "ĐĂNG XUẤT", "app_user", ctx.user().id(), "Swing"));

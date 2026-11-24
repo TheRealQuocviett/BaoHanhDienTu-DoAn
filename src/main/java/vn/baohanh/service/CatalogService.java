@@ -78,6 +78,21 @@ public class CatalogService {
         d.hint = "Nơi cửa hàng gửi máy khi lỗi cần hãng xử lý.";
         add(d);
 
+        d = new EntityDef("supplier", "supplier", "Nhà cung cấp linh kiện");
+        d.field(new Field("name", "Tên nhà cung cấp", Type.TEXT).req())
+         .field(new Field("contact", "Người liên hệ", Type.TEXT))
+         .field(new Field("phone", "Điện thoại", Type.TEXT))
+         .field(new Field("email", "Email", Type.EMAIL))
+         .field(new Field("address", "Địa chỉ", Type.TEXT))
+         .field(new Field("note", "Ghi chú", Type.TEXTAREA));
+        d.col("name", "Nhà cung cấp").col("contact", "Liên hệ").col("phone", "Điện thoại").col("email", "Email")
+         .col("po_count", "Số đơn", "int");
+        d.listSql = "SELECT s.*, (SELECT COUNT(*) FROM purchase_order o WHERE o.supplier_id = s.id) AS po_count FROM supplier s";
+        d.labelSql = "name";
+        d.orderBy = "name";
+        d.hint = "Nơi cửa hàng đặt mua linh kiện. Dùng khi tạo đơn đặt hàng.";
+        add(d);
+
         d = new EntityDef("category", "category", "Loại sản phẩm");
         d.field(new Field("name", "Tên loại", Type.TEXT).req());
         d.col("name", "Tên loại").col("product_count", "Số model", "int");

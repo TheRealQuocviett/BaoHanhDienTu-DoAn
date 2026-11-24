@@ -190,6 +190,12 @@ public class CustomerService {
                 t.put("review", rv);
                 t.put("can_review", s == TicketStatus.RETURNED);
                 t.put("payment_label", WarrantyService.PAY_METHODS.getOrDefault(t.str("payment_method"), ""));
+                Row pm = db.one("SELECT body, created_at FROM ticket_message WHERE ticket_id = ? AND sender = 'CUSTOMER' AND body LIKE ? ORDER BY id DESC LIMIT 1",
+                        t.lng("id"), MessageService.PAY_TAG + "%");
+                t.put("payment_claim", pm == null ? null : new Row().with("method", pm.str("body").contains("chuyển khoản") ? "TRANSFER" : "CASH")
+                        .with("time", pm.str("created_at")));
+                t.put("messages", db.scalar("SELECT COUNT(*) FROM ticket_message WHERE ticket_id = ?", t.lng("id")));
+                t.put("unread_messages", db.scalar("SELECT COUNT(*) FROM ticket_message WHERE ticket_id = ? AND sender = 'STAFF' AND read_by_customer = 0", t.lng("id")));
                 tickets.add(t);
             }
             d.put("tickets", tickets);
@@ -212,6 +218,8 @@ public class CustomerService {
         }
         invoices.sort((a, b) -> b.str("returned_at").compareTo(a.str("returned_at")));
         c.put("invoices", invoices);
+        c.put("unread_messages", db.scalar("SELECT COUNT(*) FROM ticket_message m JOIN ticket t ON t.id = m.ticket_id "
+                + "JOIN warranty w ON w.id = t.warranty_id WHERE w.customer_id = ? AND m.sender = 'STAFF' AND m.read_by_customer = 0", customerId));
         c.put("unread_hint", db.scalar("SELECT COUNT(*) FROM notification WHERE customer_id = ? AND status = 'SENT' AND event <> 'TEST'", customerId));
         return c;
     }

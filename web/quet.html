@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Quét mã vạch – Bảo hành điện tử</title>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--ink:#0f172a;--mute:#64748b;--line:#e3e8f0;--acc:#2563eb;--ok:#059669;--bad:#dc2626}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#111a2e;--ink:#e2e8f0;--mute:#94a3b8;--line:#22304a;--acc:#3b82f6;--ok:#34d399;--bad:#f87171}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:max(18px,env(safe-area-inset-top)) 16px 40px}
+.wrap{max-width:460px;margin:0 auto}
+h1{font-size:22px;margin:6px 0 4px}
+p{margin:6px 0;color:var(--mute)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:14px}
+.big{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:64px;border:0;border-radius:14px;background:var(--acc);color:#fff;font:600 18px/1 inherit;cursor:pointer}
+.big svg{width:26px;height:26px}
+.ghost{background:transparent;color:var(--acc);border:1px solid var(--line);min-height:48px;font-size:16px;margin-top:10px}
+input{width:100%;font:inherit;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.row{display:flex;gap:8px;margin-top:8px}.row input{flex:1}.row button{flex:none;width:auto;padding:0 18px;min-height:48px;margin:0}
+.res{margin-top:12px}
+.code{display:block;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-family:ui-monospace,Consolas,monospace;font-size:17px;word-break:break-all}
+.code small{display:block;font-family:inherit;color:var(--mute);font-size:12px}
+.ok{color:var(--ok);font-weight:600}.err{color:var(--bad);font-weight:600}
+.tips{font-size:14px;color:var(--mute);padding-left:18px;margin:8px 0 0}
+img.prev{display:block;max-width:100%;max-height:180px;margin:10px auto 0;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📷 Quét mã vạch</h1>
+  <p>Ảnh chụp được gửi tới máy tính của cửa hàng để điền số Serial / IMEI.</p>
+  <div id="state"></div>
+  <div class="card">
+    <label class="big" id="shoot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>
+      Chụp mã vạch<input type="file" accept="image/*" capture="environment" id="file" hidden></label>
+    <ul class="tips"><li>Để mã vạch <b>nằm ngang</b>, chiếm gần hết khung hình.</li><li>Đủ sáng, không lóa; chạm màn hình để lấy nét.</li><li>Hộp máy có nhiều mã: chụp riêng mã IMEI / S/N.</li></ul>
+    <img class="prev" id="prev" alt="" hidden>
+    <div class="res" id="res"></div>
+  </div>
+  <div class="card">
+    <p style="margin-top:0">Tem bị mờ, không chụp được? Gõ số serial:</p>
+    <form class="row" id="tf"><input id="txt" autocomplete="off" autocapitalize="characters" placeholder="Số Serial / IMEI"><button class="big" style="font-size:16px">Gửi</button></form>
+  </div>
+</div>
+<script>
+const token = location.pathname.split('/').pop();
+const $ = s => document.querySelector(s);
+const h = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function call(path, opt) {
+  const res = await fetch(path, opt);
+  const d = await res.json().catch(() => ({error: 'Máy chủ không phản hồi'}));
+  if (!res.ok) throw new Error(d.error || ('Lỗi ' + res.status));
+  return d;
+}
+function show(codes) {
+  $('#res').innerHTML = codes.length
+    ? '<div class="ok">✓ Đã gửi tới máy tính:</div>' + codes.map(c => `<span class="code">${h(c.text)}<small>${h(c.kind)} · ${h(c.format)}</small></span>`).join('')
+      + '<p>Xem và chọn mã trên máy tính. Có thể chụp tiếp mã khác.</p>'
+    : '<div class="err">Không đọc được mã vạch.</div><p>Chụp lại gần hơn, đủ sáng, mã nằm ngang – hoặc gõ số serial bên dưới.</p>';
+}
+call('/api/public/scan/' + token).then(d => {
+  $('#state').innerHTML = d.ok ? '<p class="ok">✓ Đã kết nối với máy tính.</p>' : '<p class="err">Mã QR đã hết hạn. Trên máy tính, mở lại “Quét” để lấy mã mới.</p>';
+}).catch(e => { $('#state').innerHTML = `<p class="err">${h(e.message)}</p>`; });
+$('#file').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  $('#res').innerHTML = '<p>Đang gửi ảnh…</p>';
+  try {
+    const img = new Image(); img.src = URL.createObjectURL(f); await img.decode();
+    $('#prev').src = img.src; $('#prev').hidden = false;
+    const s = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
+    const d = await call('/api/public/scan/' + token, {method: 'POST', headers: {'X-App': '1', 'Content-Type': 'image/jpeg'}, body: blob});
+    show(d.codes || []);
+  } catch (err) { $('#res').innerHTML = `<div class="err">${h(err.message)}</div>`; }
+  e.target.value = '';
+};
+$('#tf').onsubmit = async e => {
+  e.preventDefault(); const t = $('#txt').value.trim(); if (!t) return;
+  try {
+    const d = await call('/api/public/scan/' + token + '/text', {method: 'POST', headers: {'X-App': '1', 'Content-Type': 'application/json'}, body: JSON.stringify({text: t})});
+    show(d.codes); $('#txt').value = '';
+  } catch (err) { $('#res').innerHTML = `<div class="err">${h(err.message)}</div>`; }
+};
+</script>
+</body>
+</html>

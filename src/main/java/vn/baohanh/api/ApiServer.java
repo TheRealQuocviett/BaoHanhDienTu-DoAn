@@ -191,6 +191,45 @@ public class ApiServer {
 
         // ---------- Yêu cầu bảo hành online ----------
         get("/api/requests", true, r -> app.requests.list(r.user, r.q("status")));
+        // ---------- Lịch hẹn & tin nhắn ----------
+        get("/api/tickets/(\\d+)/vietqr", true, r -> app.warranty.vietQr(r.id(1)));
+        get("/api/tickets/board", true, r -> app.warranty.board(r.user));
+        // ---------- Đặt hàng linh kiện ----------
+        get("/api/purchase/suggest", true, r -> app.purchases.suggestions(r.user));
+        get("/api/purchase", true, r -> app.purchases.list(r.user, r.q("status")));
+        get("/api/purchase/(\\d+)", true, r -> app.purchases.get(r.user, r.id(1)));
+        post("/api/purchase", r -> app.purchases.create(r.user, r.body));
+        post("/api/purchase/(\\d+)/order", r -> app.purchases.markOrdered(r.user, r.id(1)));
+        post("/api/purchase/(\\d+)/cancel", r -> app.purchases.cancel(r.user, r.id(1), Json.str(r.body, "note")));
+        post("/api/purchase/(\\d+)/receive", r -> app.purchases.receive(r.user, r.id(1), r.body));
+        get("/api/reports/faults", true, r -> app.faults.report(r.user, ReportService.period(r.q("from"), r.q("to"))));
+
+        // ---------- Quét mã vạch ----------
+        postRaw("/api/scan/decode", r -> app.scan.decode(r.user, rawBody(r, vn.baohanh.service.ScanService.MAX_IMAGE)));
+        post("/api/scan/session", r -> app.scan.start(r.user));
+        get("/api/scan/session/([0-9a-f]{32})", true, r -> app.scan.poll(r.user, r.m.group(1), (int) parseLong(r.q("since"))));
+        delete("/api/scan/session/([0-9a-f]{32})", r -> { app.scan.stop(r.user, r.m.group(1)); return Map.of("ok", true); });
+        kh("GET", "/api/public/scan/([0-9a-f]{32})", r -> Map.of("ok", app.scan.hello(r.m.group(1))));
+        khRaw("/api/public/scan/([0-9a-f]{32})", r -> app.scan.submitImage(r.m.group(1), rawBody(r, vn.baohanh.service.ScanService.MAX_IMAGE)));
+        kh("POST", "/api/public/scan/([0-9a-f]{32})/text", r -> app.scan.submitText(r.m.group(1), Json.str(r.body, "text")));
+
+        // ---------- Nhập Excel ----------
+        get("/api/import/(customer|product|part)/template", true, r -> {
+            byte[] x = app.imports.template(r.user, r.m.group(1));
+            r.ex.getResponseHeaders().set("Content-Disposition", "attachment; filename=\"" + vn.baohanh.service.ImportService.templateName(r.m.group(1)) + "\"");
+            return new Binary("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", x);
+        });
+        postRaw("/api/import/(customer|product|part)/(preview|commit)", r -> {
+            byte[] data = rawBody(r, 10 * 1024 * 1024);
+            String name = header(r.ex, "X-File-Name");
+            return "commit".equals(r.m.group(2)) ? app.imports.commit(r.user, r.m.group(1), data, name)
+                    : app.imports.preview(r.user, r.m.group(1), data, name);
+        });
+        get("/api/reports/kpi", true, r -> app.reports.technicianKpi(r.user, vn.baohanh.service.ReportService.period(r.q("from"), r.q("to"))));
+        get("/api/calendar", true, r -> app.calendar.events(r.user, r.q("from"), r.q("to"), parseLong(r.q("technician_id"))));
+        get("/api/messages", true, r -> app.messages.conversations(r.user, "1".equals(r.q("unread"))));
+        get("/api/tickets/(\\d+)/messages", true, r -> app.messages.staffThread(r.user, r.id(1)));
+        post("/api/tickets/(\\d+)/messages", r -> app.messages.staffSend(r.user, r.id(1), Json.str(r.body, "body")));
         get("/api/request-photos/(\\d+)", true, r -> {
             Object[] img = app.photos.readRequestPhoto(0, r.id(1));
             r.ex.getResponseHeaders().set("Cache-Control", "private, max-age=3600");
@@ -244,6 +283,19 @@ public class ApiServer {
         kh("POST", "/api/kh/review", r -> app.customers.review(customer(r), Json.num(r.body, "ticket_id", 0),
                 (int) Json.num(r.body, "stars", 0), Json.str(r.body, "comment")));
         kh("GET", "/api/kh/inbox", r -> app.customers.inbox(customer(r)));
+        kh("GET", "/api/kh/tickets/(\\d+)/vietqr", r -> {
+            long me = customer(r);
+            if (app.db.scalar("SELECT COUNT(*) FROM ticket t JOIN warranty w ON w.id = t.warranty_id WHERE t.id = ? AND w.customer_id = ?",
+                    r.id(1), me) == 0) throw AppException.notFound("phiếu");
+            return app.warranty.vietQr(r.id(1));
+        });
+        kh("POST", "/api/kh/tickets/(\\d+)/payment", r -> {
+            long me = customer(r);
+            app.messages.paymentNotice(me, r.id(1), Json.str(r.body, "method"));
+            return app.customers.me(me);
+        });
+        kh("GET", "/api/kh/tickets/(\\d+)/messages", r -> app.messages.customerThread(customer(r), r.id(1)));
+        kh("POST", "/api/kh/tickets/(\\d+)/messages", r -> app.messages.customerSend(customer(r), r.id(1), Json.str(r.body, "body")));
         kh("GET", "/api/kh/print-link", r -> {
             long me = customer(r);
             String kind = r.q("kind");
@@ -320,10 +372,12 @@ public class ApiServer {
         for (Role r : Role.values()) roles.put(r.name(), r.getLabel());
         m.put("roles", roles);
         m.put("pay_methods", WarrantyService.PAY_METHODS);
+        m.put("po_status", vn.baohanh.service.PurchaseService.STATUS);
         m.put("quote_labels", WarrantyService.QUOTE_LABELS);
         m.put("stock_types", InventoryService.TYPE_LABELS);
         m.put("setting_keys", SettingService.KEYS);
         m.put("setting_hints", SettingService.HINTS);
+        m.put("setting_selects", SettingService.SELECTS);
         m.put("request_labels", CustomerService.REQUEST_LABELS);
         List<Object> ents = new ArrayList<>();
         for (EntityDef d : app.catalog.all()) ents.add(d.toMap(u.role()));
@@ -390,7 +444,7 @@ public class ApiServer {
     }
 
     private void servePrint(HttpExchange ex, String path) throws Exception {
-        Matcher m = Pattern.compile("/in/(tiep-nhan|tra-may|bao-hanh)/(\\d+)").matcher(path);
+        Matcher m = Pattern.compile("/in/(tiep-nhan|tra-may|bao-hanh|dat-hang)/(\\d+)").matcher(path);
         Map<String, String> q = parseQuery(ex.getRequestURI().getRawQuery());
         if (!m.matches()) { sendText(ex, 404, "Không tìm thấy"); return; }
         long id = Long.parseLong(m.group(2));
@@ -400,6 +454,15 @@ public class ApiServer {
         }
         byte[] html = app.print.render(m.group(1), id).getBytes(StandardCharsets.UTF_8);
         sendBytes(ex, 200, "text/html; charset=utf-8", html);
+    }
+
+    /** Thân yêu cầu nhị phân (ảnh, file Excel), giới hạn kích thước. */
+    private static byte[] rawBody(Req r, int max) throws IOException {
+        try (InputStream in = r.ex.getRequestBody()) {
+            byte[] b = in.readNBytes(max + 1);
+            if (b.length > max) throw new AppException(413, "File quá lớn (tối đa " + (max / 1024 / 1024) + " MB)");
+            return b;
+        }
     }
 
     private static Map<String, Object> readBody(HttpExchange ex) throws IOException {
@@ -467,7 +530,7 @@ public class ApiServer {
         String file = switch (path) {
             case "/", "/index.html" -> "index.html";
             case "/tra-cuu", "/tra-cuu/", "/portal.html" -> "portal.html";
-            default -> null;
+            default -> path.matches("/quet/[0-9a-f]{32}") ? "quet.html" : null;
         };
         if (file == null) { sendText(ex, 404, "Không tìm thấy"); return; }
         byte[] bytes = null;

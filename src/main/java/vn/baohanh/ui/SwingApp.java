@@ -88,7 +88,7 @@ public final class SwingApp {
 
         d.getRootPane().setDefaultButton(ok);
         d.setContentPane(root);
-        d.getContentPane().setBackground(Color.WHITE);
+        d.getContentPane().setBackground(Ui.CARD);
         d.pack();
         d.setMinimumSize(new Dimension(420, d.getHeight()));
         d.setLocationRelativeTo(null);

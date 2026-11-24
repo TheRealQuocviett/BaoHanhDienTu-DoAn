@@ -7,6 +7,7 @@
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>try { const t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <style>
 /* ===== Giao diện sáng – xanh dương ===== */
 :root{color-scheme:light;
@@ -14,7 +15,7 @@
   --acc:#2563eb;--acc2:#1d4ed8;--accs:#eaf1ff;--acct:#1e40af;
   --ok:#059669;--oks:#e7f8f1;--bad:#dc2626;--bads:#fdecec;--warn:#b45309;--warns:#fff5e0;--vio:#7c3aed;--vios:#f2ecff;
   --soft:#f6f8fc;--side:#fff;--r:14px;
-  --sh:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);--sh2:0 10px 30px -10px rgba(15,23,42,.18)}
+  --field:#fff;--bd:#d6deea;--bd2:#b9c6da;--sh:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);--sh2:0 10px 30px -10px rgba(15,23,42,.18)}
 *{box-sizing:border-box;min-width:0}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
@@ -61,8 +62,8 @@ h1{font-size:clamp(22px,2.6vw,28px);line-height:1.2;margin:0 0 4px;letter-spacin
 @media(max-width:1000px){.two{grid-template-columns:minmax(0,1fr)}}
 .head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 /* --- điều khiển --- */
-input,select,textarea{font-size:14.5px;background:#fff;border:1px solid #d6deea;border-radius:10px;padding:9px 12px;width:100%;min-height:42px;transition:border-color .15s,box-shadow .15s}
-input:hover,select:hover,textarea:hover{border-color:#b9c6da}
+input,select,textarea{font-size:14.5px;background:var(--field);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;width:100%;min-height:42px;transition:border-color .15s,box-shadow .15s}
+input:hover,select:hover,textarea:hover{border-color:var(--bd2)}
 input:focus,select:focus,textarea:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 3px #2563eb26}
 textarea{min-height:70px;resize:vertical}
 input[type=checkbox]{width:18px;min-height:18px;height:18px;accent-color:var(--acc);box-shadow:none}
@@ -74,14 +75,14 @@ label{display:block;font-size:13px;font-weight:500;margin:0 0 5px;color:#334155}
 .btn{white-space:nowrap;font-weight:600;border:1px solid transparent;border-radius:10px;padding:9px 16px;min-height:42px;cursor:pointer;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,box-shadow .15s,transform .05s}
 .btn:active{transform:translateY(1px)}
 .btn.acc{background:var(--acc);color:#fff;box-shadow:0 1px 2px #1d4ed84d,inset 0 1px 0 #ffffff26}.btn.acc:hover{background:var(--acc2)}
-.btn.ghost{background:#fff;color:var(--ink);border-color:#d6deea}.btn.ghost:hover{background:var(--soft);border-color:#b9c6da}
-.btn.danger{background:#fff;color:var(--bad);border-color:#f3b4b4}.btn.danger:hover{background:var(--bads)}
+.btn.ghost{background:var(--card);color:var(--ink);border-color:var(--bd)}.btn.ghost:hover{background:var(--soft);border-color:var(--bd2)}
+.btn.danger{background:var(--card);color:var(--bad);border-color:#f3b4b4}.btn.danger:hover{background:var(--bads)}
 .btn.sm{min-height:34px;padding:5px 12px;font-size:13px;border-radius:8px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
-.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;min-height:34px;color:#475569}
-.chip:hover{border-color:#b9c6da}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;min-height:34px;color:#475569}
+.chip:hover{border-color:var(--bd2)}
 .chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .pill{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;background:#eef2f7;color:#475569}
 .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.8}
@@ -94,13 +95,24 @@ thead th:first-child{border-top-left-radius:8px}thead th:last-child{border-top-r
 td{padding:11px 10px;border-bottom:1px solid var(--line2);vertical-align:top}
 tbody tr:last-child td{border-bottom:0}
 td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-tr.click{cursor:pointer}tr.click:hover td{background:#f5f8ff}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--accs)}
 .small{font-size:12.5px;color:var(--mute)}.mono{font-variant-numeric:tabular-nums}
 td b.mono{color:var(--acct)}
 .empty{padding:32px;text-align:center;color:var(--mute)}
 @media(max-width:640px){.stack thead{display:none}.stack tr{display:grid;padding:10px 0;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:2px 0 2px 7.5em;text-align:left!important}
   .stack td::before{content:attr(data-l);float:left;width:7em;margin-left:-7.5em;color:var(--mute);font-size:12px}.stack td:empty{display:none}}
 /* --- thành phần --- */
+.scanB{display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap}.scanB svg.i{width:18px;height:18px}
+.inScan{display:flex;gap:8px;align-items:stretch}.inScan>input{flex:1;min-width:0}
+.scanGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:14px}
+.scanBox{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--soft)}.scanBox h3{margin:0 0 6px;display:flex;align-items:center;gap:8px;font-size:15px}
+.scanQr{background:#fff;border-radius:12px;padding:10px;width:min(240px,100%);margin:8px 0}.scanQr svg{display:block;width:100%;height:auto}
+.scanCam{position:relative;margin-top:8px;border-radius:12px;overflow:hidden;background:#000}.scanCam video{display:block;width:100%}
+.scanCam i{position:absolute;left:8%;right:8%;top:38%;bottom:38%;border:2px solid #60a5fa;border-radius:8px;box-shadow:0 0 0 999px #0006}
+.codeList{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.codeB{border:1px solid var(--bd);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 12px;text-align:left;cursor:pointer;font:inherit}
+.codeB:hover{border-color:var(--acc);background:var(--accs)}.codeB b{display:block;font-family:ui-monospace,Consolas,monospace;font-size:15px}.codeB small{color:var(--mute)}
+.hint.ok{border-color:var(--ok)}
+
 .bar{display:grid;grid-template-columns:10em minmax(0,1fr) 3em;gap:10px;align-items:center;font-size:13px;margin:9px 0}
 .bar div{height:8px;background:#edf1f7;border-radius:99px;overflow:hidden}.bar div i{display:block;height:100%;background:linear-gradient(90deg,#60a5fa,#2563eb);border-radius:99px}
 .bar em{font-style:normal;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
@@ -109,7 +121,7 @@ td b.mono{color:var(--acct)}
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:10px 18px;margin:14px 0}
 .kv span{display:block;font-size:12px;color:var(--mute)}.kv b{font-weight:600}
 .tl{list-style:none;margin:0;padding:0 0 0 16px;border-left:2px solid var(--line)}
-.tl li{position:relative;padding:0 0 14px 12px}.tl li::before{content:"";position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #b9c6da}
+.tl li{position:relative;padding:0 0 14px 12px}.tl li::before{content:"";position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid #b9c6da}
 .tl li:last-child::before{background:var(--acc);border-color:var(--acc);box-shadow:0 0 0 4px #2563eb26}
 .box{border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:14px;background:#fcfdff}
 .box h3{margin-top:0}
@@ -124,7 +136,7 @@ td b.mono{color:var(--acct)}
 .chart{position:relative;height:260px}.chart svg{position:absolute;inset:0;width:100%;height:100%}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--mute)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 /* --- đăng nhập --- */
-.login{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:#fff}
+.login{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:var(--card)}
 .login .hero{background:radial-gradient(1200px 600px at 0% 0%,#3b82f6 0%,#1d4ed8 45%,#1e3a8a 100%);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
 .login .hero::after{content:"";position:absolute;right:-120px;bottom:-120px;width:420px;height:420px;border-radius:50%;border:60px solid #ffffff14}
 .login .hero h2{font-size:clamp(26px,3vw,38px);line-height:1.2;margin:0 0 14px;letter-spacing:-.02em}
@@ -144,11 +156,68 @@ td b.mono{color:var(--acct)}
 .upload{display:inline-flex;align-items:center;gap:8px;cursor:pointer}.upload input{display:none}
 @media(max-width:600px){main{padding:18px 12px 60px}.card{padding:16px}.tiles{grid-template-columns:1fr 1fr;gap:10px}
   .tile{flex-direction:column;align-items:flex-start;gap:10px}.tile .ic{width:38px;height:38px}.tile b.long{white-space:normal}}
+/* --- tin nhắn --- */
+.chat{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding:4px 2px 8px}
+.bub{max-width:78%;padding:9px 12px;border-radius:14px;background:#f1f5f9;white-space:pre-wrap;word-wrap:break-word;font-size:14px}
+.bub.me{align-self:flex-end;background:var(--acc);color:#fff;border-bottom-right-radius:4px}.bub.cu{align-self:flex-start;border-bottom-left-radius:4px}
+.bub small{display:block;font-size:11.5px;opacity:.75;margin-top:3px}
+.chatf{display:flex;gap:8px;align-items:flex-end;margin-top:6px}.chatf textarea{min-height:44px;height:44px;flex:1}
+.conv{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 6px;border-top:1px solid var(--line2);cursor:pointer;border-radius:10px}
+.conv:hover{background:var(--accs)}.conv:first-child{border-top:0}.conv .av{width:42px;height:42px;border-radius:50%;background:var(--accs);color:var(--acc);display:grid;place-items:center;font-weight:700}
+.conv.unread b.nm{color:var(--acct)}.conv .lm{color:var(--mute);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* --- kanban --- */
+.kb{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:10px;overflow-x:auto;padding-bottom:10px;align-items:start}
+.kcol{background:#eef2f7;border-radius:14px;padding:8px;min-height:300px;transition:background .15s,box-shadow .15s}
+.kcol h3{margin:2px 4px 8px;font-size:13.5px;display:flex;justify-content:space-between;align-items:center}
+.kcol h3 em{font-style:normal;background:var(--card);border-radius:99px;padding:0 8px;font-size:12px;color:var(--mute)}
+.kcol.can{background:#e3ecff;box-shadow:inset 0 0 0 2px #93b4f5}.kcol.over{background:#d6e4ff;box-shadow:inset 0 0 0 2px var(--acc)}.kcol.no{opacity:.55}
+.kcard{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:9px 10px;margin-bottom:8px;cursor:grab;box-shadow:var(--sh);font-size:13px}
+.kcard:active{cursor:grabbing}.kcard.drag{opacity:.4}.kcard b{color:var(--acct)}.kcard .t{font-weight:600;margin:2px 0;color:var(--ink)}
+.kcard .m{display:flex;justify-content:space-between;gap:6px;color:var(--mute);font-size:12px;margin-top:4px;flex-wrap:wrap}
+.kcard.late{border-left:3px solid var(--bad)}.kcard.mine{box-shadow:0 0 0 2px #c7d7fb}
+/* --- lịch --- */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.cal.day{grid-template-columns:minmax(0,1fr)}
+.cday{background:var(--card);border:1px solid var(--line);border-radius:12px;min-height:220px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.cday.today{border-color:var(--acc);box-shadow:0 0 0 2px #2563eb26}.cday.past{background:#fafbfd}
+.cday h4{margin:0 0 2px;font-size:13px;color:var(--mute);font-weight:600;display:flex;justify-content:space-between}.cday.today h4{color:var(--acc)}
+.cday h4 b{font-size:17px;color:var(--ink)}.cday.today h4 b{color:var(--acc)}
+.ev{border-radius:9px;padding:6px 8px;font-size:12.5px;line-height:1.35;cursor:pointer;border-left:3px solid;background:var(--accs)}
+.ev b{display:block;font-size:12px}.ev span{color:#475569}.ev:hover{filter:brightness(.97)}
+.ev.APPOINTMENT{border-color:#7c3aed;background:#f4efff}.ev.REQUESTED{border-color:#a78bfa;background:#faf8ff;border-left-style:dashed}
+.ev.DUE{border-color:#2563eb;background:#eef4ff}.ev.READY{border-color:#059669;background:#ecfaf3}.ev.OVERDUE{border-color:#dc2626;background:#fdeeee}
+.legend2{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--mute)}.legend2 i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+@media(max-width:900px){.cal{grid-template-columns:minmax(0,1fr)}.cday{min-height:0}.cday.empty{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ===== Chế độ tối ===== */
+html[data-theme=dark]{color-scheme:dark;--bg:#0b1220;--card:#111a2c;--ink:#e5eaf3;--mute:#94a3b8;--line:#22304a;--line2:#1a2740;
+  --acc:#3b82f6;--acc2:#60a5fa;--accs:#15254a;--acct:#9ec0ff;--ok:#34d399;--oks:#0e2c23;--bad:#f87171;--bads:#3a1717;--warn:#fbbf24;--warns:#3a2c0c;
+  --vio:#a78bfa;--vios:#241a44;--soft:#0f1829;--side:#0d1526;--field:#0d1526;--bd:#2a3a58;--bd2:#3a4d70;
+  --sh:0 1px 2px rgba(0,0,0,.4);--sh2:0 10px 30px -10px rgba(0,0,0,.7)}
+html[data-theme=dark] .top{background:rgba(13,21,38,.88)}
+html[data-theme=dark] .btn:not(.acc):not(.ghost):not(.danger){background:#e5eaf3;color:#0b1220}
+html[data-theme=dark] .hint{color:#c7d7fb;border-color:#1f3566}
+html[data-theme=dark] .box{background:#0f1829}
+html[data-theme=dark] tr.click:hover td,html[data-theme=dark] .conv:hover{background:#16233b}
+html[data-theme=dark] .kcol{background:#0f1829}html[data-theme=dark] .kcol.can{background:#13244a}html[data-theme=dark] .kcol.over{background:#1a3063}
+html[data-theme=dark] .bub{background:#1c2a44}html[data-theme=dark] .bub.me{background:#2563eb}
+html[data-theme=dark] .cday.past{background:#0e1626}
+html[data-theme=dark] .ev{background:#15223a}html[data-theme=dark] .ev.APPOINTMENT{background:#231a40}html[data-theme=dark] .ev.REQUESTED{background:#1e1a33}
+html[data-theme=dark] .ev.DUE{background:#14254a}html[data-theme=dark] .ev.READY{background:#0e2c23}html[data-theme=dark] .ev.OVERDUE{background:#3a1717}
+html[data-theme=dark] .ev span{color:#cbd5e1}
+html[data-theme=dark] .bar div,html[data-theme=dark] .meter{background:#1a2740}
+html[data-theme=dark] .pill{background:#1a2740;color:#cbd5e1}
+html[data-theme=dark] .pill.ok{color:var(--ok);background:var(--oks)}html[data-theme=dark] .pill.bad{color:var(--bad);background:var(--bads)}
+html[data-theme=dark] .pill.warn{color:var(--warn);background:var(--warns)}html[data-theme=dark] .pill.acc{background:var(--accs);color:var(--acct)}
+html[data-theme=dark] .modal{background:#000a}
+html[data-theme=dark] .tile:hover{border-color:#34507f}
+html[data-theme=dark] .light-only{background:#fff!important;color:#0f172a}
+.themeBtn{width:38px;height:38px;padding:0!important;min-height:38px}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></symbol><symbol id="i-shield-plus" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="M12 9v6M9 12h6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.6 3.3-5.5 6.5-5.5s5.8 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></symbol><symbol id="i-device" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.3"/></symbol><symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol><symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v2M11 10v7M15 12v5M19 6v11"/></symbol><symbol id="i-user-cog" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21c.6-3.8 3.4-6 7-6 1.1 0 2.1.2 3 .6"/><circle cx="18" cy="17" r="2.5"/><path d="M18 13v1.5M18 19.5V21M14 17h1.5M20.5 17H22"/></symbol><symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9.5V21h16V9.5"/><path d="M2.5 9.5 4.5 3h15l2 6.5c0 1.6-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-.9-3-2.5z"/><path d="M9.5 21v-5h5v5"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></symbol><symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 1 5-3.3l-2.7 2.7.6 2.4 2.4.6 2.7-2.7a4 4 0 0 1-5.3 5L9 18.4a2.1 2.1 0 0 1-3-3z"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol><symbol id="i-coin" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></symbol><symbol id="i-shield-plus" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="M12 9v6M9 12h6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.6 3.3-5.5 6.5-5.5s5.8 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></symbol><symbol id="i-device" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.3"/></symbol><symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol><symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v2M11 10v7M15 12v5M19 6v11"/></symbol><symbol id="i-user-cog" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21c.6-3.8 3.4-6 7-6 1.1 0 2.1.2 3 .6"/><circle cx="18" cy="17" r="2.5"/><path d="M18 13v1.5M18 19.5V21M14 17h1.5M20.5 17H22"/></symbol><symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9.5V21h16V9.5"/><path d="M2.5 9.5 4.5 3h15l2 6.5c0 1.6-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-.9-3-2.5z"/><path d="M9.5 21v-5h5v5"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></symbol><symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 1 5-3.3l-2.7 2.7.6 2.4 2.4.6 2.7-2.7a4 4 0 0 1-5.3 5L9 18.4a2.1 2.1 0 0 1-3-3z"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol><symbol id="i-coin" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17.5h2"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v10.5H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol><symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="10" rx="1.5"/><rect x="16" y="4" width="5" height="13" rx="1.5"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.5 6h11v10h-11zM13.5 9.5h4l3 3.5v3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol><symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol><symbol id="i-bug" viewBox="0 0 24 24"><rect x="7" y="8" width="10" height="13" rx="5"/><path d="M9 8V6a3 3 0 0 1 6 0v2M3 13h4M17 13h4M4 7l3 3M20 7l-3 3M4 20l3-3M20 20l-3-3M12 12v9"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol></svg>
 
 <!-- ================= ĐĂNG NHẬP ================= -->
 <div class="login" id="loginView" hidden>
@@ -159,6 +228,7 @@ td b.mono{color:var(--acct)}
       <ul><li><svg class="i"><use href="#i-shield"/></svg>Bảo hành điện tử kèm mã QR</li><li><svg class="i"><use href="#i-wrench"/></svg>Theo dõi tiến độ sửa chữa theo thời gian thực</li><li><svg class="i"><use href="#i-bell"/></svg>Tự báo khách qua Email / SMS / Zalo</li></ul></div>
     <small style="opacity:.7">© Hệ thống quản lý bảo hành điện tử</small>
   </div>
+  <button class="btn ghost sm themeBtn" type="button" data-theme-toggle aria-label="Đổi giao diện sáng / tối" title="Chế độ sáng / tối" style="position:fixed;top:14px;right:14px;z-index:5"></button>
   <form id="loginForm">
     <div class="brand" style="padding:0 0 22px"><i></i><span><span id="loginShop">Bảo hành điện tử</span><small>Đăng nhập dành cho nhân viên</small></span></div>
     <h1>Chào mừng trở lại 👋</h1>
@@ -179,7 +249,7 @@ td b.mono{color:var(--acct)}
   <div>
     <div class="top">
       <div class="row"><button class="btn ghost sm menu-btn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button><b id="pageTitle"></b></div>
-      <div class="who"><div class="nm"><div class="avatar" id="meAv"></div><span><b id="meName"></b><small id="meRole"></small></span></div>
+      <div class="who"><button class="btn ghost sm themeBtn" type="button" data-theme-toggle aria-label="Đổi giao diện sáng / tối" title="Chế độ sáng / tối"></button><div class="nm"><div class="avatar" id="meAv"></div><span><b id="meName"></b><small id="meRole"></small></span></div>
         <button class="btn ghost sm" id="pwBtn">Đổi mật khẩu</button><button class="btn ghost sm" id="logoutBtn">Đăng xuất</button></div>
     </div>
     <main id="main"></main>
@@ -188,6 +258,7 @@ td b.mono{color:var(--acct)}
 
 <div class="modal" id="modal"><div class="card" id="modalBody"></div></div>
 <div class="modal narrow" id="modal2"><div class="card" id="modal2Body"></div></div>
+<div class="modal" id="modal3"><div class="card" id="modal3Body"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -271,14 +342,14 @@ const VIEWS = {};
 function nav() {
   const A = ['ADMIN'], AR = ['ADMIN','RECEPTION'], ALL = ['ADMIN','RECEPTION','TECHNICIAN'];
   return [
-    ['', [['tong-quan','Tổng quan',ALL],['tra-cuu','Tra cứu',ALL],['phieu','Phiếu bảo hành',ALL,'open'],['kich-hoat','Kích hoạt bảo hành',AR],['bao-hanh','Danh sách bảo hành',ALL],['yeu-cau','Yêu cầu online',ALL,'req']]],
+    ['', [['tong-quan','Tổng quan',ALL],['tra-cuu','Tra cứu',ALL],['phieu','Phiếu bảo hành',ALL,'open'],['kanban','Bảng công việc',ALL],['kich-hoat','Kích hoạt bảo hành',AR],['bao-hanh','Danh sách bảo hành',ALL],['yeu-cau','Yêu cầu online',ALL,'req'],['lich-hen','Lịch hẹn',ALL,'cal'],['tin-nhan','Tin nhắn khách',ALL,'msg']]],
     ['Danh mục', [['dm-customer','Khách hàng',ALL],['dm-product','Sản phẩm / Model',ALL],['dm-brand','Hãng sản xuất',ALL],['dm-service_center','Trung tâm BH hãng',ALL],['dm-category','Loại sản phẩm',ALL]]],
-    ['Kho', [['dm-part','Linh kiện',ALL,'low'],['the-kho','Thẻ kho',['ADMIN','TECHNICIAN']]]],
-    ['Quản trị', [['bao-cao','Báo cáo thống kê',A],['dm-user','Người dùng',A],['cai-dat','Thông tin cửa hàng',A],['thong-bao','Thông báo cho khách',AR,'ntf'],['sao-luu','Sao lưu dữ liệu',A],['nhat-ky','Nhật ký hệ thống',A]]]
+    ['Kho', [['dm-part','Linh kiện',ALL,'low'],['dat-hang','Đặt hàng linh kiện',['ADMIN','TECHNICIAN'],'po'],['dm-supplier','Nhà cung cấp',['ADMIN','TECHNICIAN']],['the-kho','Thẻ kho',['ADMIN','TECHNICIAN']]]],
+    ['Quản trị', [['bao-cao','Báo cáo thống kê',A],['kpi','KPI kỹ thuật viên',['ADMIN','TECHNICIAN']],['loi','Thống kê lỗi thường gặp',['ADMIN','TECHNICIAN']],['dm-user','Người dùng',A],['cai-dat','Thông tin cửa hàng',A],['thong-bao','Thông báo cho khách',AR,'ntf'],['sao-luu','Sao lưu dữ liệu',A],['nhat-ky','Nhật ký hệ thống',A]]]
   ].map(([g, items]) => [g, items.filter(i => i[2].includes(ME.role))]).filter(g => g[1].length);
 }
-const NAV_ICON = {'tong-quan':'home','tra-cuu':'search','phieu':'clipboard','kich-hoat':'shield-plus','bao-hanh':'shield','yeu-cau':'inbox',
-  'dm-customer':'users','dm-product':'device','dm-brand':'tag','dm-service_center':'building','dm-category':'grid','dm-part':'box','the-kho':'list',
+const NAV_ICON = {'tong-quan':'home','tra-cuu':'search','phieu':'clipboard','kanban':'board','kich-hoat':'shield-plus','bao-hanh':'shield','yeu-cau':'inbox','lich-hen':'calendar','tin-nhan':'chat',
+  'dm-customer':'users','dm-product':'device','dm-brand':'tag','dm-service_center':'building','dm-category':'grid','dm-part':'box','the-kho':'list','dat-hang':'truck','dm-supplier':'building','kpi':'trophy','loi':'bug',
   'bao-cao':'chart','dm-user':'user-cog','cai-dat':'store','thong-bao':'bell','sao-luu':'database','nhat-ky':'history'};
 const icon = (n, cls = '') => `<svg class="i ${cls}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 function renderSide() {
@@ -287,7 +358,17 @@ function renderSide() {
   markNav();
 }
 function markNav() { const v = location.hash.slice(1); $$('#side a').forEach(a => a.classList.toggle('on', a.dataset.v === v)); }
-async function refreshBadges() { try { const d = await api('/api/dashboard'); BADGES = {open: d.open_tickets, low: d.low_stock, req: d.new_requests, ntf: d.notify_failed}; renderSide(); } catch (e) {} }
+function paintThemeBtns() { const dark = document.documentElement.dataset.theme === 'dark';
+  $$('[data-theme-toggle]').forEach(b => { b.innerHTML = `<svg class="i"><use href="#i-${dark ? 'sun' : 'moon'}"/></svg>`; b.title = dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'; }); }
+document.addEventListener('click', e => { if (!e.target.closest('[data-theme-toggle]')) return;
+  const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('theme', t); } catch (err) {} paintThemeBtns(); if (location.hash === '#bao-cao' && ME) route(); });
+paintThemeBtns();
+let MODAL_CLOSED = null;
+new MutationObserver(() => { if (!$('#modal').classList.contains('open') && MODAL_CLOSED) { const f = MODAL_CLOSED; MODAL_CLOSED = null; f(); } })
+  .observe($('#modal'), {attributes: true, attributeFilter: ['class']});
+setInterval(() => { if (ME) refreshBadges(); }, 60000);
+async function refreshBadges() { try { const d = await api('/api/dashboard'); BADGES = {open: d.open_tickets, low: d.low_stock, req: d.new_requests, ntf: d.notify_failed, msg: d.unread_messages, cal: d.today_events, po: d.parts_to_order}; renderSide(); } catch (e) {} }
 $('#menuBtn').onclick = () => $('#side').classList.toggle('open');
 $('#side').addEventListener('click', e => { if (e.target.closest('a')) $('#side').classList.remove('open'); });
 function route() {
@@ -355,7 +436,7 @@ const FILTER = {phieu: 'OPEN', 'bao-hanh': ''};
 /* =================== TRA CỨU =================== */
 VIEWS['tra-cuu'] = () => {
   $('#main').innerHTML = `<h1>Tra cứu bảo hành</h1><p class="sub">Nhập Serial/IMEI, số điện thoại khách, mã bảo hành, mã phiếu hoặc số hóa đơn sửa chữa.</p>
-    <form class="row" id="lkF" style="max-width:720px"><input id="lkQ" style="flex:1;font-size:17px;min-height:50px" placeholder="vd: 356789104523871 hoặc 0903123456" autocomplete="off"><button class="btn acc" style="min-height:50px">Tra cứu</button></form>
+    <form class="row" id="lkF" style="max-width:720px"><input id="lkQ" style="flex:1;font-size:17px;min-height:50px" placeholder="vd: 356789104523871 hoặc 0903123456" autocomplete="off">${scanBtn('#lkQ', true)}<button class="btn acc" style="min-height:50px">Tra cứu</button></form>
     <div id="lkR" style="margin-top:18px"></div>`;
   $('#lkQ').focus();
   $('#lkF').onsubmit = async e => {
@@ -446,7 +527,7 @@ VIEWS['phieu'] = async () => {
 async function openReceive(serial) {
   const techs = await api('/api/technicians');
   const b = openModal(`<h2>Tiếp nhận máy bảo hành</h2><form id="rcF">
-    <div class="f"><label class="req" for="rs">Số Serial / IMEI</label><input id="rs" name="serial" required autocomplete="off" value="${h(serial || '')}"><div id="rsChk"></div></div>
+    <div class="f"><label class="req" for="rs">Số Serial / IMEI</label><div class="inScan"><input id="rs" name="serial" required autocomplete="off" value="${h(serial || '')}">${scanBtn('#rs')}</div><div id="rsChk"></div></div>
     <div class="f"><label class="req" for="ri">Lỗi khách báo</label><textarea id="ri" name="issue" required></textarea></div>
     <div class="cols"><div class="f"><label for="ra">Phụ kiện kèm theo</label><input id="ra" name="accessories" placeholder="Máy, sạc, hộp…"></div>
       <div class="f"><label for="rc">Tình trạng ngoại quan</label><input id="rc" name="condition" placeholder="Trầy, móp…"></div>
@@ -493,7 +574,7 @@ async function openTicket(id) {
       <div><span>Ngoại quan</span><b>${h(t.condition_note || '—')}</b></div>${t.service_center_name ? `<div><span>Gửi hãng</span><b>${h(t.service_center_name)}</b></div>` : ''}
       ${t.invoice_no ? `<div><span>Hóa đơn sửa chữa</span><b>${h(t.invoice_no)}</b></div>` : ''}</div>
     <p style="margin:6px 0"><span class="small">Lỗi khách báo</span><br>${h(t.issue)}</p>
-    ${t.review ? `<div class="box" style="background:#fffdf6;border-color:#fde7b0;margin-top:8px"><div class="row" style="justify-content:space-between"><b>Khách đánh giá</b>${starStr(t.review.stars)}</div>${t.review.comment ? `<div style="margin-top:4px">${h(t.review.comment)}</div>` : ''}<div class="small">${fdt(t.review.updated_at || t.review.created_at)}</div></div>` : ''}
+    ${t.review ? `<div class="box" style="background:var(--warns);border-color:#fde7b0;margin-top:8px"><div class="row" style="justify-content:space-between"><b>Khách đánh giá</b>${starStr(t.review.stars)}</div>${t.review.comment ? `<div style="margin-top:4px">${h(t.review.comment)}</div>` : ''}<div class="small">${fdt(t.review.updated_at || t.review.created_at)}</div></div>` : ''}
     ${t.diagnosis ? `<p style="margin:6px 0"><span class="small">Kết luận kỹ thuật</span><br>${h(t.diagnosis)}</p>` : ''}
 
     <div class="box"><div class="row" style="justify-content:space-between"><h3>Chi phí</h3><span class="total">${money(t.total)}</span></div>
@@ -512,8 +593,14 @@ async function openTicket(id) {
       <button class="btn acc">Lưu cập nhật</button></form>` : ''}
     ${a.assign ? `<form class="box row" id="asF"><label for="asT" style="margin:0">Phân công kỹ thuật viên</label><select id="asT" name="technician_id" style="flex:1 1 200px"></select><button class="btn sm">Phân công</button></form>` : ''}
     ${a.pay ? `<form class="box" id="pyF"><h3>Thu tiền & trả máy</h3><div class="row" style="justify-content:space-between"><span>Số tiền khách phải trả</span><span class="total">${money(t.total)}</span></div>
-      ${t.total > 0 ? `<div class="f"><label class="req" for="pyM">Hình thức thanh toán</label><select id="pyM" name="method" required><option value="">— Chọn —</option>${Object.entries(META.pay_methods).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>` : '<p class="small">Không thu phí.</p>'}
+      ${t.total > 0 ? `<div class="f"><label class="req" for="pyM">Hình thức thanh toán</label><select id="pyM" name="method" required><option value="">— Chọn —</option>${Object.entries(META.pay_methods).map(([k, v]) => `<option value="${k}" ${t.payment_claim && t.payment_claim.method === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>` : '<p class="small">Không thu phí.</p>'}
+      ${t.payment_claim ? `<div class="hint" style="margin-top:8px">💬 Khách báo (${fdt(t.payment_claim.time)}): ${h(t.payment_claim.text)}</div>` : ''}
+      <div id="vqr"></div>
       <div class="f"><label for="pyN">Ghi chú</label><input id="pyN" name="note"></div><button class="btn acc">${t.total > 0 ? 'Thu tiền & trả máy' : 'Trả máy cho khách'}</button></form>` : ''}
+
+    <div class="box"><div class="row" style="justify-content:space-between"><h3 style="margin:0">💬 Trao đổi với khách</h3><span class="small">Khách nhắn từ cổng tra cứu · trả lời sẽ được báo qua email/SMS nếu bật</span></div>
+      <div class="chat" id="chT"><span class="small">Đang tải…</span></div>
+      <form class="chatf" id="chF"><textarea id="chB" placeholder="Nhập tin trả lời khách… (Ctrl+Enter để gửi)" maxlength="1000"></textarea><button class="btn acc">Gửi</button></form></div>
 
     <div class="box"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Ảnh tình trạng máy</h3>
       ${a.photos ? `<label class="btn ghost sm upload">+ Thêm ảnh<input type="file" id="phI" accept="image/jpeg,image/png,image/webp" multiple></label>` : ''}</div>
@@ -525,6 +612,22 @@ async function openTicket(id) {
       ${['READY','REJECTED','RETURNED'].includes(t.status) ? '<button class="btn ghost sm" data-pr="tra-may">In phiếu trả máy / hóa đơn</button>' : ''}</div>`);
 
   $$('[data-pr]', b).forEach(x => x.onclick = () => printDoc(x.dataset.pr, id));
+  if (a.pay && t.total > 0) api(`/api/tickets/${id}/vietqr`).then(q => { const v = $('#vqr', b); if (!v) return;
+    v.innerHTML = q.available ? `<div class="row" style="gap:14px;align-items:center;border:1px dashed var(--bd2);border-radius:12px;padding:10px;margin:10px 0;background:var(--card)">
+      <div style="width:150px;flex:none">${q.svg}</div><div><b>Khách chuyển khoản: quét mã VietQR</b><div class="small">${h(q.bank)} · STK <b>${h(q.account)}</b>${q.holder ? ' · ' + h(q.holder) : ''}</div>
+      <div class="small">Số tiền <b>${money(q.amount)}</b> · Nội dung <b>${h(q.info)}</b></div><div class="small">Nhận được tiền thì chọn hình thức "Chuyển khoản" rồi bấm Thu tiền.</div></div></div>`
+      : `<p class="small">VietQR: ${h(q.reason)}${is('ADMIN') && q.reason.includes('chưa cài') ? ' – vào <a href="#cai-dat">Thông tin cửa hàng</a> để nhập.' : ''}</p>`; }).catch(() => {});
+  const drawChat = list => { const box = $('#chT', b); if (!box) return;
+    box.innerHTML = list.length ? list.map(m => `<div class="bub ${m.sender === 'STAFF' ? 'me' : 'cu'}">${h(m.body)}<small>${m.sender === 'STAFF' ? h(m.staff_name || 'Cửa hàng') : h(t.customer_name)} · ${fdt(m.created_at)}</small></div>`).join('')
+      : '<span class="small">Chưa có tin nhắn. Bạn có thể nhắn trước cho khách (ví dụ hỏi thêm về lỗi máy).</span>';
+    box.scrollTop = box.scrollHeight; };
+  api(`/api/tickets/${id}/messages`).then(l => { drawChat(l); refreshBadges(); }).catch(() => {});
+  clearInterval(window.CHAT_POLL);
+  window.CHAT_POLL = setInterval(() => { if (!$('#modal').classList.contains('open') || !$('#chT', b)) return clearInterval(window.CHAT_POLL);
+    api(`/api/tickets/${id}/messages`).then(drawChat).catch(() => {}); }, 15000);
+  $('#chB', b).onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) $('#chF', b).requestSubmit(); };
+  $('#chF', b).onsubmit = async e => { e.preventDefault(); const ta = $('#chB', b); if (!ta.value.trim()) return;
+    try { drawChat(await post(`/api/tickets/${id}/messages`, {body: ta.value})); ta.value = ''; toast('Đã gửi cho khách'); } catch (err) { fail(err); } };
   const act = async (p, msg) => { try { await p; await reload(); if (msg) toast(msg); } catch (e) { fail(e); } };
   if (a.edit_cost) {
     options('part', true).then(list => { const sel = $('#apP', b); if (sel) sel.innerHTML = opts(list, '', '— Chọn linh kiện —'); });
@@ -593,7 +696,7 @@ VIEWS['kich-hoat'] = async () => {
       <h3 style="margin-top:0">Sản phẩm</h3>
       <div class="f"><label class="req" for="ap">Sản phẩm / Model</label><select id="ap" name="product_id" required><option value="">— Chọn sản phẩm —</option>
         ${products.map(p => `<option value="${p.id}" data-m="${p.default_months}">${h(p.brand_name)} · ${h(p.name)} (${h(p.model_code)})</option>`).join('')}</select></div>
-      <div class="cols"><div class="f"><label class="req" for="as">Số Serial / IMEI</label><input id="as" name="serial" required autocomplete="off"></div>
+      <div class="cols"><div class="f"><label class="req" for="as">Số Serial / IMEI</label><div class="inScan"><input id="as" name="serial" required autocomplete="off">${scanBtn('#as')}</div></div>
         <div class="f"><label for="ai">Số hóa đơn bán</label><input id="ai" name="invoice_no"></div>
         <div class="f"><label class="req" for="ad">Ngày mua</label><input id="ad" name="purchase_date" type="date" value="${today()}" max="${today()}" required></div>
         <div class="f"><label for="am">Thời hạn bảo hành (tháng)</label><input id="am" name="months" type="number" min="1" max="120" placeholder="Theo sản phẩm"></div></div>
@@ -667,6 +770,7 @@ VIEWS.catalog = async key => {
   const isPart = key === 'part';
   $('#main').innerHTML = `<div class="head"><div><h1>${h(d.title)}</h1>${d.hint ? `<p class="sub" style="margin:0">${h(d.hint)}</p>` : ''}</div>
     <div class="row">${isPart && is('ADMIN','TECHNICIAN') ? '<a class="btn ghost" href="#the-kho" style="text-decoration:none;display:inline-flex;align-items:center">Thẻ kho</a>' : ''}
+    ${d.canWrite && ['customer','product','part'].includes(key) ? `<button class="btn ghost" id="cImp">${icon('upload')}&nbsp;Nhập Excel</button>` : ''}
     ${d.canWrite ? '<button class="btn acc" id="cAdd">+ Thêm mới</button>' : ''}</div></div>
     <input id="cQ" placeholder="Tìm kiếm…" style="max-width:420px;margin-bottom:10px">
     <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr>${d.columns.map(c => `<th class="${['money','int'].includes(c.format) ? 'r' : ''}">${h(c.label)}</th>`).join('')}${isPart && is('ADMIN') ? '<th></th>' : ''}</tr></thead><tbody id="cB"></tbody></table></div></div>
@@ -683,6 +787,7 @@ VIEWS.catalog = async key => {
   };
   $('#cQ').oninput = debounce(() => load().catch(fail));
   if ($('#cAdd')) $('#cAdd').onclick = () => editEntity(key, 0, load);
+  if ($('#cImp')) $('#cImp').onclick = () => importDialog(key, () => load().catch(fail));
   await load();
 };
 async function editEntity(key, id, after) {
@@ -898,6 +1003,404 @@ VIEWS['sao-luu'] = async () => {
   await load();
 };
 
+/* =================== ĐẶT HÀNG LINH KIỆN =================== */
+const PO_PILL = {DRAFT: '', ORDERED: 'warn', RECEIVED: 'ok', CANCELLED: 'bad'};
+let PO_FILTER = '';
+VIEWS['dat-hang'] = async () => {
+  const admin = is('ADMIN');
+  $('#main').innerHTML = `<div class="head"><div><h1>Đặt hàng linh kiện</h1><p class="sub" style="margin:0">Linh kiện dưới mức tồn tối thiểu được gợi ý sẵn số lượng. Nhận hàng sẽ tự cộng tồn kho và ghi thẻ kho.</p></div></div>
+    <div class="card" id="poS"><div class="empty">Đang tải…</div></div>
+    <div class="head" style="margin-top:20px"><h2 style="margin:0">Đơn đặt hàng</h2><div class="chips" style="margin:0">${[['', 'Tất cả'], ...Object.entries(META.po_status || {})].map(([k, v]) => `<button class="chip ${PO_FILTER === k ? 'on' : ''}" data-pf="${k}">${h(v)}</button>`).join('')}</div></div>
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã đơn</th><th>Nhà cung cấp</th><th>Ngày lập</th><th class="r">Số dòng</th><th class="r">Tổng tiền</th><th>Trạng thái</th></tr></thead><tbody id="poL"></tbody></table></div></div>`;
+  $$('[data-pf]').forEach(c => c.onclick = () => { PO_FILTER = c.dataset.pf; VIEWS['dat-hang'](); });
+  const [sug, list, sups] = await Promise.all([api('/api/purchase/suggest'), api('/api/purchase?status=' + PO_FILTER), options('supplier')]);
+  if (!$('#poS')) return;
+  $('#poS').innerHTML = `<div class="row" style="justify-content:space-between"><h2 style="margin:0">Cần đặt thêm (${sug.length})</h2>
+      ${sug.length ? '' : '<span class="pill ok">Kho đủ hàng</span>'}</div>
+    ${sug.length ? `<form id="poF"><div class="tbl"><table class="stack"><thead><tr><th></th><th>Linh kiện</th><th class="r">Tồn / tối thiểu</th><th class="r">Đang về</th><th class="r">Số đặt</th><th class="r">Giá nhập</th></tr></thead><tbody>
+      ${sug.map(p => `<tr><td data-l="Chọn"><input type="checkbox" name="pick" value="${p.id}" ${p.suggest_qty > 0 && admin ? 'checked' : ''} ${admin ? '' : 'disabled'}></td>
+        <td data-l="Linh kiện"><b>${h(p.name)}</b><div class="small">${h(p.code)}${p.brand_name ? ' · ' + h(p.brand_name) : ''}</div></td>
+        <td class="r" data-l="Tồn / tối thiểu"><b style="color:${p.stock === 0 ? 'var(--bad)' : 'var(--warn)'}">${p.stock}</b> / ${p.min_stock} ${h(p.unit)}</td>
+        <td class="r" data-l="Đang về">${p.incoming || '–'}</td>
+        <td class="r" data-l="Số đặt"><input type="number" min="0" max="100000" value="${p.suggest_qty}" data-q="${p.id}" style="width:90px;text-align:right" ${admin ? '' : 'disabled'}></td>
+        <td class="r" data-l="Giá nhập"><input type="number" min="0" step="1000" value="${p.cost_price}" data-c="${p.id}" style="width:120px;text-align:right" ${admin ? '' : 'disabled'}></td></tr>`).join('')}</tbody></table></div>
+      ${admin ? `<div class="cols" style="margin-top:10px"><div class="f"><label class="req" for="poSup">Nhà cung cấp</label><select id="poSup" required>${opts(sups, '', '— Chọn nhà cung cấp —')}</select>
+          ${sups.length ? '' : '<div class="small">Chưa có nhà cung cấp – thêm ở <a href="#dm-supplier">Nhà cung cấp</a>.</div>'}</div>
+        <div class="f"><label for="poExp">Ngày cần hàng</label><input id="poExp" type="date" min="${today()}"></div></div>
+        <div class="f"><label for="poNote">Ghi chú cho nhà cung cấp</label><input id="poNote" placeholder="vd: giao giờ hành chính, kèm hóa đơn VAT"></div>
+        <div class="row"><button class="btn acc">Tạo đơn đặt hàng</button><span class="small" id="poSum"></span></div>` : '<p class="small">Chỉ quản lý được tạo đơn đặt hàng.</p>'}</form>`
+      : '<p class="small" style="margin:6px 0 0">Không có linh kiện nào dưới mức tồn tối thiểu (hoặc đã có đơn đang về).</p>'}`;
+  const sumUp = () => { if (!$('#poSum')) return; let n = 0, t = 0;
+    $$('input[name=pick]:checked').forEach(c => { const q = +$(`[data-q="${c.value}"]`).value || 0, cost = +$(`[data-c="${c.value}"]`).value || 0; if (q > 0) { n++; t += q * cost; } });
+    $('#poSum').textContent = `${n} linh kiện · tạm tính ${money(t)}`; };
+  $$('#poS input').forEach(i => i.oninput = sumUp); sumUp();
+  if ($('#poF') && admin) $('#poF').onsubmit = async e => { e.preventDefault();
+    const lines = $$('input[name=pick]:checked').map(c => ({part_id: +c.value, qty: +$(`[data-q="${c.value}"]`).value || 0, unit_cost: +$(`[data-c="${c.value}"]`).value || 0})).filter(l => l.qty > 0);
+    try { const po = await post('/api/purchase', {supplier_id: +$('#poSup').value, expected_date: $('#poExp').value, note: $('#poNote').value, lines});
+      toast('Đã tạo đơn ' + po.code); refreshBadges(); await VIEWS['dat-hang'](); poDialog(po.id); } catch (err) { fail(err); } };
+  $('#poL').innerHTML = list.length ? list.map(o => `<tr class="click" data-po="${o.id}"><td data-l="Mã đơn"><b class="mono">${h(o.code)}</b></td><td data-l="Nhà cung cấp">${h(o.supplier_name)}</td>
+      <td data-l="Ngày lập">${fd(o.created_at)}</td><td class="r" data-l="Số dòng">${o.lines}</td><td class="r" data-l="Tổng tiền">${money(o.total)}</td>
+      <td data-l="Trạng thái"><span class="pill ${PO_PILL[o.status]}">${h(o.status_label)}</span>${o.status === 'ORDERED' && o.expected_date ? `<div class="small">Dự kiến ${fd(o.expected_date)}</div>` : ''}</td></tr>`).join('')
+    : '<tr><td colspan="6" class="empty">Chưa có đơn đặt hàng.</td></tr>';
+  $$('[data-po]').forEach(r => r.onclick = () => poDialog(+r.dataset.po));
+};
+async function poDialog(id) {
+  let o; try { o = await api('/api/purchase/' + id); } catch (e) { return fail(e); }
+  const admin = is('ADMIN'), open = ['DRAFT', 'ORDERED'].includes(o.status);
+  const b = openModal(`<div class="small">ĐƠN ĐẶT HÀNG</div><h2 style="font-size:24px;margin:2px 0 6px">${h(o.code)}</h2>
+    <div class="row"><span class="pill ${PO_PILL[o.status]}">${h(o.status_label)}</span></div>
+    <div class="kv"><div><span>Nhà cung cấp</span><b>${h(o.supplier_name)}</b></div><div><span>Liên hệ</span><b>${h(o.supplier_contact || '–')} · ${h(o.supplier_phone || '')}</b></div>
+      <div><span>Ngày lập</span><b>${fdt(o.created_at)}</b></div><div><span>Ngày cần hàng</span><b>${o.expected_date ? fd(o.expected_date) : '–'}</b></div>
+      ${o.ordered_at ? `<div><span>Đã đặt</span><b>${fdt(o.ordered_at)}</b></div>` : ''}${o.received_at ? `<div><span>Đã nhận</span><b>${fdt(o.received_at)} · ${h(o.received_by_name)}</b></div>` : ''}</div>
+    ${o.note ? `<div class="hint">${h(o.note)}</div>` : ''}
+    <form id="rcF"><div class="tbl"><table><thead><tr><th>Linh kiện</th><th class="r">Đặt</th><th class="r">Đơn giá</th><th class="r">Thành tiền</th><th class="r">${o.status === 'RECEIVED' ? 'Đã nhận' : open && admin ? 'Thực nhận' : 'Tồn hiện tại'}</th></tr></thead><tbody>
+      ${o.lines.map(l => `<tr><td>${h(l.name)}<div class="small">${h(l.code)}</div></td><td class="r">${l.qty} ${h(l.unit)}</td><td class="r">${money(l.unit_cost)}</td><td class="r">${money(l.amount)}</td>
+        <td class="r">${o.status === 'RECEIVED' ? l.received_qty : open && admin ? `<input type="number" min="0" value="${l.qty}" data-rl="${l.id}" style="width:80px;text-align:right">` : l.stock}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="3" class="r"><b>Tổng cộng</b></td><td class="r"><b>${money(o.total)}</b></td><td></td></tr></tfoot></table></div>
+    <div class="row" style="margin-top:12px">
+      <button type="button" class="btn ghost" id="poPr">In / Lưu PDF gửi nhà cung cấp</button>
+      ${admin && o.status === 'DRAFT' ? '<button type="button" class="btn ghost" id="poOrd">Đánh dấu đã gửi đơn</button>' : ''}
+      ${admin && open ? '<button class="btn acc">Nhận hàng & nhập kho</button><button type="button" class="btn danger" id="poCx">Hủy đơn</button>' : ''}</div></form>`);
+  const after = async (p, msg) => { try { await p; toast(msg); closeModal(); refreshBadges(); if (location.hash === '#dat-hang') VIEWS['dat-hang'](); } catch (e) { fail(e); } };
+  $('#poPr', b).onclick = () => printDoc('dat-hang', id);
+  if ($('#poOrd', b)) $('#poOrd', b).onclick = () => after(post(`/api/purchase/${id}/order`), 'Đã chuyển sang "Đã đặt – chờ hàng"');
+  if ($('#poCx', b)) $('#poCx', b).onclick = e => { const x = e.target; if (x.dataset.sure !== '1') { x.dataset.sure = '1'; x.textContent = 'Bấm lần nữa để hủy'; return; }
+    after(post(`/api/purchase/${id}/cancel`, {note: ''}), 'Đã hủy đơn'); };
+  $('#rcF', b).onsubmit = e => { e.preventDefault(); if (!admin || !open) return;
+    const lines = $$('[data-rl]', b).map(i => ({id: +i.dataset.rl, received_qty: +i.value || 0}));
+    after(post(`/api/purchase/${id}/receive`, {lines}), 'Đã nhận hàng – tồn kho đã được cộng'); };
+}
+
+/* =================== KPI KỸ THUẬT VIÊN =================== */
+const KPI = {from: '', to: ''};
+VIEWS['kpi'] = async () => {
+  const now = new Date(), y = now.getFullYear(), mo = now.getMonth();
+  if (!KPI.from) { KPI.from = isoD(new Date(y, mo, 1)); KPI.to = isoD(now); }
+  $('#main').innerHTML = `<div class="head"><div><h1>KPI kỹ thuật viên</h1><p class="sub" style="margin:0">Xếp hạng theo số phiếu hoàn thành, thời gian sửa, tỷ lệ đúng hẹn và điểm đánh giá của khách.</p></div>
+    <div class="row"><div class="chips" style="margin:0"><button class="chip" data-kp="m">Tháng này</button><button class="chip" data-kp="pm">Tháng trước</button><button class="chip" data-kp="q">3 tháng</button><button class="chip" data-kp="y">Năm nay</button></div>
+      <input type="date" id="kF" value="${KPI.from}" style="width:auto"><input type="date" id="kT" value="${KPI.to}" style="width:auto"><button class="btn ghost sm" id="kGo">Xem</button></div></div>
+    <div id="kB"><div class="empty">Đang tải…</div></div>`;
+  const set = (f, t) => { KPI.from = isoD(f); KPI.to = isoD(t); VIEWS['kpi'](); };
+  $$('[data-kp]').forEach(c => c.onclick = () => ({m: () => set(new Date(y, mo, 1), now), pm: () => set(new Date(y, mo - 1, 1), new Date(y, mo, 0)),
+    q: () => set(new Date(y, mo - 2, 1), now), y: () => set(new Date(y, 0, 1), now)})[c.dataset.kp]());
+  $('#kGo').onclick = () => { KPI.from = $('#kF').value; KPI.to = $('#kT').value; VIEWS['kpi'](); };
+  let d; try { d = await api(`/api/reports/kpi?from=${KPI.from}&to=${KPI.to}`); } catch (e) { return fail(e); }
+  if (!$('#kB')) return;
+  const medal = r => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : '#' + r;
+  const top = d.rows.slice(0, 3);
+  $('#kB').innerHTML = `<div class="grid tiles" style="margin-bottom:14px">${top.map(r => `<div class="card tile" style="cursor:default;${r.me ? 'border-color:var(--acc)' : ''}"><div class="ic ${r.rank === 1 ? 'warn' : r.rank === 2 ? '' : 'vio'}" style="font-size:24px">${medal(r.rank)}</div>
+      <div><b class="long">${h(r.full_name)}</b><span>${r.score} điểm · ${r.done} phiếu · ${r.reviews ? r.rating.toFixed(1) + ' ★' : 'chưa có đánh giá'}</span></div></div>`).join('')}</div>
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Hạng</th><th>Kỹ thuật viên</th><th class="r">Phiếu hoàn thành</th><th class="r">Đang xử lý</th><th class="r">TG sửa TB</th><th class="r">Đúng hẹn</th><th class="r">Đánh giá</th><th class="r">Doanh thu</th><th class="r">Hoa hồng</th><th class="r">Điểm</th></tr></thead><tbody>
+      ${d.rows.map(r => `<tr style="${r.me ? 'background:var(--accs)' : ''}"><td data-l="Hạng" style="font-size:18px">${medal(r.rank)}</td><td data-l="Kỹ thuật viên"><b>${h(r.full_name)}</b>${r.me ? ' <span class="pill acc">Bạn</span>' : ''}</td>
+        <td class="r" data-l="Hoàn thành"><b>${r.done}</b></td><td class="r" data-l="Đang xử lý">${r.in_progress}</td><td class="r" data-l="TG sửa TB">${r.done ? r.avg_days.toFixed(1) + ' ngày' : '–'}</td>
+        <td class="r" data-l="Đúng hẹn">${r.done ? `<span style="color:${r.on_time_pct >= 80 ? 'var(--ok)' : r.on_time_pct >= 50 ? 'var(--warn)' : 'var(--bad)'}">${r.on_time_pct}%</span>` : '–'}</td>
+        <td class="r" data-l="Đánh giá">${r.reviews ? `${starStr(Math.round(r.rating))} <b>${r.rating.toFixed(1)}</b> <span class="small">(${r.reviews})</span>` : '–'}</td>
+        <td class="r" data-l="Doanh thu">${r.revenue == null ? '<span class="small">ẩn</span>' : money(r.revenue)}</td><td class="r" data-l="Hoa hồng">${r.commission == null ? '<span class="small">ẩn</span>' : `<b>${money(r.commission)}</b>`}</td>
+        <td class="r" data-l="Điểm"><b>${r.score}</b></td></tr>`).join('') || '<tr><td colspan="10" class="empty">Chưa có kỹ thuật viên.</td></tr>'}</tbody></table></div></div>
+    <div class="hint" style="margin-top:12px"><b>Cách tính.</b> Hoa hồng = ${money(d.bonus_per_ticket)} × số phiếu hoàn thành + ${d.rate_pct}% tiền công các phiếu có phí đã thu.
+      Điểm = phiếu × 10 + điểm đánh giá × 10 + % đúng hẹn × 0,3 − số ngày sửa TB × 2. Thời gian sửa tính từ lúc nhận máy tới khi sửa xong.
+      ${d.admin ? 'Đổi mức hoa hồng ở <a href="#cai-dat">Thông tin cửa hàng</a>.' : 'Bạn chỉ xem được doanh thu và hoa hồng của chính mình.'}</div>`;
+};
+
+/* =================== QUÉT MÃ VẠCH / IMEI =================== */
+const scanBtn = (sel, submit) => `<button type="button" class="btn ghost scanB" data-scan="${sel}"${submit ? ' data-scan-submit="1"' : ''} title="Quét mã vạch / IMEI bằng camera">${icon('scan')}<span>Quét</span></button>`;
+document.addEventListener('click', e => { const b = e.target.closest('[data-scan]'); if (b) { e.preventDefault(); openScanner($(b.dataset.scan), !!b.dataset.scanSubmit); } });
+const SCAN = {stream: null, timer: null, poll: null, token: null, busy: false, codes: [], done: false};
+function scanStop() {
+  clearInterval(SCAN.timer); clearInterval(SCAN.poll); SCAN.timer = SCAN.poll = null;
+  if (SCAN.stream) SCAN.stream.getTracks().forEach(t => t.stop()); SCAN.stream = null;
+  if (SCAN.token) { api('/api/scan/session/' + SCAN.token, {method: 'DELETE'}).catch(() => {}); SCAN.token = null; }
+}
+new MutationObserver(() => { if (!$('#modal3').classList.contains('open')) scanStop(); }).observe($('#modal3'), {attributes: true, attributeFilter: ['class']});
+/** Thu nhỏ ảnh (tối đa 1800px) rồi gửi lên máy chủ đọc mã. */
+async function shrinkJpeg(src, max = 1800) {
+  const w = src.videoWidth || src.naturalWidth || src.width, hh = src.videoHeight || src.naturalHeight || src.height;
+  const s = Math.min(1, max / Math.max(w, hh)), c = document.createElement('canvas');
+  c.width = Math.round(w * s); c.height = Math.round(hh * s); c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
+}
+async function decodeBlob(blob) {
+  const res = await fetch('/api/scan/decode', {method: 'POST', credentials: 'same-origin', headers: {'X-App': '1', 'Content-Type': 'image/jpeg'}, body: blob});
+  const d = await res.json().catch(() => ({error: 'Lỗi máy chủ'}));
+  if (!res.ok) throw new Error(d.error || 'Lỗi ' + res.status);
+  return d.codes || [];
+}
+function openScanner(target, submit) {
+  scanStop(); SCAN.codes = []; SCAN.done = false;
+  const cam = window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+  const b = openModal(`<h2>Quét mã vạch / IMEI</h2>
+    <p class="sub">Đọc được Code 128, Code 39 (serial, IMEI) và EAN-13. Chụp gần, đủ sáng, để mã vạch nằm ngang và chiếm phần lớn khung hình.</p>
+    <div id="scR"></div>
+    <div class="scanGrid">
+      <div class="scanBox"><h3>${icon('device')} Dùng điện thoại</h3>
+        <p class="small">Mở camera điện thoại (cùng mạng Wi-Fi với máy này), quét mã QR bên dưới rồi chụp tem mã vạch. Kết quả tự hiện ở đây.</p>
+        <div id="scQ" class="scanQr"><div class="empty" style="padding:20px">Đang tạo mã…</div></div><div class="small" id="scQs"></div></div>
+      <div class="scanBox"><h3>${icon('scan')} Camera hoặc ảnh trên máy này</h3>
+        ${cam ? `<button type="button" class="btn ghost" id="scCam">Bật camera</button><div class="scanCam" hidden><video id="scV" playsinline muted></video><i></i></div>`
+          : `<p class="small">Trình duyệt chỉ cho bật camera khi mở bằng <b>http://localhost</b> hoặc https. Hãy dùng điện thoại hoặc chọn ảnh.</p>`}
+        <label class="btn ghost" style="margin-top:8px;display:inline-flex">Chọn ảnh có mã vạch<input type="file" accept="image/*" id="scF" hidden></label>
+        <div class="small" id="scS" style="margin-top:6px"></div></div>
+    </div>`, 'modal3');
+  const pick = code => {
+    if (!target) return;
+    target.value = code; target.dispatchEvent(new Event('input', {bubbles: true})); target.dispatchEvent(new Event('change', {bubbles: true}));
+    closeModal('modal3'); target.focus(); toast('Đã điền ' + code);
+    if (submit && target.form) target.form.requestSubmit();
+  };
+  const add = (codes, auto) => {
+    let fresh = 0;
+    for (const c of codes) if (!SCAN.codes.some(x => x.text === c.text)) { SCAN.codes.push(c); fresh++; }
+    $('#scR', b).innerHTML = SCAN.codes.length ? `<div class="hint ok" style="margin-bottom:12px"><b>Đã đọc được ${SCAN.codes.length} mã</b> – bấm vào mã cần dùng:
+      <div class="codeList">${SCAN.codes.map(c => `<button type="button" class="codeB" data-code="${h(c.text)}"><b>${h(c.text)}</b><small>${h(c.kind)} · ${h(c.format)}</small></button>`).join('')}</div></div>` : '';
+    $$('[data-code]', b).forEach(x => x.onclick = () => pick(x.dataset.code));
+    if (auto && fresh && SCAN.codes.length === 1 && !SCAN.done) { SCAN.done = true; setTimeout(() => pick(SCAN.codes[0].text), 450); }
+    return fresh;
+  };
+  // Điện thoại làm máy quét
+  post('/api/scan/session').then(s => {
+    if (!$('#scQ', b)) return;
+    SCAN.token = s.token;
+    $('#scQ', b).innerHTML = s.qr_svg;
+    $('#scQs', b).innerHTML = (s.url.includes('localhost') ? '<span style="color:var(--bad)">Máy này chưa kết nối mạng LAN – điện thoại sẽ không mở được. </span>' : '')
+      + `<a href="${h(s.url)}" target="_blank" rel="noopener">${h(s.url.replace(/^https?:\/\//, '').slice(0, 34))}…</a>`;
+    let since = 0;
+    SCAN.poll = setInterval(async () => {
+      if (!SCAN.token) return;
+      try { const p = await api(`/api/scan/session/${SCAN.token}?since=${since}`); since = p.total;
+        if (p.phone_seen && $('#scQs', b) && !$('#scQs', b).dataset.seen) { $('#scQs', b).dataset.seen = 1; $('#scQs', b).innerHTML = '<b style="color:var(--ok)">✓ Điện thoại đã kết nối – hãy chụp mã vạch.</b>'; }
+        if (p.codes.length) add(p.codes, true);
+      } catch (e) { clearInterval(SCAN.poll); if ($('#scQs', b)) $('#scQs', b).textContent = e.message; }
+    }, 1500);
+  }).catch(e => { if ($('#scQ', b)) $('#scQ', b).innerHTML = `<div class="empty">${h(e.message)}</div>`; });
+  // Chọn ảnh
+  $('#scF', b).onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    $('#scS', b).textContent = 'Đang đọc ảnh…';
+    try {
+      const img = new Image(); img.src = URL.createObjectURL(f); await img.decode();
+      const codes = await decodeBlob(await shrinkJpeg(img)); URL.revokeObjectURL(img.src);
+      $('#scS', b).textContent = codes.length ? '' : 'Không thấy mã vạch trong ảnh. Hãy chụp gần hơn, đủ sáng, mã nằm ngang.';
+      add(codes, true);
+    } catch (err) { $('#scS', b).textContent = err.message; }
+    e.target.value = '';
+  };
+  // Camera trực tiếp (localhost / https)
+  if ($('#scCam', b)) $('#scCam', b).onclick = async () => {
+    try {
+      SCAN.stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment', width: {ideal: 1920}, height: {ideal: 1080}}, audio: false});
+    } catch (err) { $('#scS', b).textContent = 'Không bật được camera: ' + (err.name === 'NotAllowedError' ? 'bạn chưa cho phép truy cập camera' : err.message); return; }
+    const v = $('#scV', b); v.srcObject = SCAN.stream; await v.play(); $('.scanCam', b).hidden = false; $('#scCam', b).hidden = true;
+    $('#scS', b).textContent = 'Đưa mã vạch vào giữa khung…';
+    SCAN.timer = setInterval(async () => {
+      if (SCAN.busy || !v.videoWidth) return; SCAN.busy = true;
+      try { const codes = await decodeBlob(await shrinkJpeg(v, 1600)); if (codes.length) { $('#scS', b).textContent = ''; add(codes, true); } }
+      catch (err) { $('#scS', b).textContent = err.message; }
+      finally { SCAN.busy = false; }
+    }, 700);
+  };
+}
+
+/* =================== NHẬP EXCEL =================== */
+async function importDialog(key, after) {
+  const d = entity(key);
+  const b = openModal(`<h2>Nhập ${h(d.title.toLowerCase())} từ Excel</h2>
+    <p class="sub">Dòng đầu là tiêu đề cột. Bản ghi đã có (trùng ${key === 'customer' ? 'số điện thoại' : key === 'product' ? 'mã model' : 'mã linh kiện'}) sẽ được cập nhật, ô để trống giữ giá trị cũ.
+    ${key === 'product' ? 'Hãng / loại chưa có sẽ được tạo mới.' : ''}${key === 'part' ? 'Tồn kho chỉ áp dụng cho linh kiện mới (linh kiện đã có dùng Nhập kho).' : ''}</p>
+    <div class="row" style="margin-bottom:12px"><a class="btn ghost" href="/api/import/${key}/template" download style="text-decoration:none;display:inline-flex;align-items:center">${icon('list')}&nbsp;Tải file mẫu</a>
+      <label class="btn acc" style="display:inline-flex;align-items:center">${icon('upload')}&nbsp;Chọn file .xlsx / .csv<input type="file" id="imF" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden></label>
+      <span class="small" id="imN"></span></div>
+    <div id="imR"></div>`);
+  let file = null;
+  const send = async mode => {
+    const res = await fetch(`/api/import/${key}/${mode}`, {method: 'POST', credentials: 'same-origin',
+      headers: {'X-App': '1', 'Content-Type': 'application/octet-stream', 'X-File-Name': encodeURIComponent(file.name)}, body: file});
+    const r = await res.json().catch(() => ({error: 'Lỗi máy chủ'}));
+    if (!res.ok) throw new Error(r.error || 'Lỗi ' + res.status);
+    return r;
+  };
+  const ACT = {CREATE: ['ok', 'Thêm mới'], UPDATE: ['acc', 'Cập nhật'], ERROR: ['bad', 'Lỗi']};
+  const show = r => {
+    const ok = r.created + r.updated;
+    $('#imR', b).innerHTML = `<div class="grid tiles" style="margin-bottom:12px">
+        <div class="card tile" style="cursor:default"><div class="ic ok">${icon('plus')}</div><div><b>${r.created}</b><span>Thêm mới</span></div></div>
+        <div class="card tile" style="cursor:default"><div class="ic">${icon('check')}</div><div><b>${r.updated}</b><span>Cập nhật</span></div></div>
+        <div class="card tile ${r.errors ? 'hot' : ''}" style="cursor:default"><div class="ic ${r.errors ? 'bad' : 'ok'}">${icon('alert')}</div><div><b>${r.errors}</b><span>Dòng lỗi (bỏ qua)</span></div></div></div>
+      <p class="small">Nhận cột: ${r.mapping.map(m => m.column ? `<b>${h(m.label)}</b> ← “${h(m.column)}”` : `<span style="color:var(--mute)">${h(m.label)}: không có</span>`).join(' · ')}</p>
+      ${r.new_brands.length ? `<p class="small">Hãng mới sẽ tạo: <b>${r.new_brands.map(h).join(', ')}</b></p>` : ''}
+      ${r.new_categories.length ? `<p class="small">Loại mới sẽ tạo: <b>${r.new_categories.map(h).join(', ')}</b></p>` : ''}
+      <div class="tbl" style="max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:10px"><table><thead><tr><th>Dòng</th><th>${key === 'customer' ? 'SĐT' : 'Mã'}</th><th>Tên</th><th>Kết quả</th></tr></thead><tbody>
+        ${r.rows.slice(0, 300).map(x => `<tr><td>${x.line}</td><td><b class="mono">${h(x.key || x.values.phone || x.values.code || x.values.model_code || '')}</b></td><td>${h(x.name || x.values.name || '')}</td>
+          <td><span class="pill ${ACT[x.action][0]}">${ACT[x.action][1]}</span> <span class="small">${h(x.message || '')}</span></td></tr>`).join('')}
+        ${r.rows.length > 300 ? `<tr><td colspan="4" class="small">… và ${r.rows.length - 300} dòng nữa</td></tr>` : ''}</tbody></table></div>
+      <div class="row" style="margin-top:14px">${r.saved ? `<b style="color:var(--ok)">✓ Đã nhập xong ${ok} dòng.</b> <button type="button" class="btn ghost" data-close>Đóng</button>`
+        : ok ? `<button type="button" class="btn acc" id="imGo">Nhập ${ok} dòng hợp lệ</button><span class="small">Chưa lưu gì – đây là bản xem trước.</span>` : '<span class="small">Không có dòng hợp lệ để nhập. Sửa file rồi chọn lại.</span>'}</div>`;
+    if ($('#imGo', b)) $('#imGo', b).onclick = async e => {
+      e.target.disabled = true; e.target.textContent = 'Đang nhập…';
+      try { const done = await send('commit'); show(done); toast(`Đã nhập ${done.created} mới, ${done.updated} cập nhật`); optCache.brand = optCache.category = null; after && after(); }
+      catch (err) { fail(err); e.target.disabled = false; e.target.textContent = 'Nhập lại'; }
+    };
+  };
+  $('#imF', b).onchange = async e => {
+    file = e.target.files[0]; if (!file) return;
+    $('#imN', b).textContent = file.name; $('#imR', b).innerHTML = '<div class="empty">Đang đọc file…</div>';
+    try { show(await send('preview')); } catch (err) { $('#imR', b).innerHTML = `<div class="hint" style="color:var(--bad)">${h(err.message)}</div>`; }
+    e.target.value = '';
+  };
+}
+
+/* =================== THỐNG KÊ LỖI THƯỜNG GẶP =================== */
+const FLT = {from: '', to: ''};
+VIEWS['loi'] = async () => {
+  const now = new Date(), y = now.getFullYear(), mo = now.getMonth();
+  if (!FLT.from) { FLT.from = isoD(new Date(y, mo - 11, 1)); FLT.to = isoD(now); }
+  $('#main').innerHTML = `<div class="head"><div><h1>Thống kê lỗi thường gặp</h1><p class="sub" style="margin:0">Model nào hay hỏng, lỗi gì nhiều, linh kiện nào thay nhiều nhất – tính theo ngày nhận máy.</p></div>
+    <div class="row"><div class="chips" style="margin:0"><button class="chip" data-fp="m">Tháng này</button><button class="chip" data-fp="q">3 tháng</button><button class="chip" data-fp="y12">12 tháng</button><button class="chip" data-fp="y">Năm nay</button></div>
+      <input type="date" id="fF" value="${FLT.from}" style="width:auto"><input type="date" id="fT" value="${FLT.to}" style="width:auto"><button class="btn ghost sm" id="fGo">Xem</button>
+      ${is('ADMIN') ? `<a class="btn ghost sm" id="fX" href="/api/reports/export?from=${FLT.from}&to=${FLT.to}" style="text-decoration:none;display:inline-flex;align-items:center">Xuất Excel</a>` : ''}</div></div>
+    <div id="fB"><div class="empty">Đang tải…</div></div>`;
+  const set = (f, t) => { FLT.from = isoD(f); FLT.to = isoD(t); VIEWS['loi'](); };
+  $$('[data-fp]').forEach(c => c.onclick = () => ({m: () => set(new Date(y, mo, 1), now), q: () => set(new Date(y, mo - 2, 1), now),
+    y12: () => set(new Date(y, mo - 11, 1), now), y: () => set(new Date(y, 0, 1), now)})[c.dataset.fp]());
+  $('#fGo').onclick = () => { FLT.from = $('#fF').value; FLT.to = $('#fT').value; VIEWS['loi'](); };
+  let d; try { d = await api(`/api/reports/faults?from=${FLT.from}&to=${FLT.to}`); } catch (e) { return fail(e); }
+  if (!$('#fB')) return;
+  const gmax = Math.max(1, ...d.groups.map(g => g.count)), rmax = Math.max(1, ...d.models.map(m => m.rate));
+  $('#fB').innerHTML = `<div class="grid tiles" style="margin-bottom:14px">
+      <div class="card tile" style="cursor:default"><div class="ic">${icon('clipboard')}</div><div><b>${d.total}</b><span>Phiếu trong kỳ</span></div></div>
+      <div class="card tile" style="cursor:default"><div class="ic warn">${icon('alert')}</div><div><b class="long">${h(d.top_group || '–')}</b><span>Nhóm lỗi gặp nhiều nhất</span></div></div>
+      <div class="card tile" style="cursor:default"><div class="ic vio">${icon('device')}</div><div><b class="long">${h(d.models[0]?.product || '–')}</b><span>Model nhiều phiếu nhất</span></div></div>
+      <div class="card tile ${d.repeat_count ? 'hot' : ''}" style="cursor:default"><div class="ic ${d.repeat_count ? 'bad' : 'ok'}">${icon('wrench')}</div><div><b>${d.repeat_count}</b><span>Máy phải sửa lại ≥ 2 lần</span></div></div></div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));margin-bottom:14px">
+      <div class="card"><h2>Nhóm lỗi</h2><p class="small" style="margin-top:-6px">Phân loại tự động theo từ khóa trong “lỗi khách báo” và “kết luận kỹ thuật”; một phiếu có thể thuộc nhiều nhóm.</p>
+        ${d.groups.map(g => `<div class="bar" style="grid-template-columns:minmax(9em,15em) minmax(0,1fr) 5.5em" title="${h(g.examples.join(' | '))}"><span>${h(g.label)}<br><span class="small">${h(g.top_models.join(', '))}</span></span>
+          <div><i style="width:${g.count / gmax * 100}%;${g.key === 'OTHER' ? 'background:var(--bd2)' : ''}"></i></div><em>${g.count} <span class="small">(${g.pct}%)</span></em></div>`).join('') || '<div class="empty">Không có phiếu trong kỳ</div>'}</div>
+      <div class="card"><h2>Tỷ lệ hỏng theo model</h2><p class="small" style="margin-top:-6px">Tỷ lệ hỏng = số máy phải bảo hành trong kỳ / số máy đã bán (kích hoạt bảo hành) của model.</p>
+        ${d.models.slice(0, 8).map(m => `<div class="bar" style="grid-template-columns:minmax(9em,15em) minmax(0,1fr) 7em"><span>${h(m.product)}<br><span class="small">${h(m.top_fault)}</span></span>
+          <div><i style="width:${m.rate / rmax * 100}%;background:linear-gradient(90deg,#fbbf24,#f59e0b)"></i></div><em>${m.rate}% <span class="small">(${m.devices}/${m.sold})</span></em></div>`).join('') || '<div class="empty">Không có dữ liệu</div>'}</div></div>
+    <div class="card" style="padding:4px 10px;margin-bottom:14px"><h2 style="margin:12px 6px">Model hay hỏng</h2><div class="tbl"><table class="stack"><thead><tr><th>Sản phẩm</th><th>Hãng / loại</th><th class="r">Số phiếu</th><th class="r">Trong BH</th><th class="r">Đã bán</th><th class="r">Tỷ lệ hỏng</th><th class="r">TG sửa TB</th><th>Lỗi hay gặp</th></tr></thead><tbody>
+      ${d.models.map(m => `<tr><td data-l="Sản phẩm"><b>${h(m.product)}</b><div class="small">${h(m.model_code)}</div></td><td data-l="Hãng">${h(m.brand)}<div class="small">${h(m.category)}</div></td>
+        <td class="r" data-l="Số phiếu"><b>${m.tickets}</b></td><td class="r" data-l="Trong BH">${m.in_warranty}</td><td class="r" data-l="Đã bán">${m.sold}</td>
+        <td class="r" data-l="Tỷ lệ"><span style="color:${m.rate >= 30 ? 'var(--bad)' : m.rate >= 15 ? 'var(--warn)' : 'inherit'}">${m.rate}%</span></td><td class="r" data-l="TG sửa">${m.avg_days == null ? '–' : m.avg_days + ' ngày'}</td><td data-l="Lỗi">${h(m.top_fault)}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">Không có dữ liệu</td></tr>'}</tbody></table></div></div>
+    <div class="card" style="padding:4px 10px;margin-bottom:14px"><h2 style="margin:12px 6px">Linh kiện thay nhiều nhất</h2><div class="tbl"><table class="stack"><thead><tr><th>Linh kiện</th><th class="r">Số lượng</th><th class="r">Số phiếu</th><th class="r">Miễn phí BH</th><th class="r">Giá vốn</th><th class="r">Tồn kho</th><th>Dùng cho model</th></tr></thead><tbody>
+      ${d.parts.map(p => `<tr><td data-l="Linh kiện"><b>${h(p.name)}</b><div class="small">${h(p.code)}</div></td><td class="r" data-l="Số lượng"><b>${p.qty}</b> ${h(p.unit)}</td><td class="r" data-l="Số phiếu">${p.tickets}</td>
+        <td class="r" data-l="Miễn phí">${p.free_qty}</td><td class="r" data-l="Giá vốn">${money(p.cost)}</td><td class="r" data-l="Tồn">${p.stock}</td><td data-l="Model">${h(p.models)}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">Chưa thay linh kiện nào trong kỳ</td></tr>'}</tbody></table></div></div>
+    <div class="card" style="padding:4px 10px"><h2 style="margin:12px 6px">Máy phải sửa lại nhiều lần</h2><div class="tbl"><table class="stack"><thead><tr><th>Serial</th><th>Sản phẩm</th><th>Khách hàng</th><th class="r">Số lần</th><th>Lỗi qua các lần</th></tr></thead><tbody>
+      ${d.repeats.map(r => `<tr><td data-l="Serial"><b class="mono">${h(r.serial)}</b><div class="small">${h(r.codes)}</div></td><td data-l="Sản phẩm">${h(r.product)}</td><td data-l="Khách">${h(r.customer)}<div class="small">${h(r.phone)}</div></td>
+        <td class="r" data-l="Số lần"><b style="color:var(--bad)">${r.times}</b></td><td data-l="Lỗi">${h(r.issues)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Không có máy nào phải sửa lại – tốt!</td></tr>'}</tbody></table></div></div>`;
+};
+
+/* =================== BẢNG CÔNG VIỆC (KANBAN) =================== */
+let KB_MINE = false;
+VIEWS['kanban'] = async () => {
+  $('#main').innerHTML = `<div class="head"><div><h1>Bảng công việc</h1><p class="sub" style="margin:0">Kéo thả phiếu sang cột khác để chuyển trạng thái. Bấm vào phiếu để mở chi tiết.</p></div>
+    <div class="row"><label class="row small" style="gap:6px;margin:0;cursor:pointer"><input type="checkbox" id="kbM" ${KB_MINE ? 'checked' : ''}> Chỉ phiếu của tôi</label>
+    <input id="kbQ" placeholder="Lọc theo mã, khách, sản phẩm…" style="width:240px"></div></div><div class="kb" id="kb"><div class="empty">Đang tải…</div></div>`;
+  const data = await api('/api/tickets/board');
+  if (!$('#kb')) return;                       // người dùng đã chuyển sang trang khác
+  const draw = () => {
+    const q = $('#kbQ').value.trim().toLowerCase();
+    const list = data.tickets.filter(t => (!KB_MINE || t.mine) && (!q || `${t.code} ${t.customer_name} ${t.product_name}`.toLowerCase().includes(q)));
+    $('#kb').innerHTML = data.columns.map(c => { const cards = list.filter(t => t.status === c.key);
+      return `<div class="kcol" data-col="${c.key}"><h3>${h(c.label)}<em>${cards.length}</em></h3>${cards.map(t => `<div class="kcard ${t.overdue ? 'late' : ''} ${t.mine ? 'mine' : ''}" draggable="true" data-id="${t.id}" tabindex="0">
+        <div class="row" style="justify-content:space-between;gap:4px"><b>${h(t.code)}</b>${t.in_warranty ? '<span class="pill ok">BH</span>' : '<span class="pill warn">Có phí</span>'}</div>
+        <div class="t">${h(t.product_name)}</div><div>${h(t.customer_name)}</div>
+        <div class="m"><span>${t.technician ? '🔧 ' + h(t.technician) : '<i>Chưa phân công</i>'}</span><span style="${t.overdue ? 'color:var(--bad);font-weight:600' : ''}">📅 ${fd(t.due_date)}</span></div>
+        ${t.unread ? `<div class="m"><span style="color:var(--bad);font-weight:600">💬 ${t.unread} tin khách chưa đọc</span></div>` : ''}${t.quote_status === 'PENDING' ? '<div class="m"><span>⏳ Chờ khách duyệt báo giá</span></div>' : ''}</div>`).join('')}</div>`; }).join('');
+    let dragId = null;
+    $$('.kcard').forEach(c => {
+      c.onclick = () => { MODAL_CLOSED = () => { if (location.hash === '#kanban') VIEWS['kanban'](); }; openTicket(+c.dataset.id); };
+      c.onkeydown = e => { if (e.key === 'Enter') c.onclick(); };
+      c.ondragstart = e => { dragId = +c.dataset.id; c.classList.add('drag'); e.dataTransfer.effectAllowed = 'move';
+        const t = data.tickets.find(x => x.id === dragId);
+        $$('.kcol').forEach(col => { if (t.next.includes(col.dataset.col)) col.classList.add('can'); else if (col.dataset.col !== t.status) col.classList.add('no'); }); };
+      c.ondragend = () => { c.classList.remove('drag'); $$('.kcol').forEach(col => col.classList.remove('can', 'no', 'over')); };
+    });
+    $$('.kcol').forEach(col => {
+      col.ondragover = e => { if (col.classList.contains('can')) { e.preventDefault(); col.classList.add('over'); } };
+      col.ondragleave = () => col.classList.remove('over');
+      col.ondrop = async e => { e.preventDefault(); const target = col.dataset.col, t = data.tickets.find(x => x.id === dragId);
+        if (!t || !t.next.includes(target)) return;
+        const body = {status: target};
+        if (['REJECTED'].includes(target) || target === 'SENT_TO_VENDOR') {
+          const extra = await askMove(t, target); if (!extra) return; Object.assign(body, extra);
+        }
+        try { await post(`/api/tickets/${t.id}/status`, body); toast(`${t.code} → ${META.statuses[target]}`); refreshBadges(); VIEWS['kanban'](); }
+        catch (err) { fail(err); } };
+    });
+  };
+  const askMove = (t, target) => new Promise(res => {
+    const b = openModal(`<h2>${h(t.code)} → ${h(META.statuses[target])}</h2><form id="amF">
+      ${target === 'SENT_TO_VENDOR' ? `<div class="f"><label class="req" for="amS">Trung tâm bảo hành hãng</label><select id="amS" name="service_center_id" required><option value="">— Chọn —</option>${data.service_centers.map(s => `<option value="${s.id}">${h(s.name)}</option>`).join('')}</select></div>` : ''}
+      <div class="f"><label class="${target === 'REJECTED' ? 'req' : ''}" for="amN">${target === 'REJECTED' ? 'Lý do từ chối bảo hành' : 'Ghi chú'}</label><input id="amN" name="note" ${target === 'REJECTED' ? 'required' : ''}></div>
+      <button class="btn acc">Chuyển trạng thái</button></form>`, 'modal');
+    let done = false; MODAL_CLOSED = () => { if (!done) res(null); };
+    $('#amF', b).onsubmit = e => { e.preventDefault(); done = true; const v = formData(e.target); closeModal(); res(v); };
+  });
+  $('#kbQ').oninput = draw;
+  $('#kbM').onchange = () => { KB_MINE = $('#kbM').checked; draw(); };
+  draw();
+};
+
+/* =================== LỊCH HẸN =================== */
+const CAL = {mode: innerWidth < 900 ? 'day' : 'week', start: null, tech: ''};
+const isoD = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const DOW = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+function weekStart(d) { const x = new Date(d); const k = (x.getDay() + 6) % 7; x.setDate(x.getDate() - k); return x; }
+VIEWS['lich-hen'] = async () => {
+  if (!CAL.start) CAL.start = CAL.mode === 'week' ? weekStart(new Date()) : new Date();
+  $('#main').innerHTML = `<div class="head"><div><h1>Lịch hẹn</h1><p class="sub" style="margin:0" id="calSub"></p></div>
+    <div class="row"><div class="chips" style="margin:0"><button class="chip ${CAL.mode === 'day' ? 'on' : ''}" data-m="day">Ngày</button><button class="chip ${CAL.mode === 'week' ? 'on' : ''}" data-m="week">Tuần</button></div>
+      <button class="btn ghost sm" id="cPrev" aria-label="Trước">‹</button><button class="btn ghost sm" id="cToday">Hôm nay</button><button class="btn ghost sm" id="cNext" aria-label="Sau">›</button>
+      ${is('TECHNICIAN') ? '' : '<select id="cTech" style="width:auto;min-height:34px;padding:4px 10px"><option value="">Tất cả kỹ thuật viên</option></select>'}</div></div>
+    <div class="legend2" id="cLeg" style="margin-bottom:10px"></div><div id="cBody"><div class="empty">Đang tải…</div></div>`;
+  const days = CAL.mode === 'week' ? 7 : 1;
+  const end = new Date(CAL.start); end.setDate(end.getDate() + days - 1);
+  const data = await api(`/api/calendar?from=${isoD(CAL.start)}&to=${isoD(end)}&technician_id=${CAL.tech}`);
+  if (!$('#cBody')) return;
+  const colors = {APPOINTMENT: '#7c3aed', REQUESTED: '#a78bfa', DUE: '#2563eb', READY: '#059669', OVERDUE: '#dc2626'};
+  $('#cLeg').innerHTML = data.kinds.filter(k => !(is('TECHNICIAN') && ['APPOINTMENT', 'REQUESTED'].includes(k.key))).map(k => `<span><i style="background:${colors[k.key]}"></i>${h(k.label)}</span>`).join('');
+  if ($('#cTech')) { $('#cTech').innerHTML += data.technicians.map(t => `<option value="${t.id}" ${String(t.id) === String(CAL.tech) ? 'selected' : ''}>${h(t.full_name)}</option>`).join('');
+    $('#cTech').onchange = () => { CAL.tech = $('#cTech').value; VIEWS['lich-hen'](); }; }
+  $('#calSub').textContent = days === 1 ? `${DOW[CAL.start.getDay()]}, ${fd(isoD(CAL.start))} · ${data.events.length} lịch` : `Tuần ${fd(isoD(CAL.start))} – ${fd(isoD(end))} · ${data.events.length} lịch`;
+  let html = '';
+  for (let i = 0; i < days; i++) {
+    const d = new Date(CAL.start); d.setDate(d.getDate() + i); const k = isoD(d);
+    const evs = data.events.filter(e => e.date === k);
+    html += `<div class="cday ${k === data.today ? 'today' : ''} ${k < data.today ? 'past' : ''} ${evs.length ? '' : 'empty'}"><h4><span>${DOW[d.getDay()]}${k === data.today ? ' · Hôm nay' : ''}</span><b>${d.getDate()}/${d.getMonth() + 1}</b></h4>
+      ${evs.map((e, j) => `<div class="ev ${e.kind}" tabindex="0" data-ev="${k}|${j}"><b>${e.kind === 'APPOINTMENT' ? '📅 Khách mang máy tới' : e.kind === 'REQUESTED' ? '❔ Khách đề xuất' : e.kind === 'READY' ? '✅ Chờ khách nhận' : e.kind === 'OVERDUE' ? '⚠️ Quá hẹn' : '🔧 Hẹn trả'} · ${h(e.code)}</b>
+        <span>${h(e.title)}</span>${days === 1 ? `<div class="small">${h(e.customer_phone)}${e.technician ? ' · KTV ' + h(e.technician) : ''}${e.status_label ? ' · ' + h(e.status_label) : ''}</div><div class="small">${h(e.note || '')}</div>` : ''}</div>`).join('')
+      || '<span class="small" style="margin-top:6px">Không có lịch</span>'}</div>`;
+  }
+  $('#cBody').innerHTML = `<div class="cal ${days === 1 ? 'day' : ''}">${html}</div>`;
+  $$('[data-ev]').forEach(x => x.onclick = x.onkeydown = async ev => { if (ev.type === 'keydown' && ev.key !== 'Enter') return;
+    const [k, j] = x.dataset.ev.split('|'); const e = data.events.filter(z => z.date === k)[+j];
+    if (e.ticket_id) { MODAL_CLOSED = () => { if (location.hash === '#lich-hen') VIEWS['lich-hen'](); }; openTicket(e.ticket_id); }
+    else { try { const all = await api('/api/requests'); const r = all.find(z => z.id === e.request_id); if (r) requestDialog(r, () => { VIEWS['lich-hen'](); refreshBadges(); }); } catch (err) { fail(err); } } });
+  $$('[data-m]').forEach(c => c.onclick = () => { CAL.mode = c.dataset.m; CAL.start = CAL.mode === 'week' ? weekStart(CAL.start) : (isoD(weekStart(new Date())) === isoD(CAL.start) ? new Date() : CAL.start); VIEWS['lich-hen'](); });
+  $('#cPrev').onclick = () => { CAL.start.setDate(CAL.start.getDate() - days); VIEWS['lich-hen'](); };
+  $('#cNext').onclick = () => { CAL.start.setDate(CAL.start.getDate() + days); VIEWS['lich-hen'](); };
+  $('#cToday').onclick = () => { CAL.start = CAL.mode === 'week' ? weekStart(new Date()) : new Date(); VIEWS['lich-hen'](); };
+};
+
+/* =================== TIN NHẮN KHÁCH =================== */
+let MSG_FILTER = '';
+VIEWS['tin-nhan'] = async () => {
+  $('#main').innerHTML = `<div class="head"><div><h1>Tin nhắn khách</h1><p class="sub" style="margin:0">Khách hỏi về phiếu của mình từ cổng tra cứu. Bấm vào để mở phiếu và trả lời.</p></div></div>
+    <div class="chips"><button class="chip ${MSG_FILTER === '' ? 'on' : ''}" data-mf="">Tất cả</button><button class="chip ${MSG_FILTER === '1' ? 'on' : ''}" data-mf="1">Chưa trả lời</button></div>
+    <div class="card" style="padding:8px 12px" id="mL"><div class="empty">Đang tải…</div></div>`;
+  $$('[data-mf]').forEach(c => c.onclick = () => { MSG_FILTER = c.dataset.mf; VIEWS['tin-nhan'](); });
+  const list = await api('/api/messages?unread=' + MSG_FILTER);
+  if (!$('#mL')) return;
+  $('#mL').innerHTML = list.length ? list.map(c => `<div class="conv ${c.unread ? 'unread' : ''}" data-t="${c.ticket_id}" tabindex="0">
+      <div class="av">${h((c.customer_name.trim().split(/\s+/).pop() || '?')[0])}</div>
+      <div><div class="row" style="gap:8px"><b class="nm">${h(c.customer_name)}</b><span class="small">${h(c.code)} · ${h(c.product_name)}</span></div>
+        <div class="lm">${c.last_sender === 'STAFF' ? 'Bạn: ' : ''}${h(c.last_body)}</div></div>
+      <div style="text-align:right"><div class="small">${fdt(c.last_time)}</div>${c.unread ? `<span class="pill bad" style="margin-top:4px">${c.unread} tin mới</span>` : `<span class="pill" style="margin-top:4px">${h(c.status_label)}</span>`}</div></div>`).join('')
+    : `<div class="empty">${MSG_FILTER ? 'Không có tin nào chờ trả lời 🎉' : 'Chưa có khách nào nhắn tin.'}</div>`;
+  $$('[data-t]', $('#mL')).forEach(x => x.onclick = x.onkeydown = e => { if (e.type === 'keydown' && e.key !== 'Enter') return;
+    MODAL_CLOSED = () => { if (location.hash === '#tin-nhan') VIEWS['tin-nhan'](); }; openTicket(+x.dataset.t); });
+};
+
 /* =================== THÔNG BÁO CHO KHÁCH =================== */
 VIEWS['thong-bao'] = async () => {
   const admin = is('ADMIN');
@@ -962,7 +1465,7 @@ VIEWS['cai-dat'] = async () => {
   const s = await api('/api/settings');
   $('#main').innerHTML = `<h1>Thông tin cửa hàng</h1><p class="sub">In trên phiếu tiếp nhận, phiếu trả máy và phiếu bảo hành điện tử.</p>
     <form class="card" id="sF" style="max-width:720px">${Object.entries(META.setting_keys).map(([k, l]) => `<div class="f"><label for="s_${k}">${h(l)}${(META.setting_hints || {})[k] ? ` <span class="small" style="font-weight:400">– ${h(META.setting_hints[k])}</span>` : ''}</label>
-      ${['policy','open_hours','portal_intro'].includes(k) ? `<textarea id="s_${k}" name="${k}" style="min-height:${k === 'policy' ? 110 : 80}px">${h(s[k])}</textarea>` : `<input id="s_${k}" name="${k}" value="${h(s[k])}">`}</div>`).join('')}
+      ${(META.setting_selects || {})[k] ? `<select id="s_${k}" name="${k}">${Object.entries(META.setting_selects[k]).map(([v, t]) => `<option value="${h(v)}" ${v === (s[k] || '') ? 'selected' : ''}>${h(t)}</option>`).join('')}</select>` : ['policy','open_hours','portal_intro'].includes(k) ? `<textarea id="s_${k}" name="${k}" style="min-height:${k === 'policy' ? 110 : 80}px">${h(s[k])}</textarea>` : `<input id="s_${k}" name="${k}" value="${h(s[k])}">`}</div>`).join('')}
       <div class="hint">Cổng tra cứu cho khách hiện tại: <b>${h(s._portal_base)}/tra-cuu</b> – mã QR trên phiếu dẫn tới địa chỉ này. Điện thoại của khách phải cùng mạng Wi-Fi với máy chạy phần mềm (hoặc bạn nhập tên miền công khai).</div>
       <button class="btn acc" style="margin-top:8px">Lưu</button></form>`;
   $('#sF').onsubmit = async e => { e.preventDefault(); try { await api('/api/settings', {method: 'PUT', body: formData(e.target)}); toast('Đã lưu thông tin cửa hàng'); route(); } catch (err) { fail(err); } };

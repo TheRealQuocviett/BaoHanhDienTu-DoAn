@@ -1,5 +1,7 @@
 # Hệ thống quản lý bảo hành điện tử (Java + SQLite)
 
+[![Kiểm thử tự động](https://github.com/TheRealQuocviett/BaoHanhDienTu-DoAn/actions/workflows/kiem-thu.yml/badge.svg)](https://github.com/TheRealQuocviett/BaoHanhDienTu-DoAn/actions/workflows/kiem-thu.yml)
+
 Phần mềm quản lý bảo hành cho **cửa hàng / đại lý bán lẻ thiết bị điện tử**. Phần mềm lo trọn quy trình: kích hoạt bảo hành điện tử lúc bán hàng, tiếp nhận máy hỏng, sửa chữa (linh kiện, báo giá cho máy hết hạn), thu tiền, trả máy, rồi thống kê báo cáo.
 
 Chạy **một chương trình Java** là có cùng lúc:
@@ -38,7 +40,7 @@ Nên đổi mật khẩu sau khi đăng nhập (nút **Đổi mật khẩu**).
 
 **Tài khoản khách hàng mẫu** (đăng nhập ở `/tra-cuu` → *Tài khoản của tôi*): `0903123456` / `123456` (Nguyễn Văn An), `0934567890` / `123456` (Phạm Thu Hà). Khách khác tự đăng ký bằng SĐT + số Serial của máy đã mua.
 
-**Kiểm thử tự động:** trong VS Code chọn cấu hình *Chạy kiểm thử tự động* rồi nhấn F5 (kết quả hiện ở tab **Debug Console**), hoặc nhấp đúp `run-tests.bat`. Chương trình chạy 119 kiểm thử nghiệp vụ (kể cả gửi email/SMS/Zalo qua máy chủ giả) trên một CSDL tạm, không đụng tới dữ liệu thật.
+**Kiểm thử tự động:** trong VS Code chọn cấu hình *Chạy kiểm thử tự động* rồi nhấn F5 (kết quả hiện ở tab **Debug Console**), hoặc nhấp đúp `run-tests.bat`. Chương trình chạy 205 kiểm thử nghiệp vụ (kể cả gửi email/SMS/Zalo qua máy chủ giả) trên một CSDL tạm, không đụng tới dữ liệu thật.
 
 Nếu bạn đã dùng phiên bản trước, CSDL được **tự nâng cấp và giữ nguyên dữ liệu**. Dữ liệu mẫu cho các chức năng mới chỉ có khi tạo CSDL mới.
 
@@ -95,6 +97,21 @@ Lần chạy đầu, phần mềm tự tạo CSDL và **dữ liệu mẫu**: 7 h
   - **Hộp thư:** các tin cửa hàng đã gửi qua email / SMS / Zalo (gộp theo sự kiện).
   - **Tài khoản:** email, địa chỉ, mật khẩu, tắt tin nhắc hết hạn.
 - **Trang "Cửa hàng" cho khách** (`/tra-cuu#cua-hang`): giới thiệu, giờ mở cửa, nút gọi / email / nhắn tin / chỉ đường, bản đồ Google Maps (cần Internet), chính sách bảo hành. Nội dung sửa ở **Thông tin cửa hàng**.
+- **Bảng công việc (Kanban)**: các cột Đã tiếp nhận → Đang kiểm tra → Chờ linh kiện → Đã gửi hãng → Đang sửa → Sửa xong → Từ chối; kéo thả phiếu để chuyển trạng thái (chỉ thả được vào cột hợp lệ với vai trò). Gửi hãng / từ chối sẽ hỏi trung tâm hoặc lý do. Có lọc "chỉ phiếu của tôi".
+- **Thanh toán VietQR**: nhập ngân hàng + số tài khoản ở *Thông tin cửa hàng*; phiếu còn phải trả sẽ có mã QR chuẩn NAPAS với **đúng số tiền và nội dung (mã phiếu)** – hiện khi thu tiền và in trên hóa đơn. Trong cổng tra cứu, máy sửa xong có phí sẽ có khung **Thanh toán** để khách chọn **💵 Tiền mặt khi nhận máy** hoặc **🏦 Chuyển khoản (VietQR)** rồi bấm *Tôi đã chuyển khoản*; lựa chọn của khách hiện trong phiếu (chọn sẵn hình thức khi thu tiền) và trong tin nhắn cho nhân viên. Phần mềm không tự đối soát với ngân hàng – nhân viên kiểm tra tiền về rồi bấm Thu tiền. Mã tạo ngay trong máy, không gọi dịch vụ ngoài.
+- **Đặt hàng linh kiện từ nhà cung cấp** (menu *Kho → Đặt hàng linh kiện*, *Nhà cung cấp*): linh kiện có tồn ≤ mức tối thiểu được gợi ý sẵn số lượng (đủ lên gấp đôi mức tối thiểu, trừ phần đang về). Quản lý chọn nhà cung cấp → *Tạo đơn* → in/lưu PDF gửi nhà cung cấp → *Đánh dấu đã gửi đơn* → khi hàng về bấm *Nhận hàng & nhập kho* (sửa được số thực nhận): tồn kho tự cộng, ghi thẻ kho "Nhập theo đơn DH-…", cập nhật giá nhập. Số trên menu là số linh kiện cần đặt.
+- **KPI / hoa hồng kỹ thuật viên** (menu *KPI kỹ thuật viên*): bảng xếp hạng theo kỳ với số phiếu hoàn thành, đang xử lý, thời gian sửa trung bình, % đúng hẹn, điểm đánh giá của khách, doanh thu và hoa hồng. Hoa hồng = thưởng mỗi phiếu + % tiền công các phiếu có phí (đổi ở *Thông tin cửa hàng*). Kỹ thuật viên xem được bảng xếp hạng nhưng chỉ thấy tiền của chính mình.
+- **Chế độ tối (dark mode)**: web nhân viên và cổng khách hàng bấm nút 🌙 / ☀️ góc trên (lần đầu tự theo cài đặt của máy); ứng dụng Swing bấm nút *Giao diện tối / Giao diện sáng* trên thanh trên cùng. Lựa chọn được ghi nhớ cho lần mở sau.
+- **Quét mã vạch / IMEI khi tiếp nhận máy** (nút *Quét* cạnh ô Serial ở Tiếp nhận máy, Kích hoạt bảo hành, Tra cứu – cả web và Swing). Đọc được Code 128, Code 39 (serial, IMEI) và EAN-13; bộ giải mã viết thuần Java, không cần thư viện. Ba cách:
+  - *Dùng điện thoại*: máy tính hiện mã QR, điện thoại (cùng Wi-Fi) quét QR → mở trang chụp ảnh → chụp tem mã vạch → số serial tự điền trên máy tính. Không cần cài app, chạy được qua mạng LAN thường.
+  - *Camera laptop* (web, khi mở bằng `http://localhost`): bật camera, đưa mã vào khung là tự đọc.
+  - *Chọn ảnh* có mã vạch từ máy.
+  Phiếu tiếp nhận in kèm mã vạch serial để lần sau quét lại. 15 số đúng thuật toán Luhn được nhận là IMEI.
+- **Nhập Excel** (nút *Nhập Excel* ở danh mục Khách hàng, Sản phẩm / Model, Linh kiện): tải file mẫu → điền → chọn file (.xlsx hoặc .csv) → xem trước từng dòng (thêm mới / cập nhật / lỗi kèm lý do) → bấm nhập. Nhận cột theo tên (không phân biệt dấu, thứ tự tùy ý), trùng SĐT / mã thì cập nhật, ô trống giữ giá trị cũ, tự thêm số 0 đầu SĐT bị Excel làm mất, tự tạo hãng / loại mới. Dòng lỗi được bỏ qua, không ảnh hưởng dòng khác.
+- **Thống kê lỗi thường gặp** (menu *Quản trị → Thống kê lỗi thường gặp*, quản lý và kỹ thuật viên): nhóm lỗi (tự phân loại theo từ khóa trong lỗi khách báo + kết luận kỹ thuật: nguồn, pin/sạc, màn hình, loa/mic, camera, mạng, nóng máy, vào nước/rơi vỡ, bàn phím, phần mềm, điện lạnh, máy giặt, tiếng kêu…), model hay hỏng kèm tỷ lệ hỏng, linh kiện thay nhiều nhất, máy phải sửa lại nhiều lần. Có trong file Excel báo cáo (4 trang mới).
+- **Kiểm thử tự động trên GitHub (GitHub Actions)**: mỗi lần đưa code lên, GitHub tải thư viện, biên dịch và chạy toàn bộ kiểm thử; huy hiệu đầu README hiện xanh (đạt) / đỏ (lỗi).
+- **Lịch hẹn theo ngày / tuần** (menu *Lịch hẹn*, cả web và Swing): khách hẹn mang máy tới (yêu cầu online đã xác nhận), khách đề xuất ngày chưa xác nhận, hẹn trả máy, máy sửa xong chờ khách nhận, phiếu quá hẹn (hiện ở ngày hôm nay). Lọc theo kỹ thuật viên; kỹ thuật viên chỉ thấy phiếu của mình. Bấm vào lịch để mở phiếu / yêu cầu.
+- **Tin nhắn giữa khách và cửa hàng trong phiếu:** khách bấm *💬 Nhắn tin với cửa hàng* ở từng phiếu trong cổng tra cứu; nhân viên trả lời ngay trong cửa sổ phiếu. Menu *Tin nhắn khách* gom các hội thoại, số trên menu là số phiếu có tin chưa trả lời. Khi nhân viên trả lời, khách được báo qua email / SMS / Zalo (nếu bật thông báo, sự kiện *Cửa hàng trả lời tin nhắn*). Chống spam: tối đa 10 tin / 10 phút mỗi khách.
 - **Đánh giá của khách trong báo cáo:** điểm trung bình, phân bố 1–5 sao, tỷ lệ khách đánh giá, điểm theo kỹ thuật viên, nhận xét gần đây; có thêm sheet *Đánh giá* trong file Excel. Nhân viên cũng thấy đánh giá ngay trong phiếu.
 - **Sao lưu & khôi phục:** tự động mỗi 24 giờ (giữ 20 bản), hoặc bấm *Sao lưu ngay*. Mỗi bản là một file `.zip` trong `data/backup/` gồm CSDL và ảnh. Trước khi khôi phục, hệ thống tự sao lưu trạng thái hiện tại để có thể quay lại.
 - **Thông báo cho khách (Email / SMS / Zalo):** tự gửi khi *tiếp nhận máy*, *có báo giá*, *sửa xong*, *hẹn lịch / từ chối yêu cầu online* và *bảo hành sắp hết hạn (30 ngày)*. Tin được xếp hàng đợi và gửi ở nền nên không làm chậm thao tác; lỗi thì tự thử lại 4 lần, sau đó hiện ở trang **Thông báo cho khách** để bấm *Gửi lại*. Không gửi trùng; SMS/Zalo chỉ gửi 6h–22h. Nội dung tin sửa được. Xem cách cấu hình ở mục 6.
@@ -150,6 +167,9 @@ setting (thông tin cửa hàng)
 | `notify_optout` | Khách đã tắt tin nhắc hết hạn |
 | `ticket_review` | Đánh giá của khách cho phiếu đã trả máy (1–5 sao, nhận xét) |
 | `request_photo` | Ảnh khách gửi kèm yêu cầu online (file ở `data/photos/yc-<id>/`) |
+| `ticket_message` | Tin nhắn khách ↔ cửa hàng theo phiếu, cờ đã đọc cho từng phía |
+| `supplier` | Nhà cung cấp linh kiện |
+| `purchase_order`, `purchase_order_line` | Đơn đặt hàng (Nháp → Đã đặt → Đã nhận / Đã hủy) và các dòng linh kiện, số thực nhận |
 | View `v_warranty`, `v_ticket_cost` | Bảo hành kèm tên sản phẩm/khách; chi phí từng phiếu |
 
 Ràng buộc: khóa ngoại (`ON DELETE RESTRICT` chặn xóa dữ liệu đang được dùng), `UNIQUE`, `CHECK` (trạng thái, số tháng 1–120, tồn kho ≥ 0…). Các thao tác nhiều bước chạy trong **transaction**.
@@ -183,7 +203,7 @@ src/main/java/vn/baohanh/
 └── util/      Json (đọc/ghi JSON), QrCode (tạo mã QR), Xlsx (xuất Excel), Fmt
 web/index.html                  Giao diện web cho nhân viên
 web/portal.html                 Cổng khách hàng (tra cứu nhanh + tài khoản)
-src/test/java/.../KiemThu.java  Bộ kiểm thử tự động (119 kiểm thử) + MayChuGia.java (SMTP/eSMS/Zalo giả)
+src/test/java/.../KiemThu.java  Bộ kiểm thử tự động (205 kiểm thử) + MayChuGia.java (SMTP/eSMS/Zalo giả)
 database/schema.sql             Script tạo CSDL
 lib/                            Driver sqlite-jdbc + slf4j (tải bằng tai-thu-vien.bat)
 ```
@@ -209,7 +229,13 @@ Phần mềm không dùng framework ngoài nào: bộ tạo **mã QR**, file **E
 | GET/PUT/POST | `/api/notify`, `/api/notify/config`, `/test`, `/{id}/retry`, `/run`, `/stats` | Thông báo cho khách |
 | GET | `/api/public/lookup?q=` | Tra cứu cho khách (công khai) |
 | POST/GET/PUT | `/api/kh/register`, `/login`, `/logout`, `/me`, `/profile`, `/password`, `/quote`, `/requests` | Cổng khách hàng (cookie riêng `ksid`) |
+| GET/POST | `/api/calendar?from&to&technician_id`, `/api/messages`, `/api/tickets/{id}/messages`, `/api/kh/tickets/{id}/messages` | Lịch hẹn, tin nhắn |
 | GET/POST/DELETE | `/api/kh/inbox`, `/review`, `/print-link`, `/requests/{id}/photos`, `/photos/{id}`; `/api/public/shop-page` | Hộp thư, đánh giá, phiếu in, ảnh yêu cầu, trang cửa hàng |
+| GET/POST | `/api/purchase/suggest`, `/api/purchase[/{id}]`, `/api/purchase/{id}/order`, `/receive`, `/cancel` | Đặt hàng nhà cung cấp |
+| GET | `/api/reports/kpi?from=&to=` | KPI / hoa hồng kỹ thuật viên |
+| GET | `/api/reports/faults?from=&to=` | Thống kê lỗi thường gặp |
+| POST/GET/DELETE | `/api/scan/decode`, `/api/scan/session[/{mã}]`; `/api/public/scan/{mã}[/text]`; trang `/quet/{mã}` | Quét mã vạch (ảnh, phiên quét bằng điện thoại) |
+| GET/POST | `/api/import/{customer,product,part}/template`, `/preview`, `/commit` | Nhập Excel |
 
 ---
 

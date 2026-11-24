@@ -130,7 +130,7 @@ public class DashboardView extends MainFrame.View {
                 long v = vals.get(i)[0];
                 g.setColor(Ui.INK);
                 g.drawString(s.getLabel(), 0, y + 14);
-                g.setColor(new java.awt.Color(0xEDF1F7));
+                g.setColor(Ui.GRID);
                 g.fillRoundRect(lw, y + 4, w - lw - nw, 10, 10, 10);
                 g.setColor(s == TicketStatus.READY ? Ui.OK : Ui.ACCENT);
                 g.fillRoundRect(lw, y + 4, (int) ((w - lw - nw) * v / (double) max), 10, 10, 10);

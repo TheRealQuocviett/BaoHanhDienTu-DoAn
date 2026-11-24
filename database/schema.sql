@@ -295,6 +295,60 @@ CREATE TABLE IF NOT EXISTS request_photo (
 CREATE INDEX IF NOT EXISTS idx_req_photo ON request_photo(request_id);
 
 -- ---------------------------------------------------------------------
+-- 7c. TIN NHẮN GIỮA KHÁCH VÀ CỬA HÀNG TRONG PHIẾU  (phiên bản 6)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS ticket_message (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    ticket_id         INTEGER NOT NULL REFERENCES ticket(id) ON DELETE CASCADE,
+    sender            TEXT NOT NULL CHECK (sender IN ('CUSTOMER','STAFF')),
+    user_id           INTEGER REFERENCES app_user(id) ON DELETE SET NULL,   -- nhân viên trả lời
+    body              TEXT NOT NULL,
+    created_at        TEXT NOT NULL,
+    read_by_staff     INTEGER NOT NULL DEFAULT 0,
+    read_by_customer  INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_msg_ticket ON ticket_message(ticket_id, id);
+CREATE INDEX IF NOT EXISTS idx_msg_unread ON ticket_message(sender, read_by_staff);
+
+-- ---------------------------------------------------------------------
+-- 7d. NHÀ CUNG CẤP & ĐƠN ĐẶT HÀNG LINH KIỆN  (phiên bản 7)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS supplier (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    name            TEXT NOT NULL,
+    contact         TEXT,
+    phone           TEXT,
+    email           TEXT,
+    address         TEXT,
+    note            TEXT
+);
+
+CREATE TABLE IF NOT EXISTS purchase_order (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    code            TEXT NOT NULL UNIQUE,                  -- DH-000001
+    supplier_id     INTEGER NOT NULL REFERENCES supplier(id),
+    status          TEXT NOT NULL DEFAULT 'DRAFT' CHECK (status IN ('DRAFT','ORDERED','RECEIVED','CANCELLED')),
+    expected_date   TEXT,
+    note            TEXT,
+    created_by      INTEGER REFERENCES app_user(id) ON DELETE SET NULL,
+    created_at      TEXT NOT NULL,
+    ordered_at      TEXT,
+    received_at     TEXT,
+    received_by     INTEGER REFERENCES app_user(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_po_status ON purchase_order(status);
+
+CREATE TABLE IF NOT EXISTS purchase_order_line (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    po_id           INTEGER NOT NULL REFERENCES purchase_order(id) ON DELETE CASCADE,
+    part_id         INTEGER NOT NULL REFERENCES part(id),
+    qty             INTEGER NOT NULL CHECK (qty > 0),
+    unit_cost       INTEGER NOT NULL DEFAULT 0 CHECK (unit_cost >= 0),
+    received_qty    INTEGER NOT NULL DEFAULT 0 CHECK (received_qty >= 0)
+);
+CREATE INDEX IF NOT EXISTS idx_pol_po ON purchase_order_line(po_id);
+
+-- ---------------------------------------------------------------------
 -- 8. VIEW tiện tra cứu (dùng trong báo cáo / xem nhanh bằng DB Browser)
 -- ---------------------------------------------------------------------
 CREATE VIEW IF NOT EXISTS v_warranty AS

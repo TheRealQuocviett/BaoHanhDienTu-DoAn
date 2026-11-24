@@ -7,6 +7,7 @@
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>try { const t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <style>
 :root{color-scheme:light;--bg:#f3f6fb;--card:#fff;--ink:#0f172a;--mute:#64748b;--line:#e3e8f0;--acc:#2563eb;--acc2:#1d4ed8;--accs:#eaf1ff;--acct:#1e40af;
   --ok:#059669;--oks:#e7f8f1;--bad:#dc2626;--bads:#fdecec;--warn:#b45309;--warns:#fff5e0;--soft:#f6f8fc;
@@ -72,7 +73,7 @@ a{color:var(--acc)}
 .subnav a.on{background:var(--accs);color:var(--acct)}.subnav a em{font-style:normal;font-size:11.5px;background:var(--acc);color:#fff;border-radius:99px;padding:1px 7px;margin-left:5px}
 .stars{display:inline-flex;gap:2px}.stars button{background:none;border:0;box-shadow:none;min-height:0;padding:0 2px;font-size:30px;line-height:1;color:#cbd5e1;cursor:pointer}
 .stars button.on,.stars b.on{color:#f59e0b}.stars button:hover{background:none}.stars b{font-size:18px;color:#cbd5e1;font-weight:400}
-.review{border:1px solid #fde7b0;background:#fffdf6;border-radius:12px;padding:12px 14px;margin-top:10px}
+.review{border:1px solid #fde7b0;background:var(--warns);border-radius:12px;padding:12px 14px;margin-top:10px}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.thumbs figure{margin:0;position:relative;width:76px;height:76px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--soft)}
 .thumbs img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}.thumbs button{position:absolute;top:3px;right:3px;min-height:0;width:22px;height:22px;padding:0;border-radius:6px;background:#0f172acc;font-size:13px;line-height:1;box-shadow:none}
 .mail{display:grid;grid-template-columns:40px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--line)}.mail:first-of-type{border-top:0}
@@ -85,8 +86,43 @@ a{color:var(--acc)}
 .hours{list-style:none;padding:0;margin:8px 0 0}.hours li{padding:6px 0;border-top:1px dashed var(--line)}.hours li:first-child{border-top:0}
 .linkbtn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid #d6deea;color:var(--ink);background:#fff}
 .imgview{position:fixed;inset:0;background:#0f172ae6;display:grid;place-items:center;z-index:20;padding:16px;cursor:zoom-out}.imgview img{max-width:100%;max-height:100%;border-radius:10px}
+/* thanh toán */
+.paybox{border:1.5px solid #bfd3fb;background:#f7faff;border-radius:14px;padding:14px;margin-top:12px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.seg button{flex:1 1 180px;background:#fff;color:var(--ink);border:1px solid #d6deea;box-shadow:none;min-height:46px}
+.seg button:hover{background:var(--soft)}.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+/* tin nhắn */
+.chatwrap{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;background:#fcfdff}
+.chat{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;padding:2px}
+.bub{max-width:82%;padding:9px 12px;border-radius:14px;background:#eef2f7;white-space:pre-wrap;word-wrap:break-word;font-size:15px}
+.bub.me{align-self:flex-end;background:var(--acc);color:#fff;border-bottom-right-radius:4px}.bub.cu{align-self:flex-start;border-bottom-left-radius:4px}
+.bub small{display:block;font-size:12px;opacity:.75;margin-top:3px}
+.chatf{display:flex;gap:8px;align-items:flex-end;margin-top:8px}.chatf textarea{min-height:50px;height:50px;flex:1}
 footer{text-align:center;color:var(--mute);font-size:13px;padding:10px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== Chế độ tối ===== */
+html[data-theme=dark]{color-scheme:dark;--bg:#0b1220;--card:#111a2c;--ink:#e5eaf3;--mute:#94a3b8;--line:#22304a;--acc:#3b82f6;--acc2:#60a5fa;
+  --accs:#15254a;--acct:#9ec0ff;--ok:#34d399;--oks:#0e2c23;--bad:#f87171;--bads:#3a1717;--warn:#fbbf24;--warns:#3a2c0c;--soft:#0f1829;
+  --sh:0 1px 2px rgba(0,0,0,.4),0 4px 14px -6px rgba(0,0,0,.6)}
+html[data-theme=dark] header{background:radial-gradient(900px 500px at 10% -10%,#1d4ed8 0%,#1e3a8a 55%,#0b1220 100%)}
+html[data-theme=dark] input,html[data-theme=dark] textarea{background:#0d1526;border-color:#2a3a58}
+html[data-theme=dark] button.ghost,html[data-theme=dark] button.danger,html[data-theme=dark] .linkbtn,html[data-theme=dark] .seg button{background:var(--card);border-color:#2a3a58;color:var(--ink)}
+html[data-theme=dark] button.danger{color:var(--bad)}
+html[data-theme=dark] .seg button.on{background:var(--acc);color:#fff}
+html[data-theme=dark] .note{color:#c7d7fb;border-color:#1f3566}
+html[data-theme=dark] .quote{background:#2a2410;border-color:#6b5520}html[data-theme=dark] .quote td{border-color:#4a3c18}
+html[data-theme=dark] .review{background:#2a2410;border-color:#6b5520}
+html[data-theme=dark] .paybox{background:#0f1a33;border-color:#2a4580}
+html[data-theme=dark] .chatwrap{background:#0f1829}html[data-theme=dark] .bub{background:#1c2a44}html[data-theme=dark] .bub.me{background:#2563eb}
+html[data-theme=dark] .meter{background:#1a2740}html[data-theme=dark] .kv{background:#0f1829}
+html[data-theme=dark] .pill{background:#1a2740;color:#cbd5e1}html[data-theme=dark] .pill.ok{background:var(--oks);color:var(--ok)}
+html[data-theme=dark] .pill.bad{background:var(--bads);color:var(--bad)}html[data-theme=dark] .pill.acc{background:var(--accs);color:var(--acct)}
+html[data-theme=dark] .steps li::before{background:var(--card);border-color:#3a4d70}html[data-theme=dark] .steps li::after{background:#22304a}
+html[data-theme=dark] .subnav{background:var(--card)}html[data-theme=dark] .tabs a.on{background:#e5eaf3;color:#1e3a8a}
+html[data-theme=dark] .mail .ic{background:var(--accs)}
+html[data-theme=dark] .stars button,html[data-theme=dark] .stars b{color:#3a4d70}html[data-theme=dark] .stars .on{color:#f59e0b}
+.themeBtn{position:absolute;top:22px;right:max(5vw,16px);z-index:2;width:40px;height:40px;min-height:40px;padding:0;border-radius:12px;background:#ffffff26;border:1px solid #ffffff40;box-shadow:none;font-size:18px}
+.themeBtn:hover{background:#ffffff40}
 </style>
 </head>
 <body>
@@ -94,6 +130,7 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:10px}
   <div class="shop"><i></i><div><span id="sn">Tra cứu bảo hành</span><small id="sa"></small></div></div>
   <h1 id="hd">Tra cứu bảo hành &amp; tiến độ sửa chữa</h1>
   <p id="hp">Nhập số Serial/IMEI in trên máy hoặc mã phiếu bảo hành (PBH-…).</p>
+  <button class="themeBtn" type="button" id="themeBtn" aria-label="Đổi giao diện sáng / tối"></button>
   <nav class="tabs"><a href="#" id="tLookup" class="on">Tra cứu nhanh</a><a href="#tai-khoan" id="tAcc">Tài khoản của tôi</a><a href="#cua-hang" id="tShop">Cửa hàng</a></nav>
 </div></header>
 <main><div class="wrap">
@@ -209,7 +246,7 @@ $('#rf').onsubmit = async e => {
   catch (err) { $('#rerr').textContent = err.message; }
 };
 
-const EV_ICON = {RECEIVED: ['📥', ''], QUOTE: ['💰', 'warn'], READY: ['✅', 'ok'], REQUEST_CONFIRMED: ['📅', ''], REQUEST_REJECTED: ['⚠️', 'bad'], EXPIRING: ['⏳', 'warn']};
+const EV_ICON = {MESSAGE: ['💬', ''], RECEIVED: ['📥', ''], QUOTE: ['💰', 'warn'], READY: ['✅', 'ok'], REQUEST_CONFIRMED: ['📅', ''], REQUEST_REJECTED: ['⚠️', 'bad'], EXPIRING: ['⏳', 'warn']};
 let SUB = 'may', INBOX = null;
 function starsView(n) { return `<span class="stars" aria-label="${n} sao">${[1,2,3,4,5].map(i => `<b class="${i <= n ? 'on' : ''}">★</b>`).join('')}</span>`; }
 function reviewBox(t) {
@@ -239,6 +276,13 @@ function deviceCard(d) {
       <div class="muted">Lỗi: ${h(t.issue)}</div>${msg ? `<div class="note">${msg}</div>` : ''}${quote}
       ${t.status === 'RETURNED' ? `<div class="actions" style="align-items:center"><span class="muted">${t.paid_amount ? 'Đã thanh toán <b>' + money(t.paid_amount) + '</b>' : 'Miễn phí'}${t.invoice_no ? ' · HĐ ' + h(t.invoice_no) : ''}</span>
         <button class="sm ghost" data-print="tra-may:${t.id}">Xem / in hóa đơn</button></div>` : ''}
+      ${t.status === 'READY' && t.total > 0 && !t.quote_pending ? `<div class="paybox"><div class="status"><b>Thanh toán: ${money(t.total)}</b>
+          ${t.payment_claim ? `<span class="pill ${t.payment_claim.method === 'TRANSFER' ? 'acc' : 'ok'}">${t.payment_claim.method === 'TRANSFER' ? 'Đã báo chuyển khoản' : 'Trả tiền mặt khi nhận'}</span>` : ''}</div>
+        ${t.payment_claim ? `<p class="muted" style="margin:4px 0 0">${t.payment_claim.method === 'TRANSFER' ? 'Bạn đã báo chuyển khoản lúc ' + fdt(t.payment_claim.time) + '. Cửa hàng sẽ kiểm tra và xác nhận khi bạn đến nhận máy.' : 'Bạn chọn thanh toán tại quầy khi đến nhận máy.'} Có thể đổi cách thanh toán bên dưới.</p>` : '<p class="muted" style="margin:4px 0 0">Chọn cách thanh toán:</p>'}
+        <div class="seg"><button type="button" data-pm="CASH:${t.id}">💵 Tiền mặt khi nhận máy</button><button type="button" data-pm="TRANSFER:${t.id}">🏦 Chuyển khoản (VietQR)</button></div>
+        <div data-paypanel="${t.id}"></div></div>` : ''}
+      <div class="actions"><button class="sm ghost" data-chat="${t.id}">💬 Nhắn tin với cửa hàng${t.unread_messages ? ` <b style="color:var(--bad)">(${t.unread_messages} tin mới)</b>` : t.messages ? ` (${t.messages})` : ''}</button></div>
+      <div data-chatbox="${t.id}"></div>
       ${reviewBox(t)}${steps(t.steps)}</div>`;
   }).join('');
   const pending = ME.requests.some(r => r.serial === d.serial && ['NEW','CONFIRMED'].includes(r.status));
@@ -301,7 +345,7 @@ async function uploadPhotos(reqId, files) {
 function renderMe() {
   $('#auth').hidden = true; const box = $('#me'); box.hidden = false;
   $('#hd').textContent = 'Xin chào, ' + ME.name; $('#hp').textContent = 'Máy của bạn, hóa đơn, thông báo và tài khoản.';
-  const tabs = [['may', 'Máy của tôi', ME.devices.length], ['hoa-don', 'Hóa đơn', ME.invoices.length], ['hop-thu', 'Hộp thư', 0], ['tai-khoan', 'Tài khoản', 0]];
+  const tabs = [['may', 'Máy của tôi', ME.unread_messages ? '💬 ' + ME.unread_messages : ME.devices.length], ['hoa-don', 'Hóa đơn', ME.invoices.length], ['hop-thu', 'Hộp thư', 0], ['tai-khoan', 'Tài khoản', 0]];
   let body = '';
   if (SUB === 'may') body = requestsCard() + ME.devices.map(deviceCard).join('');
   else if (SUB === 'hoa-don') body = invoicesView();
@@ -321,6 +365,46 @@ function renderMe() {
   $$('[data-up]', box).forEach(inp => inp.onchange = async () => {
     const r = await uploadPhotos(inp.dataset.up, inp.files);
     run(api('/api/kh/me'), r.err ? null : `Đã thêm ${r.ok} ảnh`); if (r.err) toast(r.err, true);
+  });
+  // Thanh toán: tiền mặt khi nhận máy hoặc chuyển khoản VietQR
+  $$('[data-pm]', box).forEach(b => b.onclick = async () => {
+    const [method, id] = b.dataset.pm.split(':'), panel = box.querySelector(`[data-paypanel="${id}"]`);
+    b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    const send = (m, msg) => run(api(`/api/kh/tickets/${id}/payment`, 'POST', {method: m}), msg);
+    if (method === 'CASH') {
+      panel.innerHTML = `<div class="note">Thanh toán <b>tại quầy khi đến nhận máy</b>, bằng tiền mặt hoặc quẹt thẻ. Nhớ mang theo phiếu hoặc báo mã phiếu.
+        <div class="actions"><button class="sm" data-cash>Chọn trả tiền mặt khi nhận máy</button></div></div>`;
+      panel.querySelector('[data-cash]').onclick = () => send('CASH', 'Đã báo cửa hàng: bạn trả tiền khi nhận máy');
+      return;
+    }
+    panel.innerHTML = '<div class="note">Đang tạo mã…</div>';
+    try { const q = await api(`/api/kh/tickets/${id}/vietqr`);
+      panel.innerHTML = q.available ? `<div class="note" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:#fff">
+        <div style="width:170px;flex:none">${q.svg}</div><div style="flex:1 1 200px"><b>Mở app ngân hàng → Quét QR</b><div class="muted">${h(q.bank)} · STK <b>${h(q.account)}</b>${q.holder ? '<br>' + h(q.holder) : ''}</div>
+        <div class="muted">Số tiền <b>${money(q.amount)}</b> · Nội dung <b>${h(q.info)}</b></div>
+        <div class="actions"><button class="sm" data-paid>Tôi đã chuyển khoản</button></div>
+        <div class="muted" style="font-size:13px">Bấm sau khi chuyển xong để cửa hàng kiểm tra. Cửa hàng xác nhận khi bạn đến nhận máy.</div></div></div>`
+        : `<div class="note">${h(q.reason)}. Bạn vui lòng chọn trả tiền mặt khi nhận máy.</div>`;
+      const pb = panel.querySelector('[data-paid]');
+      if (pb) pb.onclick = () => { if (pb.dataset.sure !== '1') { pb.dataset.sure = '1'; pb.textContent = 'Bấm lần nữa để xác nhận đã chuyển'; return; }
+        send('TRANSFER', 'Đã báo cửa hàng: bạn đã chuyển khoản'); };
+    } catch (e) { panel.innerHTML = ''; toast(e.message, true); } });
+  // tin nhắn với cửa hàng
+  $$('[data-chat]', box).forEach(b => b.onclick = async () => {
+    const id = b.dataset.chat, holder = box.querySelector(`[data-chatbox="${id}"]`);
+    if (holder.innerHTML) { holder.innerHTML = ''; return; }
+    const draw = list => { const c = holder.querySelector('.chat');
+      c.innerHTML = list.length ? list.map(m => `<div class="bub ${m.sender === 'CUSTOMER' ? 'me' : 'cu'}">${h(m.body)}<small>${m.sender === 'CUSTOMER' ? 'Bạn' : h(m.staff_name || 'Cửa hàng')} · ${fdt(m.created_at)}</small></div>`).join('')
+        : '<span class="muted">Bạn có câu hỏi về máy đang gửi? Nhắn cho cửa hàng tại đây, nhân viên sẽ trả lời sớm.</span>';
+      c.scrollTop = c.scrollHeight; };
+    holder.innerHTML = `<div class="chatwrap"><div class="chat"><span class="muted">Đang tải…</span></div>
+      <form class="chatf"><textarea placeholder="Nhập tin nhắn…" maxlength="1000" required></textarea><button class="sm">Gửi</button></form></div>`;
+    try { draw(await api(`/api/kh/tickets/${id}/messages`)); b.innerHTML = '💬 Nhắn tin với cửa hàng'; } catch (e) { toast(e.message, true); }
+    const f = holder.querySelector('form'), ta = f.querySelector('textarea');
+    ta.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) f.requestSubmit(); };
+    f.onsubmit = async e => { e.preventDefault(); if (!ta.value.trim()) return;
+      try { draw(await api(`/api/kh/tickets/${id}/messages`, 'POST', {body: ta.value})); ta.value = ''; } catch (err) { toast(err.message, true); } };
+    ta.focus();
   });
   // đánh giá
   $$('[data-rve]', box).forEach(b => b.onclick = () => { for (const d of ME.devices) for (const t of d.tickets) if (t.id === +b.dataset.rve) t.editing = true; renderMe(); });
@@ -384,6 +468,13 @@ async function renderShop() {
       <ul style="margin:12px 0 0;padding-left:20px;color:#334155"><li>Tra cứu bảo hành bằng số Serial/IMEI hoặc mã phiếu – không cần giữ phiếu giấy.</li>
       <li>Máy hết hạn bảo hành: cửa hàng báo giá trước, chỉ sửa khi quý khách đồng ý.</li><li>Theo dõi tiến độ, duyệt báo giá và đặt lịch ngay trong mục <a href="#tai-khoan">Tài khoản của tôi</a>.</li></ul></div>`;
 }
+
+/* ---------- sáng / tối ---------- */
+function paintTheme() { const dark = document.documentElement.dataset.theme === 'dark'; $('#themeBtn').textContent = dark ? '☀️' : '🌙';
+  $('#themeBtn').title = dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'; }
+$('#themeBtn').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t; try { localStorage.setItem('theme', t); } catch (e) {} paintTheme(); };
+paintTheme();
 
 /* ---------- điều hướng ---------- */
 async function route() {

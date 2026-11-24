@@ -29,13 +29,31 @@ public class SettingService {
         KEYS.put("map_query", "Vị trí trên bản đồ");
         KEYS.put("social_link", "Trang Facebook / Zalo OA");
         KEYS.put("portal_intro", "Lời giới thiệu trên trang khách");
+        KEYS.put("bank_bin", "Ngân hàng nhận chuyển khoản (VietQR)");
+        KEYS.put("bank_account", "Số tài khoản");
+        KEYS.put("bank_holder", "Tên chủ tài khoản");
+        KEYS.put("kpi_commission_rate", "Hoa hồng kỹ thuật viên (% tiền công)");
+        KEYS.put("kpi_bonus_per_ticket", "Thưởng mỗi phiếu hoàn thành (đồng)");
         KEYS.put("portal_url", "Địa chỉ cổng tra cứu");
         KEYS.put("policy", "Điều khoản / chính sách bảo hành");
+        HINTS.put("bank_bin", "Chọn ngân hàng để in mã QR chuyển khoản trên hóa đơn và cho khách thanh toán online");
+        HINTS.put("bank_holder", "Viết hoa không dấu như trên app ngân hàng, vd NGUYEN VAN A");
+        HINTS.put("kpi_commission_rate", "Để trống = 10%. Tính trên tiền công các phiếu có phí đã thu");
+        HINTS.put("kpi_bonus_per_ticket", "Để trống = 20.000 đ cho mỗi phiếu đã trả máy");
         HINTS.put("open_hours", "Mỗi dòng một mục, vd: Thứ 2 – Thứ 7: 8:00 – 20:00");
         HINTS.put("map_query", "Để trống = dùng địa chỉ cửa hàng. Có thể nhập tọa độ, vd 10.7626,106.6602");
         HINTS.put("social_link", "Đường dẫn bắt đầu bằng https://");
         HINTS.put("portal_url", "Để trống = tự động dùng địa chỉ mạng LAN của máy này");
         HINTS.put("policy", "In trên phiếu và hiện ở trang Cửa hàng của khách");
+    }
+
+    /** Các ô chọn từ danh sách: key → (giá trị → nhãn). */
+    public static final Map<String, Map<String, String>> SELECTS = new LinkedHashMap<>();
+    static {
+        Map<String, String> banks = new LinkedHashMap<>();
+        banks.put("", "— Không dùng VietQR —");
+        vn.baohanh.util.VietQr.BANKS.forEach((k, v) -> banks.put(k, v + " (" + k + ")"));
+        SELECTS.put("bank_bin", banks);
     }
 
     /** Các ô nhập nhiều dòng. */

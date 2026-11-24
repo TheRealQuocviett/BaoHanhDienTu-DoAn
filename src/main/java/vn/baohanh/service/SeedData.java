@@ -227,6 +227,17 @@ public final class SeedData {
             app.warranty.activate(reception, m("serial", w[0], "product_id", ids.get("p:" + w[1]), "customer_name", w[2],
                     "customer_phone", w[3], "invoice_no", "HD-" + (10200 + rnd.nextInt(300)), "purchase_date", w[4].toString()));
 
+        // Hai máy từng sửa trước đây (để thống kê "máy phải sửa lại nhiều lần" có dữ liệu)
+        Object[][] past = {{"356789104523871", "Mất sóng, không nhận SIM", 40}, {"R58T20ABCDE", "Pin chai, sạc chậm, máy nóng", 75}};
+        for (Object[] pz : past) {
+            long t = app.warranty.createTicket(reception, m("serial", pz[0], "issue", pz[1], "accessories", "Máy", "technician_id", kt1)).lng("id");
+            app.warranty.changeStatus(tech1, t, m("status", "DIAGNOSING", "note", "Kiểm tra lỗi"));
+            app.warranty.changeStatus(tech1, t, m("status", "REPAIRING", "note", "Sửa chữa bảo hành"));
+            app.warranty.changeStatus(tech1, t, m("status", "READY", "note", "Sửa xong"));
+            app.warranty.pay(reception, t, m("method", "CASH"));
+            backdates.add(new long[]{t, (int) pz[2], 3});
+        }
+
         long a = app.warranty.createTicket(reception, m("serial", "356789104523871", "issue", "Màn hình chớp nháy, cảm ứng loạn khi sạc",
                 "accessories", "Máy, ốp lưng", "condition", "Không trầy xước", "technician_id", kt1)).lng("id");
         app.warranty.changeStatus(tech1, a, m("status", "DIAGNOSING", "note", "Kiểm tra: lỗi màn hình"));
@@ -283,6 +294,51 @@ public final class SeedData {
                 "issue", "Tủ lạnh ngăn mát không lạnh, có tiếng kêu lạch cạch", "preferred_date", LocalDate.now().plusDays(2).toString()));
         app.warranty.extend(reception, db.scalar("SELECT id FROM warranty WHERE serial = 'C02FK1ZQMD6M'"),
                 m("months", 12, "price", 1_490_000, "method", "CASH", "note", "Gói Bảo hành Vàng 12 tháng"));
+
+        // Nhà cung cấp & đơn đặt hàng linh kiện
+        long ncc1 = app.catalog.save(admin, "supplier", 0, m("name", "Công ty TNHH Linh Kiện Số Sài Gòn", "contact", "Anh Hùng",
+                "phone", "028 3925 1122", "email", "banhang@linhkienso.vn", "address", "56 Nhật Tảo, Phường 4, Quận 10, TP. HCM")).lng("id");
+        app.catalog.save(admin, "supplier", 0, m("name", "Phụ Tùng Điện Máy Toàn Phát", "contact", "Chị Lan",
+                "phone", "0908 765 432", "email", "lan@toanphat.vn", "address", "112 Lý Thường Kiệt, Quận Tân Bình, TP. HCM"));
+        long pinIp = db.scalar("SELECT id FROM part WHERE code = 'PIN-IP15PM'"), keo = db.scalar("SELECT id FROM part WHERE code = 'KEO-TN'");
+        Row po1 = app.purchases.create(admin, m("supplier_id", ncc1, "note", "Nhập bổ sung đầu tháng",
+                "lines", List.of(m("part_id", pinIp, "qty", 5), m("part_id", keo, "qty", 10))));
+        app.purchases.markOrdered(admin, po1.lng("id"));
+        app.purchases.receive(admin, po1.lng("id"), m());
+        db.update("UPDATE purchase_order SET created_at = ?, ordered_at = ?, received_at = ? WHERE id = ?",
+                Database.ts(LocalDate.now().minusDays(20).atTime(9, 15)), Database.ts(LocalDate.now().minusDays(20).atTime(9, 30)),
+                Database.ts(LocalDate.now().minusDays(17).atTime(14, 0)), po1.lng("id"));
+        long pinRn = db.scalar("SELECT id FROM part WHERE code = 'PIN-RN13'");
+        Row po2 = app.purchases.create(admin, m("supplier_id", ncc1, "expected_date", LocalDate.now().plusDays(3).toString(),
+                "note", "Pin Redmi đang thiếu cho phiếu chờ linh kiện", "lines", List.of(m("part_id", pinRn, "qty", 6))));
+        app.purchases.markOrdered(admin, po2.lng("id"));
+
+        // Lịch hẹn: hai khách đã được hẹn mang máy tới trong tuần
+        int dayOff = 1;
+        for (Row w : db.query("SELECT w.id, w.customer_id FROM warranty w JOIN customer cu ON cu.id = w.customer_id "
+                + "WHERE cu.phone NOT IN ('0934567890', '0903123456') AND w.expiry_date >= ? "
+                + "AND NOT EXISTS (SELECT 1 FROM ticket t WHERE t.warranty_id = w.id AND t.status NOT IN ('RETURNED','CANCELLED')) "
+                + "ORDER BY w.id LIMIT 2", LocalDate.now())) {
+            Row me = app.customers.createRequest(w.lng("customer_id"), m("warranty_id", w.lng("id"),
+                    "issue", dayOff == 1 ? "Máy tự khởi động lại liên tục" : "Màn hình có sọc ngang khi bật"));
+            app.requests.confirm(reception, me.lng("last_request_id"), LocalDate.now().plusDays(dayOff).toString(),
+                    dayOff == 1 ? "Mang theo hộp và hóa đơn" : "Đến trước 17h");
+            dayOff += 2;
+        }
+
+        // Tin nhắn mẫu: khách Nguyễn Văn An hỏi tiến độ phiếu đang sửa
+        Row anT = db.one("SELECT t.id FROM ticket t JOIN warranty w ON w.id = t.warranty_id JOIN customer cu ON cu.id = w.customer_id "
+                + "WHERE cu.phone = '0903123456' AND t.status NOT IN ('RETURNED','CANCELLED') ORDER BY t.id LIMIT 1");
+        if (anT != null) {
+            java.time.LocalDateTime nowT = java.time.LocalDateTime.now();
+            db.insert("INSERT INTO ticket_message (ticket_id, sender, body, created_at, read_by_staff, read_by_customer) VALUES (?, 'CUSTOMER', ?, ?, 1, 1)",
+                    anT.lng("id"), "Chào shop, cho em hỏi máy em khoảng khi nào xong ạ?", Database.ts(nowT.minusHours(5)));
+            db.insert("INSERT INTO ticket_message (ticket_id, sender, user_id, body, created_at, read_by_staff, read_by_customer) VALUES (?, 'STAFF', ?, ?, ?, 1, 1)",
+                    anT.lng("id"), tech1.id(), "Chào anh, bên em đang chờ linh kiện từ hãng, dự kiến 2–3 ngày nữa ạ. Có linh kiện em báo anh ngay.",
+                    Database.ts(nowT.minusHours(4)));
+            db.insert("INSERT INTO ticket_message (ticket_id, sender, body, created_at, read_by_staff, read_by_customer) VALUES (?, 'CUSTOMER', ?, ?, 0, 1)",
+                    anT.lng("id"), "Dạ vâng. Nếu thay linh kiện thì máy có mất dữ liệu không shop?", Database.ts(nowT.minusMinutes(35)));
+        }
 
         fillAddresses(db);
         app.settings.put("sample_addresses_done", "true");

@@ -37,6 +37,14 @@ public final class KiemThu {
     @FunctionalInterface
     interface Action { void run() throws Exception; }
 
+    private static String unzipText(byte[] zip, String name) throws Exception {
+        try (ZipInputStream z = new ZipInputStream(new ByteArrayInputStream(zip))) {
+            for (var e = z.getNextEntry(); e != null; e = z.getNextEntry())
+                if (e.getName().equals(name)) return new String(z.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+        return "";
+    }
+
     private static void check(String name, boolean ok) {
         if (ok) { pass++; System.out.println("  [ĐẠT]  " + name); }
         else { fail++; failures.add(name); System.out.println("  [LỖI]  " + name); }
@@ -210,7 +218,7 @@ public final class KiemThu {
         byte[] xlsx = app.reports.exportXlsx(admin, vn.baohanh.service.ReportService.period("", ""));
         int entries = 0;
         try (ZipInputStream z = new ZipInputStream(new ByteArrayInputStream(xlsx))) { while (z.getNextEntry() != null) entries++; }
-        check("File Excel là gói zip hợp lệ có 7 sheet", entries == 5 + 7);
+        check("File Excel là gói zip hợp lệ có 11 sheet (7 báo cáo + 4 thống kê lỗi)", entries == 5 + 11);
         Row bk = app.backup.create(admin, "thu-cong");
         app.catalog.save(admin, "brand", 0, m("name", "Hãng tạo sau sao lưu"));
         app.backup.restore(admin, bk.str("name"));
@@ -370,6 +378,241 @@ public final class KiemThu {
             app.settings.put("social_link", "javascript:alert(1)");
             Row sp = app.portal.shopPage();
             check("Trang cửa hàng có giờ mở cửa, chặn liên kết không phải http(s)", "T2–T7: 8:00 – 20:00".equals(sp.str("open_hours")) && sp.str("social_link").isEmpty());
+
+            section("13. Tin nhắn giữa khách và cửa hàng trong phiếu");
+            app.messages.customerSend(khA, openT, "Máy em khi nào xong ạ?");
+            check("Khách nhắn được về phiếu của mình", app.messages.customerThread(khA, openT).size() == 1);
+            expectError("Khách khác không đọc được hội thoại", null, () -> app.messages.customerThread(kh1b, openT));
+            expectError("Khách khác không nhắn vào phiếu người khác", null, () -> app.messages.customerSend(kh1b, openT, "xin chào"));
+            expectError("Không gửi tin trống", "trống", () -> app.messages.customerSend(khA, openT, "   "));
+            expectError("Tin quá dài bị chặn", "tối đa", () -> app.messages.customerSend(khA, openT, "x".repeat(1001)));
+            check("Nhân viên thấy hội thoại chưa đọc + số trên menu", app.messages.conversations(rec, true).stream().anyMatch(x -> x.lng("ticket_id") == openT)
+                    && ((Row) app.warranty.dashboard(rec)).lng("unread_messages") >= 1);
+            app.messages.staffThread(tech, openT);
+            check("Mở hội thoại → đánh dấu đã đọc", app.messages.conversations(rec, true).stream().noneMatch(x -> x.lng("ticket_id") == openT));
+            app.messages.staffSend(tech, openT, "Dạ chiều mai anh/chị qua lấy được ạ");
+            check("Khách thấy tin trả lời chưa đọc", ((Row) app.customers.me(khA)).lng("unread_messages") == 1);
+            app.messages.customerThread(khA, openT);
+            check("Khách mở hội thoại → hết tin chưa đọc", ((Row) app.customers.me(khA)).lng("unread_messages") == 0);
+            check("Nhân viên trả lời → xếp tin SMS báo khách", db.scalar("SELECT COUNT(*) FROM notification WHERE event = 'MESSAGE' AND ticket_id = ?", openT) == 1);
+            app.notify.processDue();
+            check("SMS báo khách có nội dung trả lời (không dấu)", gia.of("SMS").stream().anyMatch(x -> x.contains("chieu mai")));
+            expectError("Nhân viên gửi tin trống bị chặn", "trống", () -> app.messages.staffSend(tech, openT, ""));
+            for (int i = 0; i < 9; i++) app.messages.customerSend(khA, openT, "Tin " + i);
+            expectError("Chống spam: tối đa 10 tin / 10 phút", "quá nhanh", () -> app.messages.customerSend(khA, openT, "Tin nữa"));
+
+            section("14. Lịch hẹn theo ngày / tuần");
+            LocalDate tmr = LocalDate.now().plusDays(1);
+            long apId = db.insert("INSERT INTO service_request (code, customer_id, warranty_id, issue, appointment, status, created_at) "
+                    + "VALUES ('YC-TEST', ?, ?, 'Hẹn thử', ?, 'CONFIRMED', ?)", kh3, wn.lng("id"), tmr.toString(), Database.now());
+            Row cal = app.calendar.events(rec, LocalDate.now().toString(), LocalDate.now().plusDays(6).toString(), 0);
+            @SuppressWarnings("unchecked") List<Row> evs = (List<Row>) cal.get("events");
+            check("Lịch tuần có lịch khách hẹn mang máy tới đúng ngày", evs.stream().anyMatch(e -> "APPOINTMENT".equals(e.str("kind"))
+                    && e.lng("request_id") == apId && tmr.toString().equals(e.str("date"))));
+            String due = db.one("SELECT due_date FROM ticket WHERE id = ?", openT).str("due_date");
+            check("Lịch có hẹn trả máy của phiếu đang sửa", evs.stream().anyMatch(e -> e.get("ticket_id") != null && e.lng("ticket_id") == openT)
+                    || LocalDate.parse(due).isAfter(LocalDate.now().plusDays(6)));
+            @SuppressWarnings("unchecked") List<Row> techEv = (List<Row>) app.calendar.events(tech, LocalDate.now().toString(), LocalDate.now().plusDays(6).toString(), 0).get("events");
+            check("Kỹ thuật viên không thấy lịch khách hẹn (chỉ phiếu)", techEv.stream().noneMatch(e -> "APPOINTMENT".equals(e.str("kind"))));
+            db.update("UPDATE ticket SET due_date = ? WHERE id = ?", LocalDate.now().minusDays(3).toString(), openT);
+            @SuppressWarnings("unchecked") List<Row> todayEv = (List<Row>) app.calendar.events(rec, LocalDate.now().toString(), LocalDate.now().toString(), 0).get("events");
+            check("Phiếu quá hẹn hiện ở ngày hôm nay", todayEv.stream().anyMatch(e -> "OVERDUE".equals(e.str("kind")) && e.lng("ticket_id") == openT));
+            expectError("Ngày sai định dạng", "không hợp lệ", () -> app.calendar.events(rec, "abc", "", 0));
+            expectError("Không xem quá 2 tháng", "2 tháng", () -> app.calendar.events(rec, "2026-01-01", "2026-06-01", 0));
+
+            section("15. Thanh toán VietQR & bảng Kanban");
+            check("CRC16-CCITT đúng chuẩn (\"123456789\" → 29B1)", "29B1".equals(vn.baohanh.util.VietQr.crc16("123456789")));
+            String vq = vn.baohanh.util.VietQr.payload("970436", "0011001234567", 350000, "PBH-000019 Sửa máy");
+            check("Chuỗi VietQR có ngân hàng, số TK, số tiền, nội dung không dấu, CRC hợp lệ",
+                    vq.startsWith("000201010212") && vq.contains("0006970436") && vq.contains("01130011001234567") && vq.contains("5406350000")
+                    && vq.contains("PBH000019 Sua may") && vq.endsWith(vn.baohanh.util.VietQr.crc16(vq.substring(0, vq.length() - 4))));
+            check("Mã VietQR đọc được thành mã QR", QrCode.encode(vq).size > 21);
+            boolean badBin = false;
+            try { vn.baohanh.util.VietQr.payload("12", "123456", 1, ""); } catch (IllegalArgumentException e) { badBin = e.getMessage().contains("ngân hàng"); }
+            check("Sai mã ngân hàng bị chặn", badBin);
+            db.update("UPDATE ticket SET in_warranty = 0, labor_cost = 250000, status = 'READY', quote_status = 'APPROVED' WHERE id = ?", openT);
+            check("Chưa cài tài khoản ngân hàng → không hiện VietQR", !Boolean.TRUE.equals(app.warranty.vietQr(openT).get("available")));
+            app.settings.put("bank_bin", "970436");
+            app.settings.put("bank_account", "0011 0012 34567");
+            app.settings.put("bank_holder", "CUA HANG TEST");
+            Row vr = app.warranty.vietQr(openT);
+            check("Phiếu sửa xong còn phải trả → có VietQR đúng số tiền", Boolean.TRUE.equals(vr.get("available")) && vr.lng("amount") >= 250000
+                    && vr.str("payload").contains("54" + String.format("%02d", String.valueOf(vr.lng("amount")).length()) + vr.lng("amount"))
+                    && vr.str("svg").startsWith("<svg"));
+            check("Phiếu trả máy in kèm mã VietQR", app.print.render("tra-may", openT).contains("Quét mã để chuyển khoản"));
+            app.warranty.pay(rec, openT, m("method", "TRANSFER"));
+            check("Đã thanh toán → không còn VietQR", !Boolean.TRUE.equals(app.warranty.vietQr(openT).get("available")));
+
+            long cvT = cv.lng("ticket_id");
+            expectError("Chưa sửa xong thì chưa chọn thanh toán", "chưa đến bước", () -> app.messages.paymentNotice(kh3, cvT, "CASH"));
+            db.update("UPDATE ticket SET in_warranty = 0, labor_cost = 120000, status = 'READY', quote_status = 'APPROVED' WHERE id = ?", cvT);
+            app.messages.paymentNotice(kh3, cvT, "CASH");
+            check("Khách chọn trả tiền mặt khi nhận máy → nhân viên thấy trong phiếu", app.warranty.getTicket(rec, cvT).get("payment_claim") instanceof Row pc1
+                    && "CASH".equals(pc1.str("method")));
+            app.messages.paymentNotice(kh3, cvT, "TRANSFER");
+            check("Khách báo đã chuyển khoản → cập nhật lựa chọn mới nhất + tin chưa đọc cho nhân viên",
+                    app.warranty.getTicket(rec, cvT).get("payment_claim") instanceof Row pc2 && "TRANSFER".equals(pc2.str("method"))
+                    && app.messages.conversations(rec, true).stream().anyMatch(x -> x.lng("ticket_id") == cvT));
+            expectError("Khách khác không báo thanh toán phiếu người khác", null, () -> app.messages.paymentNotice(kh1b, cvT, "CASH"));
+            expectError("Cách thanh toán sai bị chặn", "không hợp lệ", () -> app.messages.paymentNotice(kh3, cvT, "BITCOIN"));
+
+            Row bd = app.warranty.board(tech);
+            @SuppressWarnings("unchecked") List<Row> bt = (List<Row>) bd.get("tickets");
+            check("Bảng Kanban có 7 cột và chỉ phiếu đang mở", ((List<?>) bd.get("columns")).size() == 7
+                    && bt.stream().noneMatch(x -> List.of("RETURNED", "CANCELLED").contains(x.str("status"))));
+            Row recv = bt.stream().filter(x -> "RECEIVED".equals(x.str("status"))).findFirst().orElse(null);
+            check("Kỹ thuật viên chỉ kéo được phiếu mới nhận sang Đang kiểm tra (không được hủy)", recv == null
+                    || (((List<?>) recv.get("next")).contains("DIAGNOSING") && !((List<?>) recv.get("next")).contains("CANCELLED")));
+            @SuppressWarnings("unchecked") List<Row> br = (List<Row>) app.warranty.board(rec).get("tickets");
+            check("Tiếp nhận không kéo được sang trạng thái kỹ thuật", br.stream().filter(x -> "RECEIVED".equals(x.str("status")))
+                    .allMatch(x -> !((List<?>) x.get("next")).contains("DIAGNOSING")));
+
+            section("16. Đặt hàng linh kiện từ nhà cung cấp");
+            long sup1 = app.catalog.save(admin, "supplier", 0, m("name", "NCC Thử", "phone", "0281234567", "email", "ncc@example.com")).lng("id");
+            long pz = app.catalog.save(admin, "part", 0, m("code", "LK-PO1", "name", "Linh kiện đặt thử", "unit", "cái", "cost_price", 50000,
+                    "sell_price", 90000, "stock", 1, "min_stock", 3)).lng("id");
+            Row sg = app.purchases.suggestions(admin).stream().filter(x -> x.lng("id") == pz).findFirst().orElse(null);
+            check("Gợi ý đặt linh kiện dưới mức tối thiểu (2×3 − 1 = 5)", sg != null && sg.lng("suggest_qty") == 5);
+            expectError("Tiếp nhận không xem/đặt hàng được", "quyền", () -> app.purchases.suggestions(rec));
+            expectError("Kỹ thuật viên không tạo được đơn", "quyền", () -> app.purchases.create(tech, m("supplier_id", sup1, "lines", List.of(m("part_id", pz, "qty", 5)))));
+            expectError("Đơn phải có nhà cung cấp", "nhà cung cấp", () -> app.purchases.create(admin, m("lines", List.of(m("part_id", pz, "qty", 5)))));
+            expectError("Đơn phải có linh kiện", "ít nhất", () -> app.purchases.create(admin, m("supplier_id", sup1, "lines", List.of())));
+            Row po = app.purchases.create(admin, m("supplier_id", sup1, "lines", List.of(m("part_id", pz, "qty", 5, "unit_cost", 48000))));
+            check("Tạo đơn nháp có mã DH-… và tổng tiền đúng", po.str("code").startsWith("DH-") && "DRAFT".equals(po.str("status")) && po.lng("total") == 240000);
+            Row sg2 = app.purchases.suggestions(admin).stream().filter(x -> x.lng("id") == pz).findFirst().orElse(null);
+            check("Đã có đơn đang về → không gợi ý đặt trùng", sg2 != null && sg2.lng("incoming") == 5 && sg2.lng("suggest_qty") == 0);
+            app.purchases.markOrdered(admin, po.lng("id"));
+            expectError("Không chốt đơn hai lần", "trạng thái", () -> app.purchases.markOrdered(admin, po.lng("id")));
+            check("Phiếu in đơn đặt hàng có tên nhà cung cấp và tổng", app.print.render("dat-hang", po.lng("id")).contains("NCC Thử")
+                    && app.print.render("dat-hang", po.lng("id")).contains("240.000"));
+            long lineId = ((List<Row>) app.purchases.get(admin, po.lng("id")).get("lines")).get(0).lng("id");
+            app.purchases.receive(admin, po.lng("id"), m("lines", List.of(m("id", lineId, "received_qty", 4))));
+            Row pzr = db.one("SELECT stock, cost_price FROM part WHERE id = ?", pz);
+            check("Nhận hàng → cộng tồn theo số thực nhận + cập nhật giá nhập", pzr.lng("stock") == 5 && pzr.lng("cost_price") == 48000);
+            check("Thẻ kho ghi nhập theo đơn", db.scalar("SELECT COUNT(*) FROM stock_movement WHERE part_id = ? AND type = 'IN' AND note LIKE ?", pz, "%" + po.str("code") + "%") == 1);
+            expectError("Đơn đã nhận thì không hủy được", "trạng thái", () -> app.purchases.cancel(admin, po.lng("id"), ""));
+            Row po2 = app.purchases.create(admin, m("supplier_id", sup1, "lines", List.of(m("part_id", pz, "qty", 2))));
+            app.purchases.cancel(admin, po2.lng("id"), "Đặt nhầm");
+            check("Hủy đơn nháp", "CANCELLED".equals(app.purchases.get(admin, po2.lng("id")).str("status")));
+            expectError("Không xóa nhà cung cấp đã có đơn", null, () -> app.catalog.delete(admin, "supplier", sup1));
+
+            section("17. KPI / hoa hồng kỹ thuật viên");
+            app.settings.put("kpi_commission_rate", "10");
+            app.settings.put("kpi_bonus_per_ticket", "20000");
+            long tkK = app.warranty.createTicket(rec, m("serial", "SNEXP2", "issue", "Thử KPI", "technician_id", tech.id())).lng("id");
+            db.update("UPDATE ticket SET in_warranty = 0, labor_cost = 300000, quote_status = 'APPROVED', status = 'READY', received_at = ?, due_date = ? WHERE id = ?",
+                    Database.ts(java.time.LocalDateTime.now().minusDays(2)), LocalDate.now().plusDays(1).toString(), tkK);
+            db.update("INSERT INTO ticket_history (ticket_id, time, status, user_id) VALUES (?, ?, 'READY', ?)", tkK, Database.now(), tech.id());
+            app.warranty.pay(rec, tkK, m("method", "CASH"));
+            long khB = app.customers.require(app.customers.register("0907777888", "SNEXP2", "abcdef"));
+            app.customers.review(khB, tkK, 5, "Tốt");
+            Row kpi = app.reports.technicianKpi(admin, vn.baohanh.service.ReportService.period("", ""));
+            @SuppressWarnings("unchecked") Row me = ((List<Row>) kpi.get("rows")).stream().filter(x -> x.lng("id") == tech.id()).findFirst().orElse(null);
+            check("KPI: đếm phiếu hoàn thành, đúng hẹn, đánh giá", me != null && me.lng("done") >= 1 && me.lng("on_time_pct") > 0 && me.lng("reviews") >= 1);
+            check("KPI: hoa hồng = thưởng/phiếu + 10% tiền công", me != null && me.lng("commission") >= 20000 + 30000);
+            check("KPI: có thời gian sửa trung bình (tính từ lúc nhận tới lúc sửa xong)", me != null && ((Number) me.get("avg_days")).doubleValue() > 0);
+            @SuppressWarnings("unchecked") List<Row> techView = (List<Row>) app.reports.technicianKpi(tech, vn.baohanh.service.ReportService.period("", "")).get("rows");
+            check("Kỹ thuật viên chỉ thấy tiền của mình", techView.stream().allMatch(x -> x.lng("id") == tech.id() ? x.get("commission") != null : x.get("commission") == null));
+            expectError("Tiếp nhận không xem KPI", "quyền", () -> app.reports.technicianKpi(rec, vn.baohanh.service.ReportService.period("", "")));
+
+            section("18. Quét mã vạch / IMEI");
+            {
+                java.awt.image.BufferedImage bar = vn.baohanh.util.Barcode.image128("356938035643809", 3, 70);
+                java.awt.image.BufferedImage photo = new java.awt.image.BufferedImage(1000, 560, java.awt.image.BufferedImage.TYPE_INT_RGB);
+                java.awt.Graphics2D g = photo.createGraphics();
+                g.setColor(new java.awt.Color(190, 190, 190));
+                g.fillRect(0, 0, 1000, 560);
+                g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g.rotate(Math.toRadians(5), 500, 280);
+                g.drawImage(bar, 500 - bar.getWidth() / 2, 280 - bar.getHeight() / 2, null);
+                g.dispose();
+                java.io.ByteArrayOutputStream jpgOut = new java.io.ByteArrayOutputStream();
+                javax.imageio.ImageIO.write(photo, "jpg", jpgOut);
+                @SuppressWarnings("unchecked") List<Row> codes = (List<Row>) app.scan.decode(rec, jpgOut.toByteArray()).get("codes");
+                check("Đọc mã Code 128 từ ảnh chụp nghiêng (JPEG)", !codes.isEmpty() && "356938035643809".equals(codes.get(0).str("text")));
+                check("Nhận ra IMEI (15 số, đúng Luhn)", !codes.isEmpty() && "IMEI".equals(codes.get(0).str("kind")));
+                java.io.ByteArrayOutputStream png = new java.io.ByteArrayOutputStream();
+                javax.imageio.ImageIO.write(vn.baohanh.util.Barcode.image128("SN-TV55X90L-0042", 2, 60), "png", png);
+                @SuppressWarnings("unchecked") List<Row> c2 = (List<Row>) app.scan.decode(rec, png.toByteArray()).get("codes");
+                check("Đọc serial chữ + số (Code 128 bộ B/C)", !c2.isEmpty() && "SN-TV55X90L-0042".equals(c2.get(0).str("text")));
+                java.io.ByteArrayOutputStream blank = new java.io.ByteArrayOutputStream();
+                javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(300, 200, java.awt.image.BufferedImage.TYPE_INT_RGB), "png", blank);
+                check("Ảnh không có mã → danh sách rỗng", ((List<?>) app.scan.decode(rec, blank.toByteArray()).get("codes")).isEmpty());
+                expectError("File không phải ảnh bị từ chối", "ảnh", () -> app.scan.decode(rec, "khong phai anh".getBytes()));
+                Row ss = app.scan.start(rec);
+                String scTok = ss.str("token");
+                check("Phiên quét có mã QR trỏ tới trang /quet/", ss.str("url").contains("/quet/" + scTok) && ss.str("qr_svg").startsWith("<svg"));
+                app.scan.submitImage(scTok, png.toByteArray());
+                app.scan.submitText(scTok, "R58T20ABCDE");
+                Row pl = app.scan.poll(rec, scTok, 0);
+                @SuppressWarnings("unchecked") List<Row> pc = (List<Row>) pl.get("codes");
+                check("Điện thoại gửi ảnh + gõ tay → máy tính nhận đủ 2 mã", pc.size() == 2 && Boolean.TRUE.equals(pl.get("phone_seen")));
+                check("Hỏi lại từ vị trí cuối → không lặp mã cũ", ((List<?>) app.scan.poll(rec, scTok, 2).get("codes")).isEmpty());
+                expectError("Người khác không xem được phiên quét", "hết hạn", () -> app.scan.poll(admin, scTok, 0));
+                expectError("Serial gõ tay có ký tự lạ bị chặn", "không hợp lệ", () -> app.scan.submitText(scTok, "<script>"));
+                app.scan.stop(rec, scTok);
+                expectError("Phiên đã đóng → điện thoại không gửi được", "hết hạn", () -> app.scan.submitText(scTok, "ABC123"));
+                check("Phiếu tiếp nhận in kèm mã vạch serial", app.print.render("tiep-nhan", tkK).contains("crispEdges"));
+            }
+
+            section("19. Nhập Excel khách hàng / sản phẩm / linh kiện");
+            {
+                byte[] cx = new Xlsx().sheet("KH", List.of("STT", "Họ và tên", "SĐT", "Địa chỉ", "Email"), List.of(
+                        List.of(1, "Khách Nhập Một", "0911222333", "1 Lê Lợi", ""),
+                        List.of(2, "Khách Mất Số Không", 911222444L, "", "kh2@example.com"),
+                        List.of(3, "Sai Số", "12345", "", ""),
+                        List.of(4, "", "0911222333", "99 Trần Hưng Đạo", ""))).toBytes();
+                Row pv = app.imports.preview(rec, "customer", cx, "kh.xlsx");
+                check("Xem trước: 2 thêm mới, 1 cập nhật, 1 lỗi", pv.lng("created") == 2 && pv.lng("updated") == 1 && pv.lng("errors") == 1);
+                check("Xem trước không lưu gì vào CSDL", db.scalar("SELECT COUNT(*) FROM customer WHERE phone IN ('0911222333','0911222444')") == 0);
+                check("Nhận cột theo tên gọi khác (Họ và tên, SĐT)", ((List<Row>) pv.get("mapping")).stream().anyMatch(x -> "phone".equals(x.str("field")) && "SĐT".equals(x.str("column"))));
+                Row cm = app.imports.commit(rec, "customer", cx, "kh.xlsx");
+                check("Nhập thật: lưu dòng hợp lệ, bỏ dòng lỗi", cm.lng("created") == 2 && db.scalar("SELECT COUNT(*) FROM customer WHERE phone IN ('0911222333','0911222444')") == 2);
+                check("Excel mất số 0 đầu → tự thêm lại", db.one("SELECT email FROM customer WHERE phone = '0911222444'") != null);
+                check("Dòng trùng SĐT cập nhật địa chỉ, ô trống giữ tên cũ",
+                        "99 Trần Hưng Đạo".equals(db.one("SELECT address FROM customer WHERE phone = '0911222333'").str("address"))
+                        && "Khách Nhập Một".equals(db.one("SELECT name FROM customer WHERE phone = '0911222333'").str("name")));
+                check("Ghi nhật ký nhập Excel", db.scalar("SELECT COUNT(*) FROM audit_log WHERE action = 'NHẬP EXCEL'") >= 1);
+                expectError("Kỹ thuật viên không nhập khách hàng", "quyền", () -> app.imports.preview(tech, "customer", cx, "kh.xlsx"));
+                expectError("Thiếu cột bắt buộc → báo rõ", "thiếu cột", () -> app.imports.preview(rec, "customer",
+                        new Xlsx().sheet("x", List.of("Tên"), List.of(List.of("A"))).toBytes(), "x.xlsx"));
+                byte[] px = new Xlsx().sheet("SP", List.of("Mã model *", "Tên sản phẩm *", "Hãng *", "Loại *", "Bảo hành (tháng)", "Giá bán"), List.of(
+                        List.of("IMP-001", "Máy nhập thử", "Hãng Nhập Mới", "Loại Nhập Mới", 18, "1.990.000"))).toBytes();
+                Row pp = app.imports.commit(admin, "product", px, "sp.xlsx");
+                Row impProd = db.one("SELECT p.default_months, p.price, b.name AS brand FROM product p JOIN brand b ON b.id = p.brand_id WHERE p.model_code = 'IMP-001'");
+                check("Nhập sản phẩm: tự tạo hãng/loại mới, đọc giá có dấu chấm", impProd != null && impProd.lng("default_months") == 18 && impProd.lng("price") == 1_990_000
+                        && ((List<?>) pp.get("new_brands")).contains("Hãng Nhập Mới"));
+                byte[] csv = "Mã linh kiện;Tên linh kiện;Giá nhập;Tồn kho\nLK-CSV1;Linh kiện từ CSV;\"1.200.000\";7\n".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                app.imports.commit(admin, "part", csv, "lk.csv");
+                Row lk = db.one("SELECT id, stock, cost_price FROM part WHERE code = 'LK-CSV1'");
+                check("Nhập linh kiện từ CSV (dấu ;) kèm tồn kho ban đầu + thẻ kho", lk != null && lk.lng("stock") == 7 && lk.lng("cost_price") == 1_200_000
+                        && db.scalar("SELECT COUNT(*) FROM stock_movement WHERE part_id = ?", lk.lng("id")) == 1);
+                Row again = app.imports.commit(admin, "part", "Mã linh kiện;Tên linh kiện;Tồn kho\nLK-CSV1;Linh kiện từ CSV;9\n".getBytes(java.nio.charset.StandardCharsets.UTF_8), "lk.csv");
+                check("Nhập lại linh kiện đã có: không đổi tồn kho, có ghi chú", db.scalar("SELECT stock FROM part WHERE code = 'LK-CSV1'") == 7
+                        && ((List<Row>) again.get("rows")).get(0).str("message").contains("giữ nguyên"));
+                byte[] tpl = app.imports.template(admin, "part");
+                check("File mẫu đọc lại được, có tiêu đề cột", vn.baohanh.util.SheetReader.read(tpl, "m.xlsx").get(0).contains("Mã linh kiện *"));
+            }
+
+            section("20. Thống kê lỗi thường gặp");
+            {
+                check("Phân loại lỗi theo từ khóa (có dấu / không dấu)", vn.baohanh.service.FaultService.classify("Không lên nguồn, pin phồng").containsAll(List.of("POWER", "BATTERY"))
+                        && vn.baohanh.service.FaultService.classify("man hinh soc ngang").contains("SCREEN"));
+                check("Mô tả lạ → nhóm Khác", vn.baohanh.service.FaultService.classify("abc xyz").equals(List.of("OTHER")));
+                Row fr = app.faults.report(tech, vn.baohanh.service.ReportService.period("", ""));
+                @SuppressWarnings("unchecked") List<Row> gr = (List<Row>) fr.get("groups");
+                check("Báo cáo có nhóm lỗi, model, linh kiện", fr.lng("total") > 0 && !gr.isEmpty() && !((List<?>) fr.get("models")).isEmpty());
+                long sumPct = Math.round(gr.stream().mapToDouble(x -> ((Number) x.get("pct")).doubleValue()).sum());
+                check("Tỷ lệ % tính trên tổng số phiếu", sumPct >= 99);
+                long rid = app.warranty.createTicket(rec, m("serial", "SNEXP2", "issue", "Lại không lên nguồn")).lng("id");
+                @SuppressWarnings("unchecked") List<Row> rep = (List<Row>) app.faults.report(admin, vn.baohanh.service.ReportService.period("", "")).get("repeats");
+                check("Phát hiện máy phải sửa lại nhiều lần", rep.stream().anyMatch(x -> "SNEXP2".equals(x.str("serial")) && x.lng("times") >= 2));
+                app.warranty.changeStatus(rec, rid, m("status", "CANCELLED", "note", "Thử"));
+                expectError("Tiếp nhận không xem thống kê lỗi", "quyền", () -> app.faults.report(rec, vn.baohanh.service.ReportService.period("", "")));
+                byte[] xl = app.reports.exportXlsx(admin, vn.baohanh.service.ReportService.period("", ""));
+                check("File Excel báo cáo có thêm trang Nhóm lỗi / Model hay hỏng", unzipText(xl, "xl/workbook.xml").contains("Nhóm lỗi")
+                        && unzipText(xl, "xl/workbook.xml").contains("Model hay hỏng"));
+            }
         }
 
         db.close();

@@ -22,6 +22,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import vn.baohanh.db.Row;
@@ -129,12 +130,12 @@ public class TicketDialog extends JDialog {
         info.add(Ui.kv("Gửi hãng", t.str("service_center_name")));
         if (!t.str("invoice_no").isEmpty()) info.add(Ui.kv("Hóa đơn sửa chữa", t.str("invoice_no")));
         body.add(left(info));
-        body.add(left(new JLabel("<html><span style='color:#5c6066'>Địa chỉ khách:</span> "
+        body.add(left(new JLabel("<html><span style='color:" + Ui.hex(Ui.MUTE) + "'>Địa chỉ khách:</span> "
                 + Fmt.html(t.str("customer_address").isEmpty() ? "—" : t.str("customer_address"))
-                + (t.str("customer_email").isEmpty() ? "" : " &nbsp;·&nbsp; <span style='color:#5c6066'>Email:</span> " + Fmt.html(t.str("customer_email")))
-                + "<br><span style='color:#5c6066'>Lỗi khách báo:</span> " + Fmt.html(t.str("issue"))
-                + (t.str("diagnosis").isEmpty() ? "" : "<br><span style='color:#5c6066'>Kết luận kỹ thuật:</span> " + Fmt.html(t.str("diagnosis")))
-                + (t.get("review") instanceof Row rv ? "<br><span style='color:#5c6066'>Khách đánh giá:</span> <b style='color:#b45309'>" + rv.lng("stars") + "/5 sao</b> "
+                + (t.str("customer_email").isEmpty() ? "" : " &nbsp;·&nbsp; <span style='color:" + Ui.hex(Ui.MUTE) + "'>Email:</span> " + Fmt.html(t.str("customer_email")))
+                + "<br><span style='color:" + Ui.hex(Ui.MUTE) + "'>Lỗi khách báo:</span> " + Fmt.html(t.str("issue"))
+                + (t.str("diagnosis").isEmpty() ? "" : "<br><span style='color:" + Ui.hex(Ui.MUTE) + "'>Kết luận kỹ thuật:</span> " + Fmt.html(t.str("diagnosis")))
+                + (t.get("review") instanceof Row rv ? "<br><span style='color:" + Ui.hex(Ui.MUTE) + "'>Khách đánh giá:</span> <b style='color:" + Ui.hex(Ui.WARN) + "'>" + rv.lng("stars") + "/5 sao</b> "
                         + Fmt.html(rv.str("comment")) : "")
                 + "</html>")));
 
@@ -234,6 +235,10 @@ public class TicketDialog extends JDialog {
             method.addItem(new Ui.Item("", "— Hình thức thanh toán —"));
             WarrantyService.PAY_METHODS.forEach((k, v) -> method.addItem(new Ui.Item(k, v)));
             method.setEnabled(t.lng("total") > 0);
+            if (t.get("payment_claim") instanceof Row pc) {
+                for (int i = 0; i < method.getItemCount(); i++)
+                    if (pc.str("method").equals(String.valueOf(method.getItemAt(i).id()))) method.setSelectedIndex(i);
+            }
             Ui.wide(method, 230);
             JTextField note = new JTextField(24);
             sp.add(left(Ui.flow(method, new JLabel("Ghi chú"), note, Ui.primary(t.lng("total") > 0 ? "Thu tiền & trả máy" : "Trả máy cho khách", () -> {
@@ -246,8 +251,75 @@ public class TicketDialog extends JDialog {
                     if (Ui.confirm(this, "Đã trả máy cho khách. In phiếu trả máy / hóa đơn?")) Ui.print(ctx, this, "tra-may", id);
                 }
             }))));
+            if (t.get("payment_claim") instanceof Row pc)
+                sp.add(left(new JLabel("<html><span style='color:" + Ui.hex(Ui.ACCENT_TEXT) + "'>Khách báo (" + Fmt.dateTime(pc.str("time")) + "): " + Fmt.html(pc.str("text")) + "</span></html>")));
+            if (t.lng("total") > 0) {
+                final Row[] q = new Row[1];
+                Ui.run(this, () -> q[0] = ctx.app().warranty.vietQr(id));
+                if (q[0] != null && Boolean.TRUE.equals(q[0].get("available"))) {
+                    JLabel qInfo = new JLabel("<html><b>Khách chuyển khoản: quét mã VietQR</b><br>" + Fmt.html(q[0].str("bank")) + " · STK <b>"
+                            + Fmt.html(q[0].str("account")) + "</b>" + (q[0].str("holder").isEmpty() ? "" : " · " + Fmt.html(q[0].str("holder")))
+                            + "<br>Số tiền <b>" + Fmt.money(q[0].lng("amount")) + "</b> · Nội dung <b>" + Fmt.html(q[0].str("info"))
+                            + "</b><br><span style='color:" + Ui.hex(Ui.MUTE) + "'>Nhận được tiền thì chọn \"Chuyển khoản\" rồi bấm Thu tiền.</span></html>");
+                    sp.add(Box.createVerticalStrut(6));
+                    sp.add(left(Ui.flow(Ui.qr(q[0].str("payload"), 150), qInfo)));
+                } else if (q[0] != null) {
+                    sp.add(left(Ui.sub("VietQR: " + q[0].str("reason"))));
+                }
+            }
             body.add(sp);
         }
+
+        // ---------- Trao đổi với khách ----------
+        JPanel chat = section("Trao đổi với khách (khách nhắn từ cổng tra cứu)");
+        javax.swing.JEditorPane thread = new javax.swing.JEditorPane("text/html", "");
+        thread.setEditable(false);
+        thread.setBackground(Ui.SOFT);
+        thread.putClientProperty(javax.swing.JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+        thread.setFont(Ui.font(java.awt.Font.PLAIN, 13));
+        JScrollPane tsp = new JScrollPane(thread);
+        tsp.setPreferredSize(new java.awt.Dimension(820, 200));
+        tsp.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, 220));
+        tsp.setAlignmentX(Component.LEFT_ALIGNMENT);
+        tsp.setBorder(BorderFactory.createLineBorder(Ui.LINE));
+        String customer = t.str("customer_name");
+        Runnable[] drawChat = new Runnable[1];
+        java.util.function.Consumer<java.util.List<Row>> draw = list -> {
+            StringBuilder hb = new StringBuilder("<html><body style='font-family:sans-serif;padding:4px'>");
+            if (list.isEmpty()) hb.append("<p style='color:" + Ui.hex(Ui.MUTE) + "'>Chưa có tin nhắn. Bạn có thể nhắn trước cho khách.</p>");
+            for (Row m : list) {
+                boolean staff = "STAFF".equals(m.str("sender"));
+                hb.append("<table cellpadding='0' cellspacing='0'><tr>").append(staff ? "<td width='60'></td>" : "").append("<td>")
+                  .append("<table cellpadding='7' cellspacing='0' bgcolor='").append(staff ? Ui.hex(Ui.ACCENT) : Ui.hex(Ui.isDark() ? Ui.SOFT : new java.awt.Color(0xE2E8F0))).append("'><tr><td style='color:")
+                  .append(staff ? "#ffffff" : Ui.hex(Ui.INK)).append("'>").append(Fmt.html(m.str("body")).replace("\n", "<br>"))
+                  .append("<br><span style='font-size:9px;color:").append(staff ? "#dbe6ff" : Ui.hex(Ui.MUTE)).append("'>")
+                  .append(Fmt.html(staff ? (m.str("staff_name").isEmpty() ? "Cửa hàng" : m.str("staff_name")) : customer))
+                  .append(" · ").append(Fmt.dateTime(m.str("created_at"))).append("</span></td></tr></table></td></tr></table><br>");
+            }
+            thread.setText(hb.append("</body></html>").toString());
+            SwingUtilities.invokeLater(() -> tsp.getVerticalScrollBar().setValue(tsp.getVerticalScrollBar().getMaximum()));
+        };
+        drawChat[0] = () -> {
+            final java.util.List<Row>[] l = new java.util.List[1];
+            if (Ui.run(this, () -> l[0] = ctx.app().messages.staffThread(ctx.user(), id))) { draw.accept(l[0]); ctx.frame().refreshBadges(); }
+        };
+        drawChat[0].run();
+        chat.add(tsp);
+        chat.add(Box.createVerticalStrut(6));
+        javax.swing.JTextArea reply = new javax.swing.JTextArea(2, 50);
+        reply.setLineWrap(true);
+        reply.setWrapStyleWord(true);
+        reply.setFont(Ui.font(java.awt.Font.PLAIN, 14));
+        JScrollPane rsp = new JScrollPane(reply);
+        rsp.setPreferredSize(new java.awt.Dimension(640, 52));
+        chat.add(left(Ui.flow(rsp, Ui.primary("Gửi cho khách", () -> {
+            final java.util.List<Row>[] l = new java.util.List[1];
+            if (Ui.run(this, () -> l[0] = ctx.app().messages.staffSend(ctx.user(), id, reply.getText()))) {
+                reply.setText("");
+                draw.accept(l[0]);
+            }
+        }))));
+        body.add(chat);
 
         // ---------- Ảnh tình trạng máy ----------
         body.add(PhotoPanel.build(ctx, this, id, Boolean.TRUE.equals(a.get("photos")), this::reload));

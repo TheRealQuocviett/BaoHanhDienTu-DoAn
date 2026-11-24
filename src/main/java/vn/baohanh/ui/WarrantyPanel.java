@@ -161,7 +161,7 @@ public final class WarrantyPanel {
             Row w = ctx.app().warranty.getWarranty(ctx.user(), warrantyId);
             JPanel root = new JPanel(new BorderLayout());
             root.setBorder(Ui.pad(12, 12));
-            root.setBackground(Color.WHITE);
+            root.setBackground(Ui.CARD);
             root.add(build(ctx, w, () -> { d.dispose(); if (after != null) after.run(); }), BorderLayout.NORTH);
             d.setContentPane(new JScrollPane(root));
             d.setSize(860, Math.min(720, root.getPreferredSize().height + 60));

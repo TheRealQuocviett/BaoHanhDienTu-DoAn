@@ -23,6 +23,12 @@ public class AppContext {
     public final PhotoService photos;
     public final BackupService backup;
     public final vn.baohanh.notify.NotificationService notify;
+    public final MessageService messages;
+    public final CalendarService calendar;
+    public final PurchaseService purchases;
+    public final FaultService faults;
+    public final ImportService imports;
+    public final ScanService scan;
 
     public AppContext(Database db, int port) {
         this.db = db;
@@ -32,6 +38,7 @@ public class AppContext {
         this.warranty = new WarrantyService(db, audit);
         this.inventory = new InventoryService(db, audit);
         this.settings = new SettingService(db, audit);
+        this.warranty.setSettings(settings);
         this.settings.setPort(port);
         this.reports = new ReportService(db);
         this.portal = new PortalService(db, settings);
@@ -44,6 +51,14 @@ public class AppContext {
         this.warranty.setNotifier(notify);
         this.requests.setNotifier(notify);
         this.requests.setPhotos(photos);
+        this.messages = new MessageService(db, audit);
+        this.messages.setNotifier(notify);
+        this.calendar = new CalendarService(db);
+        this.purchases = new PurchaseService(db, audit);
+        this.print.setPurchases(purchases);
         this.customers.setPhotos(photos);
+        this.faults = new FaultService(db);
+        this.imports = new ImportService(db, catalog, audit);
+        this.scan = new ScanService(settings);
     }
 }

@@ -61,6 +61,8 @@ public class CatalogView extends MainFrame.View {
                 btns.add(Ui.button("Kiểm kê", () -> stock(false)));
             }
         }
+        if (canWrite && List.of("customer", "product", "part").contains(key))
+            btns.add(Ui.button("Nhập Excel", () -> ImportDialog.open(ctx, key, def.title, this::refresh)));
         if (canWrite) {
             btns.add(Ui.button("Sửa", () -> { Row r = Ui.selected(table, model); if (r == null) Ui.info(this, "Chọn một dòng"); else edit(r.lng("id")); }));
             btns.add(Ui.primary("+ Thêm mới", () -> edit(0)));

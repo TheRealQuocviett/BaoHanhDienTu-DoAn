@@ -49,9 +49,37 @@ public class PrintService {
     /** Đường dẫn tương đối, vd /in/tiep-nhan/12?exp=...&sig=... */
     public String link(User u, String kind, long id) {
         if (u == null) throw new AppException(401, "Vui lòng đăng nhập");
-        if (!List.of("tiep-nhan", "tra-may", "bao-hanh").contains(kind)) throw new AppException("Mẫu phiếu không hợp lệ");
+        if (!List.of("tiep-nhan", "tra-may", "bao-hanh", "dat-hang").contains(kind)) throw new AppException("Mẫu phiếu không hợp lệ");
+        if ("dat-hang".equals(kind)) vn.baohanh.service.Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
         long exp = System.currentTimeMillis() + LINK_TTL_MS;
         return "/in/" + kind + "/" + id + "?exp=" + exp + "&sig=" + sign(kind + ":" + id + ":" + exp);
+    }
+
+    private vn.baohanh.service.PurchaseService purchases;
+
+    public void setPurchases(vn.baohanh.service.PurchaseService p) { this.purchases = p; }
+
+    /** Phiếu đặt hàng gửi nhà cung cấp. */
+    @SuppressWarnings("unchecked")
+    private String purchaseOrder(Row o, Map<String, String> shop, String base) {
+        StringBuilder lines = new StringBuilder();
+        int i = 0;
+        for (Row l : (List<Row>) o.get("lines"))
+            lines.append("<tr><td>").append(++i).append("</td><td>").append(h(l.str("name"))).append("<br><small>").append(h(l.str("code")))
+                 .append("</small></td><td class=\"r\">").append(l.lng("qty")).append(" ").append(h(l.str("unit")))
+                 .append("</td><td class=\"r\">").append(Fmt.money(l.lng("unit_cost"))).append("</td><td class=\"r\">")
+                 .append(Fmt.money(l.lng("amount"))).append("</td></tr>");
+        String body = "<section class=\"grid\">" + kv("Nhà cung cấp", o.str("supplier_name")) + kv("Người liên hệ", o.str("supplier_contact"))
+                + kv("Điện thoại", o.str("supplier_phone")) + kv("Email", o.str("supplier_email"))
+                + kv("Ngày lập", Fmt.dateTime(o.str("created_at"))) + kv("Ngày cần hàng", o.str("expected_date").isEmpty() ? "Sớm nhất có thể" : Fmt.date(o.str("expected_date")))
+                + kv("Người lập", o.str("created_by_name")) + kv("Trạng thái", o.str("status_label")) + "</section>"
+                + "<table class=\"lines\"><thead><tr><th>#</th><th>Linh kiện</th><th class=\"r\">Số lượng</th><th class=\"r\">Đơn giá</th><th class=\"r\">Thành tiền</th></tr></thead>"
+                + "<tbody>" + lines + "</tbody><tfoot><tr><td colspan=\"4\" class=\"r\">TỔNG CỘNG</td><td class=\"r\">" + Fmt.money(o.lng("total"))
+                + "</td></tr></tfoot></table>"
+                + (o.str("note").isEmpty() ? "" : "<p><b>Ghi chú:</b> " + h(o.str("note")) + "</p>")
+                + "<p class=\"policy\">Đề nghị nhà cung cấp xác nhận số lượng, đơn giá và ngày giao. Hàng giao kèm hóa đơn / phiếu xuất kho ghi mã đơn "
+                + h(o.str("code")) + ".</p>" + signatures("Nhà cung cấp xác nhận", "Người lập đơn");
+        return page("ĐƠN ĐẶT HÀNG LINH KIỆN", shop, o.str("code"), o.str("code"), "Mã đơn", body);
     }
 
     /** Liên kết cho khách (quyền đã được kiểm tra ở CustomerService.checkPrint). */
@@ -90,11 +118,27 @@ public class PrintService {
             case "tiep-nhan" -> receipt(warranty.getTicket(SYSTEM, id), shop, base, photoStrip(id));
             case "tra-may" -> returnSlip(warranty.getTicket(SYSTEM, id), shop, base);
             case "bao-hanh" -> certificate(warranty.getWarranty(SYSTEM, id), shop, base);
+            case "dat-hang" -> purchaseOrder(purchases.get(SYSTEM, id), shop, base);
             default -> throw new AppException("Mẫu phiếu không hợp lệ");
         };
     }
 
     private static String h(Object o) { return Fmt.html(o); }
+
+    /** Khối mã VietQR chuyển khoản (chỉ khi phiếu còn phải trả và cửa hàng đã cài tài khoản ngân hàng). */
+    private String vietQrBlock(Row t) {
+        try {
+            Row q = warranty.vietQr(t.lng("id"));
+            if (!Boolean.TRUE.equals(q.get("available"))) return "";
+            return "<section style=\"display:flex;gap:14px;align-items:center;border:1px dashed #94a3b8;border-radius:8px;padding:8px 12px;margin:8px 0\">"
+                    + "<div style=\"width:120px;flex:none\">" + q.str("svg") + "</div><div><b>Quét mã để chuyển khoản (VietQR)</b><br>"
+                    + h(q.str("bank")) + " · STK <b>" + h(q.str("account")) + "</b>" + (q.str("holder").isEmpty() ? "" : " · " + h(q.str("holder")))
+                    + "<br>Số tiền: <b>" + Fmt.money(q.lng("amount")) + "</b> · Nội dung: <b>" + h(q.str("info")) + "</b>"
+                    + "<br><small>Mở app ngân hàng → Quét QR. Số tiền và nội dung được điền sẵn.</small></div></section>";
+        } catch (Exception e) {
+            return "";
+        }
+    }
 
     private String page(String title, Map<String, String> shop, String code, String qrText, String qrCaption, String body) {
         String qr = QrCode.encode(qrText).toSvg(2);
@@ -133,6 +177,17 @@ public class PrintService {
         return n == 0 ? "" : "<div class=\"photos\"><span>Ảnh tình trạng máy khi nhận</span><div>" + sb + "</div></div>";
     }
 
+    /** Mã vạch Code 128 của serial: dán lên máy / phiếu, lần sau bấm "Quét" là đọc lại được. */
+    private static String serialBarcode(String serial) {
+        try {
+            return "<div style=\"margin:10px 0 4px;text-align:center\"><div style=\"display:inline-block;width:min(100%," + (60 + serial.length() * 22)
+                    + "px);height:46px\">" + vn.baohanh.util.Barcode.svg128(serial, 60).replace("<svg ", "<svg style=\"width:100%;height:100%\" ")
+                    + "</div><div style=\"font:12px monospace;letter-spacing:2px\">" + h(serial) + "</div></div>";
+        } catch (IllegalArgumentException e) {
+            return "";                                         // serial có ký tự ngoài ASCII
+        }
+    }
+
     private String receipt(Row t, Map<String, String> shop, String base, String photoHtml) {
         Row w = (Row) t.get("warranty");
         boolean inW = Boolean.TRUE.equals(t.get("in_warranty"));
@@ -143,6 +198,7 @@ public class PrintService {
                 + kv("Sản phẩm", t.str("product_name")) + kv("Serial / IMEI", t.str("serial"))
                 + kv("Mã bảo hành", w.str("code")) + kv("Hạn bảo hành", Fmt.date(w.str("expiry_date")))
                 + "</section>"
+                + serialBarcode(t.str("serial"))
                 + "<div class=\"badge " + (inW ? "ok" : "warn") + "\">" + (inW ? "TRONG THỜI HẠN BẢO HÀNH" : "HẾT HẠN BẢO HÀNH – SỬA CHỮA CÓ TÍNH PHÍ") + "</div>"
                 + "<table><tr><th>Lỗi khách báo</th><td>" + h(t.str("issue")) + "</td></tr>"
                 + "<tr><th>Phụ kiện kèm theo</th><td>" + h(t.str("accessories").isEmpty() ? "Không" : t.str("accessories")) + "</td></tr>"
@@ -189,6 +245,7 @@ public class PrintService {
                 + "<tbody>" + parts + "</tbody><tfoot><tr><td colspan=\"4\" class=\"r\">TỔNG THANH TOÁN</td><td class=\"r\">"
                 + Fmt.money(t.lng("total")) + "</td></tr></tfoot></table>"
                 + "<section class=\"grid\">" + pay + "</section>"
+                + vietQrBlock(t)
                 + "<p class=\"policy\">Linh kiện thay thế được bảo hành 3 tháng kể từ ngày trả máy. Vui lòng kiểm tra máy trước khi rời cửa hàng.</p>"
                 + signatures("Khách hàng", "Nhân viên trả máy");
         String title = t.lng("total") > 0 ? "PHIẾU TRẢ MÁY – HÓA ĐƠN SỬA CHỮA" : "PHIẾU TRẢ MÁY BẢO HÀNH";

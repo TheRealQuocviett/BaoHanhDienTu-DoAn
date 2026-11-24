@@ -30,7 +30,7 @@ public class LookupView extends MainFrame.View {
         results.setOpaque(false);
         JPanel center = new JPanel(new BorderLayout(0, 12));
         center.setOpaque(false);
-        center.add(Ui.flow(q, Ui.primary("Tra cứu", this::search)), BorderLayout.NORTH);
+        center.add(Ui.flow(q, Ui.button("Quét mã", () -> ScanDialog.open(ctx, this, q, this::search)), Ui.primary("Tra cứu", this::search)), BorderLayout.NORTH);
         JScrollPane sp = new JScrollPane(results);
         sp.setBorder(null);
         sp.getViewport().setOpaque(false);

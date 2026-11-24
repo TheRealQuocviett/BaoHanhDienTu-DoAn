@@ -230,6 +230,7 @@ public class ReportService {
             rr.add(List.of(x1.str("created_at").replace('T', ' '), x1.lng("stars"), x1.str("code"), x1.str("customer"), x1.str("product"),
                     x1.str("technician"), x1.str("comment")));
         x.sheet("Đánh giá", List.of("Thời gian", "Số sao", "Mã phiếu", "Khách hàng", "Sản phẩm", "Kỹ thuật viên", "Nhận xét"), rr);
+        new FaultService(db).addSheets(x, u, p);
         return x.toBytes();
     }
 
@@ -246,5 +247,73 @@ public class ReportService {
     /** Dùng cho tên file xuất. */
     public static String fileName(Period p) {
         return "bao-cao-bao-hanh_" + p.from() + "_" + p.to() + ".xlsx";
+    }
+
+    // ===================== KPI / HOA HỒNG KỸ THUẬT VIÊN =====================
+
+    /**
+     * Bảng xếp hạng kỹ thuật viên trong kỳ (theo ngày trả máy).
+     * Hoa hồng = thưởng mỗi phiếu hoàn thành + % tiền công các phiếu có phí (cài ở Thông tin cửa hàng).
+     * Điểm xếp hạng = số phiếu × 10 + điểm đánh giá TB × 10 + % đúng hẹn × 0,3 − số ngày sửa TB × 2.
+     * Quản lý xem cả bảng; kỹ thuật viên xem bảng xếp hạng nhưng chỉ thấy tiền của chính mình.
+     */
+    public Row technicianKpi(User u, Period p) throws SQLException {
+        Auth.require(u, Role.ADMIN, Role.TECHNICIAN);
+        boolean admin = u.is(Role.ADMIN);
+        long ratePct = parseLong(settingValue("kpi_commission_rate"), 10);
+        long bonus = parseLong(settingValue("kpi_bonus_per_ticket"), 20000);
+        List<Row> rows = new ArrayList<>();
+        for (Row tech : db.query("SELECT id, full_name FROM app_user WHERE role = 'TECHNICIAN' ORDER BY full_name")) {
+            long id = tech.lng("id");
+            Row r = new Row().with("id", id).with("full_name", tech.str("full_name"));
+            String done = "FROM ticket t WHERE t.technician_id = ? AND t.status = 'RETURNED' AND t.returned_at BETWEEN ? AND ?";
+            long n = db.scalar("SELECT COUNT(*) " + done, id, p.fromTs(), p.toTs());
+            r.put("done", n);
+            r.put("in_progress", db.scalar("SELECT COUNT(*) FROM ticket WHERE technician_id = ? AND status NOT IN ('RETURNED','CANCELLED')", id));
+            Row tm = db.one("SELECT AVG(julianday(rt) - julianday(t.received_at)) AS avg_days, "
+                    + "SUM(CASE WHEN substr(rt, 1, 10) <= t.due_date THEN 1 ELSE 0 END) AS on_time, COUNT(rt) AS measured FROM ("
+                    + "SELECT t.*, (SELECT MIN(h.time) FROM ticket_history h WHERE h.ticket_id = t.id AND h.status IN ('READY','REJECTED')) AS rt "
+                    + done + ") t", id, p.fromTs(), p.toTs());
+            double avgDays = tm.get("avg_days") == null ? 0 : ((Number) tm.get("avg_days")).doubleValue();
+            long measured = tm.lng("measured");
+            double onTime = measured == 0 ? 0 : tm.lng("on_time") * 100.0 / measured;
+            r.put("avg_days", Math.round(avgDays * 10) / 10.0);
+            r.put("on_time_pct", Math.round(onTime));
+            Row rv = db.one("SELECT COUNT(*) AS c, COALESCE(AVG(rv.stars), 0) AS a FROM ticket_review rv JOIN ticket t ON t.id = rv.ticket_id "
+                    + "WHERE t.technician_id = ? AND rv.created_at BETWEEN ? AND ?", id, p.fromTs(), p.toTs());
+            double rating = ((Number) rv.get("a")).doubleValue();
+            r.put("reviews", rv.lng("c"));
+            r.put("rating", Math.round(rating * 10) / 10.0);
+            long labor = db.scalar("SELECT COALESCE(SUM(t.labor_cost), 0) " + done + " AND t.in_warranty = 0 AND t.paid_amount > 0", id, p.fromTs(), p.toTs());
+            long revenue = db.scalar("SELECT COALESCE(SUM(t.paid_amount), 0) " + done, id, p.fromTs(), p.toTs());
+            long commission = n * bonus + labor * ratePct / 100;
+            r.put("labor", labor);
+            r.put("revenue", revenue);
+            r.put("commission", commission);
+            double score = n * 10 + rating * 10 + onTime * 0.3 - avgDays * 2;
+            r.put("score", Math.round(Math.max(0, score)));
+            if (!admin && id != u.id()) { r.put("labor", null); r.put("revenue", null); r.put("commission", null); }
+            r.put("me", id == u.id());
+            rows.add(r);
+        }
+        rows.sort((a, b) -> Long.compare(b.lng("score"), a.lng("score")));
+        for (int i = 0; i < rows.size(); i++) rows.get(i).put("rank", i + 1);
+        Row out = new Row();
+        out.put("from", p.from().toString());
+        out.put("to", p.to().toString());
+        out.put("rows", rows);
+        out.put("rate_pct", ratePct);
+        out.put("bonus_per_ticket", bonus);
+        out.put("admin", admin);
+        return out;
+    }
+
+    private String settingValue(String key) throws SQLException {
+        Row r = db.one("SELECT value FROM setting WHERE key = ?", key);
+        return r == null ? "" : r.str("value");
+    }
+
+    private static long parseLong(String s, long def) {
+        try { return s == null || s.isBlank() ? def : Long.parseLong(s.replaceAll("[^0-9]", "")); } catch (NumberFormatException e) { return def; }
     }
 }

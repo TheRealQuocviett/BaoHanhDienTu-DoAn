@@ -48,7 +48,7 @@ public class ActivateView extends MainFrame.View {
         print.setOpaque(false);
         Ui.Form f = new Ui.Form();
         f.full(Ui.bold("Sản phẩm"))
-         .add("Sản phẩm / Model *", product).add("Số Serial / IMEI *", serial).add("Số hóa đơn bán", invoice)
+         .add("Sản phẩm / Model *", product).add("Số Serial / IMEI *", ScanDialog.field(ctx, serial, null)).add("Số hóa đơn bán", invoice)
          .add("Ngày mua (dd/MM/yyyy) *", date).add("Thời hạn bảo hành (tháng)", months)
          .full(Ui.bold("Khách hàng"))
          .add("Số điện thoại *", phone).full(custInfo)
@@ -112,7 +112,7 @@ public class ActivateView extends MainFrame.View {
                 throw new vn.baohanh.service.AppException("Thời hạn bảo hành phải là số tháng");
             w[0] = ctx.app().warranty.activate(user(), in);
         })) {
-            result.setText("<html><b style='color:#2563eb'>Đã kích hoạt " + w[0].str("code") + "</b> – " + Fmt.html(w[0].str("product_name"))
+            result.setText("<html><b style='color:" + Ui.hex(Ui.ACCENT) + "'>Đã kích hoạt " + w[0].str("code") + "</b> – " + Fmt.html(w[0].str("product_name"))
                     + " · Serial " + Fmt.html(w[0].str("serial")) + " · bảo hành đến hết ngày " + Fmt.date(w[0].str("expiry_date")) + "</html>");
             if (print.isSelected()) Ui.print(ctx, this, "bao-hanh", w[0].lng("id"));
             clear();

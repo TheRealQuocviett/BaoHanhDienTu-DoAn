@@ -26,7 +26,12 @@ public class SettingsView extends MainFrame.View {
         Ui.Form f = new Ui.Form();
         SettingService.KEYS.forEach((k, label) -> {
             JComponent c;
-            if (SettingService.MULTILINE.contains(k)) {
+            if (SettingService.SELECTS.containsKey(k)) {
+                javax.swing.JComboBox<Ui.Item> cb = new javax.swing.JComboBox<>();
+                SettingService.SELECTS.get(k).forEach((v, t) -> cb.addItem(new Ui.Item(v, t)));
+                c = cb;
+                f.add(label, cb);
+            } else if (SettingService.MULTILINE.contains(k)) {
                 int rows = "policy".equals(k) ? 4 : 3;
                 JTextArea ta = new JTextArea(rows, 30);
                 ta.setLineWrap(true);
@@ -67,7 +72,8 @@ public class SettingsView extends MainFrame.View {
 
     private void save() {
         Map<String, Object> in = new LinkedHashMap<>();
-        fields.forEach((k, c) -> in.put(k, c instanceof JTextArea ta ? ta.getText() : ((JTextField) c).getText()));
+        fields.forEach((k, c) -> in.put(k, c instanceof JTextArea ta ? ta.getText()
+                : c instanceof javax.swing.JComboBox<?> cb ? String.valueOf(((Ui.Item) cb.getSelectedItem()).id()) : ((JTextField) c).getText()));
         if (Ui.run(this, () -> ctx.app().settings.save(user(), in))) {
             refresh();
             Ui.info(this, "Đã lưu thông tin cửa hàng");
@@ -79,7 +85,11 @@ public class SettingsView extends MainFrame.View {
         Ui.run(this, () -> {
             Map<String, String> s = ctx.app().settings.all();
             fields.forEach((k, c) -> {
-                if (c instanceof JTextArea ta) ta.setText(s.get(k)); else ((JTextField) c).setText(s.get(k));
+                if (c instanceof JTextArea ta) ta.setText(s.get(k));
+                else if (c instanceof javax.swing.JComboBox<?> cb) {
+                    for (int i = 0; i < cb.getItemCount(); i++)
+                        if (String.valueOf(((Ui.Item) cb.getItemAt(i)).id()).equals(s.getOrDefault(k, ""))) cb.setSelectedIndex(i);
+                } else ((JTextField) c).setText(s.get(k));
             });
             portal.setText("<html>Cổng tra cứu cho khách hiện tại: <b>" + Fmt.html(ctx.app().settings.portalBase()) + "/tra-cuu</b><br>"
                     + "Mã QR trên phiếu dẫn tới địa chỉ này. Điện thoại khách phải cùng mạng Wi-Fi với máy chạy phần mềm,<br>"

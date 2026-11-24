@@ -6,6 +6,9 @@ public interface Notifier {
 
     void onRequest(String event, long requestId);
 
+    /** Nhân viên vừa trả lời tin nhắn của khách trong phiếu. */
+    default void onMessage(long ticketId, long messageId, String body) { }
+
     Notifier NONE = new Notifier() {
         public void onTicket(String event, long ticketId) { }
         public void onRequest(String event, long requestId) { }

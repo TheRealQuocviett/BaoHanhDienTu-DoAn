@@ -52,6 +52,10 @@ public class WarrantyService {
     private final Database db;
     private final AuditService audit;
 
+    private SettingService settings;
+
+    public void setSettings(SettingService s) { this.settings = s; }
+
     public WarrantyService(Database db, AuditService audit) {
         this.db = db;
         this.audit = audit;
@@ -267,6 +271,10 @@ public class WarrantyService {
         t.put("warranty", warrantyView(db.one("SELECT * FROM v_warranty WHERE id = ?", t.lng("warranty_id")), today()));
         t.put("actions", actions(u, t));
         t.put("review", db.one("SELECT stars, comment, created_at, updated_at FROM ticket_review WHERE ticket_id = ?", id));
+        Row pm = db.one("SELECT body, created_at FROM ticket_message WHERE ticket_id = ? AND sender = 'CUSTOMER' AND body LIKE ? ORDER BY id DESC LIMIT 1",
+                id, MessageService.PAY_TAG + "%");
+        t.put("payment_claim", pm == null ? null : new Row().with("method", pm.str("body").contains("chuyển khoản") ? "TRANSFER" : "CASH")
+                .with("time", pm.str("created_at")).with("text", pm.str("body").substring(MessageService.PAY_TAG.length())));
         return t;
     }
 
@@ -530,6 +538,70 @@ public class WarrantyService {
     }
 
     /** Thu tiền (nếu có) và trả máy cho khách. Đầu vào: method (CASH/TRANSFER/CARD), note. */
+    /**
+     * Mã VietQR để khách chuyển khoản số tiền còn phải trả của phiếu.
+     * available = false nếu cửa hàng chưa nhập tài khoản ngân hàng, phiếu không còn phải trả, hoặc đã thanh toán.
+     */
+    public Row vietQr(long id) throws SQLException {
+        Row t = ticketRow(id);
+        Row out = new Row();
+        String bin = settings.get("bank_bin"), acc = settings.get("bank_account");
+        long due = t.lng("total");
+        boolean payable = List.of("READY", "REJECTED").contains(t.str("status")) && !"PENDING".equals(t.str("quote_status"));
+        if (bin.isBlank() || acc.isBlank()) { out.put("available", false); out.put("reason", "Cửa hàng chưa cài đặt tài khoản ngân hàng"); return out; }
+        if (due <= 0 || !payable) {
+            out.put("available", false);
+            out.put("reason", "RETURNED".equals(t.str("status")) ? "Phiếu đã thanh toán" : due <= 0 ? "Phiếu không phải trả tiền" : "Chưa đến bước thanh toán");
+            return out;
+        }
+        String info = t.str("code").replace("-", "") + " thanh toan";
+        try {
+            out.put("svg", vn.baohanh.util.VietQr.svg(bin, acc, due, info, 2));
+        } catch (IllegalArgumentException e) {
+            out.put("available", false);
+            out.put("reason", e.getMessage());
+            return out;
+        }
+        out.put("available", true);
+        out.put("payload", vn.baohanh.util.VietQr.payload(bin, acc, due, info));
+        out.put("amount", due);
+        out.put("bank", vn.baohanh.util.VietQr.BANKS.getOrDefault(bin, bin));
+        out.put("account", acc.replaceAll("\\s", ""));
+        out.put("holder", settings.get("bank_holder"));
+        out.put("info", vn.baohanh.util.VietQr.cleanInfo(info));
+        return out;
+    }
+
+    /** Bảng Kanban: phiếu đang mở theo cột trạng thái, kèm các cột người dùng được kéo tới. */
+    public Row board(User u) throws SQLException {
+        Auth.require(u);
+        List<Row> list = db.query("SELECT t.id, t.code, t.status, t.due_date, t.in_warranty, t.quote_status, t.technician_id, "
+                + "cu.name AS customer_name, p.name AS product_name, COALESCE(us.full_name, '') AS technician, vc.total, "
+                + "(SELECT COUNT(*) FROM ticket_message m WHERE m.ticket_id = t.id AND m.sender = 'CUSTOMER' AND m.read_by_staff = 0) AS unread "
+                + "FROM ticket t JOIN warranty w ON w.id = t.warranty_id JOIN customer cu ON cu.id = w.customer_id "
+                + "JOIN product p ON p.id = w.product_id LEFT JOIN app_user us ON us.id = t.technician_id "
+                + "JOIN v_ticket_cost vc ON vc.ticket_id = t.id WHERE t.status NOT IN " + TicketStatus.CLOSED_SQL + " ORDER BY t.due_date, t.id");
+        LocalDate td = today();
+        for (Row t : list) {
+            TicketStatus s = TicketStatus.valueOf(t.str("status"));
+            List<String> nx = new ArrayList<>();
+            for (TicketStatus n : s.next()) if (n != TicketStatus.RETURNED && n.allowedFor(u.role())) nx.add(n.name());
+            t.put("next", nx);
+            t.put("overdue", s.countsOverdue() && t.date("due_date").isBefore(td));
+            t.put("mine", t.lng("technician_id") == u.id());
+            t.put("status_label", s.getLabel());
+        }
+        Row out = new Row();
+        List<Row> cols = new ArrayList<>();
+        for (TicketStatus s : new TicketStatus[]{TicketStatus.RECEIVED, TicketStatus.DIAGNOSING, TicketStatus.WAITING_PARTS,
+                TicketStatus.SENT_TO_VENDOR, TicketStatus.REPAIRING, TicketStatus.READY, TicketStatus.REJECTED})
+            cols.add(new Row().with("key", s.name()).with("label", s.getLabel()));
+        out.put("columns", cols);
+        out.put("tickets", list);
+        out.put("service_centers", db.query("SELECT id, name FROM service_center ORDER BY name"));
+        return out;
+    }
+
     public Row pay(User u, long id, Map<String, Object> in) throws SQLException {
         Auth.require(u, Role.ADMIN, Role.RECEPTION);
         db.tx(() -> {
@@ -615,6 +687,11 @@ public class WarrantyService {
         m.put("my_tickets", db.scalar("SELECT COUNT(*) FROM ticket WHERE technician_id = ? AND status NOT IN " + TicketStatus.CLOSED_SQL, u.id()));
         m.put("low_stock", db.scalar("SELECT COUNT(*) FROM part WHERE stock <= min_stock"));
         m.put("new_requests", db.scalar("SELECT COUNT(*) FROM service_request WHERE status = 'NEW'"));
+        m.put("parts_to_order", db.scalar("SELECT COUNT(*) FROM part p WHERE p.stock <= p.min_stock AND NOT EXISTS (SELECT 1 FROM purchase_order_line l "
+                + "JOIN purchase_order o ON o.id = l.po_id WHERE l.part_id = p.id AND o.status IN ('DRAFT','ORDERED'))"));
+        m.put("unread_messages", db.scalar("SELECT COUNT(DISTINCT ticket_id) FROM ticket_message WHERE sender = 'CUSTOMER' AND read_by_staff = 0"));
+        m.put("today_events", db.scalar("SELECT COUNT(*) FROM service_request WHERE status = 'CONFIRMED' AND appointment = ?", t)
+                + db.scalar("SELECT COUNT(*) FROM ticket WHERE status NOT IN ('RETURNED','CANCELLED') AND due_date = ?", t));
         m.put("notify_failed", db.scalar("SELECT COUNT(*) FROM notification WHERE status = 'FAILED'"));
         m.put("confirmed_requests", db.scalar("SELECT COUNT(*) FROM service_request WHERE status = 'CONFIRMED'"));
         String month = t.toString().substring(0, 7);

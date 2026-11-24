@@ -47,6 +47,8 @@ public class NotificationService implements Notifier {
                 "{cua_hang}: Đã xác nhận yêu cầu bảo hành {ma_yeu_cau}. Mời quý khách mang {san_pham} đến cửa hàng ngày {ngay_hen}. {loi_nhan}"),
         REQUEST_REJECTED("Từ chối yêu cầu online", true, "[{cua_hang}] Yêu cầu bảo hành {ma_yeu_cau}",
                 "{cua_hang}: Rất tiếc, yêu cầu bảo hành {ma_yeu_cau} chưa được tiếp nhận. Lý do: {loi_nhan}. Liên hệ {sdt_cua_hang}."),
+        MESSAGE("Cửa hàng trả lời tin nhắn", true, "[{cua_hang}] Phản hồi về phiếu {ma_phieu}",
+                "{cua_hang} trả lời về phiếu {ma_phieu} ({san_pham}): \"{loi_nhan}\". Xem và nhắn lại tại {link}"),
         EXPIRING("Sắp hết hạn bảo hành (30 ngày)", false, "[{cua_hang}] Bảo hành {san_pham} sắp hết hạn",
                 "{cua_hang}: Bảo hành {san_pham} của quý khách sẽ hết hạn ngày {han_bh}. Quý khách có thể mua gói bảo hành mở rộng tại cửa hàng. Liên hệ {sdt_cua_hang}."),
         TEST("Tin thử", true, "[{cua_hang}] Tin thử từ hệ thống bảo hành",
@@ -182,6 +184,17 @@ public class NotificationService implements Notifier {
 
     @Override
     public void onTicket(String event, long ticketId) {
+        ticketEvent(event, ticketId, null, null);
+    }
+
+    @Override
+    public void onMessage(long ticketId, long messageId, String body) {
+        String b = body == null ? "" : body.replaceAll("\\s+", " ").trim();
+        if (b.length() > 160) b = b.substring(0, 157) + "…";
+        ticketEvent("MESSAGE", ticketId, b, "MESSAGE:M" + messageId);
+    }
+
+    private void ticketEvent(String event, long ticketId, String note, String dedupKey) {
         try {
             Row t = db.one("SELECT t.id, t.code, t.due_date, t.warranty_id, cu.id AS customer_id, cu.name, cu.phone, cu.email, "
                     + "p.name AS product, w.serial, w.expiry_date, vc.total FROM ticket t JOIN warranty w ON w.id = t.warranty_id "
@@ -192,8 +205,9 @@ public class NotificationService implements Notifier {
             v.put("ma_phieu", t.str("code"));
             v.put("so_tien", Fmt.money(t.lng("total")));
             v.put("ngay_hen", Fmt.date(t.str("due_date")));
-            v.put("link", settings.portalBase() + "/tra-cuu#" + ("QUOTE".equals(event) ? "tai-khoan" : t.str("code")));
-            String dedup = event + ":T" + ticketId + ("QUOTE".equals(event) ? ":" + t.lng("total") : "");
+            if (note != null) v.put("loi_nhan", note);
+            v.put("link", settings.portalBase() + "/tra-cuu#" + ("QUOTE".equals(event) || "MESSAGE".equals(event) ? "tai-khoan" : t.str("code")));
+            String dedup = dedupKey != null ? dedupKey : event + ":T" + ticketId + ("QUOTE".equals(event) ? ":" + t.lng("total") : "");
             enqueue(Event.valueOf(event), v, t, dedup, ticketId, t.lng("warranty_id"), null);
         } catch (Exception e) {
             System.err.println("Khong tao duoc thong bao " + event + ": " + e.getMessage());
