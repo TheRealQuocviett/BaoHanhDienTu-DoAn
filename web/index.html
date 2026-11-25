@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quản lý bảo hành</title>
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>try { const t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.dataset.theme = t; } catch (e) {}</script>
@@ -25,8 +25,7 @@ svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .shell{display:grid;grid-template-columns:252px minmax(0,1fr);min-height:100vh}
 aside{background:var(--side);color:#334155;position:sticky;top:0;height:100vh;overflow-y:auto;padding:16px 12px;border-right:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:11px;font-weight:700;color:var(--ink);padding:4px 8px 18px;font-size:15.5px;letter-spacing:-.01em}
-.brand i{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);flex:none;display:grid;place-items:center;box-shadow:0 6px 14px -6px #2563eb}
-.brand i::after{content:"";width:14px;height:16px;background:#fff;clip-path:polygon(50% 0,100% 18%,100% 55%,50% 100%,0 55%,0 18%)}
+.brand i{width:36px;height:36px;flex:none;background:url("/logo.svg") center/contain no-repeat;filter:drop-shadow(0 4px 8px #2563eb40)}
 .brand small{display:block;font-weight:500;font-size:11.5px;color:var(--mute)}
 .navg{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;padding:16px 10px 6px}
 aside a{display:flex;align-items:center;gap:11px;color:#475569;text-decoration:none;padding:8px 10px;border-radius:9px;font-weight:500;font-size:14.5px;margin:1px 0}
@@ -102,6 +101,18 @@ td b.mono{color:var(--acct)}
 @media(max-width:640px){.stack thead{display:none}.stack tr{display:grid;padding:10px 0;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:2px 0 2px 7.5em;text-align:left!important}
   .stack td::before{content:attr(data-l);float:left;width:7em;margin-left:-7.5em;color:var(--mute);font-size:12px}.stack td:empty{display:none}}
 /* --- thành phần --- */
+.dx{border:1px solid var(--bd);background:linear-gradient(180deg,var(--accs),transparent 70%);border-radius:12px;padding:12px 14px;margin:8px 0 10px}
+.dxH{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.dxH svg.i{color:var(--warn);width:20px;height:20px}.dxS{margin:6px 0 8px;font-size:14px}
+.dxG{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:4px 18px}
+.dxBar{display:grid;grid-template-columns:minmax(0,1fr) 70px 38px;gap:8px;align-items:center;font-size:13px;margin:4px 0}.dxBar i{display:block;height:7px;border-radius:9px;background:var(--line);overflow:hidden}
+.dxBar i b{display:block;height:100%;background:var(--acc);border-radius:9px}.dxBar em{font-style:normal;text-align:right;color:var(--mute);font-weight:600}
+.dxF{display:flex;gap:8px 22px;flex-wrap:wrap;margin-top:8px;font-size:13.5px}.dx details{margin-top:8px}.dx summary{cursor:pointer}
+.alW{position:relative;display:inline-flex}.alBtn{position:relative}.alBtn .cnt{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}
+.alP{position:absolute;top:calc(100% + 8px);right:0;width:min(420px,92vw);max-height:70vh;overflow:auto;z-index:40;padding:12px;box-shadow:0 18px 40px #0f172a30}
+.alI{all:unset;box-sizing:border-box;display:flex;gap:10px;width:100%;padding:9px 8px;border-radius:10px;cursor:pointer;font-size:13.5px;line-height:1.45}.alI:hover{background:var(--soft)}
+.alI.new{background:var(--accs)}.alI .ic{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--soft)}.alI .ic svg{width:17px;height:17px}
+.alI .ic.bad{color:var(--bad)}.alI .ic.warn{color:var(--warn)}
+
 .pqGrid{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:14px;align-items:start}@media(max-width:800px){.pqGrid{grid-template-columns:1fr}}
 .pqUsers{padding:8px;display:grid;gap:4px}.pqU{all:unset;cursor:pointer;display:block;padding:10px 12px;border-radius:10px}.pqU:hover{background:var(--soft)}
 .pqU.on{background:var(--accs);box-shadow:inset 3px 0 0 var(--acc)}.pqU b{display:block}.pqU span{font-size:12.5px;color:var(--mute)}.pqU em{font-style:normal;color:var(--warn);font-weight:600}
@@ -139,6 +150,12 @@ td b.mono{color:var(--acct)}
 .x{position:absolute;right:10px;top:10px;width:38px;height:38px;border:0;background:transparent;font-size:22px;cursor:pointer;border-radius:10px;color:var(--mute)}.x:hover{background:var(--soft);color:var(--ink)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);opacity:0;background:#0f172a;color:#fff;padding:12px 18px;border-radius:12px;z-index:80;transition:.25s;max-width:92vw;pointer-events:none;box-shadow:var(--sh2);font-weight:500}
 .toast.show{transform:translateX(-50%);opacity:1}.toast.err{background:#b91c1c}
+.rcGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.rcGrid span{padding:7px;border:1px dashed var(--line);border-radius:8px;text-align:center;font-size:14px}
+.tfQr{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.tfQr .qrBox{width:180px;height:180px;background:#fff;padding:6px;border-radius:10px;border:1px solid var(--line)}.tfQr .qrBox svg{width:100%;height:100%}
+.tfQr>div.small{flex:1;min-width:200px}.tfKey{font-size:15px;margin:6px 0;padding:6px 8px;background:var(--soft,#f3f5f9);border-radius:8px;word-break:break-all}.tfSteps{margin:0 0 10px;padding-left:20px;font-size:13.5px}.tfSteps li{margin:3px 0}
+@media(max-width:560px){.rcGrid{grid-template-columns:repeat(2,1fr)}}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin:8px 2px}
+.pgBtns{display:flex;gap:6px;align-items:center}.pgIn{width:64px!important;padding:4px 6px!important;text-align:center}
 .hint{font-size:13.5px;padding:10px 13px;border-radius:10px;background:var(--accs);color:#1e3a8a;margin:6px 0;border:1px solid #d6e4ff}
 .chart{position:relative;height:260px}.chart svg{position:absolute;inset:0;width:100%;height:100%}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--mute)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
@@ -150,7 +167,7 @@ td b.mono{color:var(--acct)}
 .login .hero p{opacity:.85;max-width:440px;margin:0}
 .login .hero ul{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:12px}
 .login .hero li{display:flex;gap:10px;align-items:center;opacity:.95}.login .hero li svg.i{background:#ffffff26;border-radius:8px;padding:6px;width:30px;height:30px}
-.login .hero .brand,.login .hero .brand small{color:#fff}.login .hero .brand i{background:#fff}.login .hero .brand i::after{background:#2563eb}
+.login .hero .brand,.login .hero .brand small{color:#fff}.login .hero .brand i{background:#fff url("/logo.svg") center/26px no-repeat;border-radius:11px;width:40px;height:40px}
 .login form{align-self:center;justify-self:center;width:min(400px,100%);padding:24px}
 .login h1{font-size:28px}
 @media(max-width:860px){.login{grid-template-columns:minmax(0,1fr)}.login .hero{display:none}}
@@ -224,7 +241,7 @@ html[data-theme=dark] .light-only{background:#fff!important;color:#0f172a}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></symbol><symbol id="i-shield-plus" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="M12 9v6M9 12h6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.6 3.3-5.5 6.5-5.5s5.8 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></symbol><symbol id="i-device" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.3"/></symbol><symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol><symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v2M11 10v7M15 12v5M19 6v11"/></symbol><symbol id="i-user-cog" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21c.6-3.8 3.4-6 7-6 1.1 0 2.1.2 3 .6"/><circle cx="18" cy="17" r="2.5"/><path d="M18 13v1.5M18 19.5V21M14 17h1.5M20.5 17H22"/></symbol><symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9.5V21h16V9.5"/><path d="M2.5 9.5 4.5 3h15l2 6.5c0 1.6-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-.9-3-2.5z"/><path d="M9.5 21v-5h5v5"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></symbol><symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 1 5-3.3l-2.7 2.7.6 2.4 2.4.6 2.7-2.7a4 4 0 0 1-5.3 5L9 18.4a2.1 2.1 0 0 1-3-3z"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol><symbol id="i-coin" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17.5h2"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v10.5H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol><symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="10" rx="1.5"/><rect x="16" y="4" width="5" height="13" rx="1.5"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.5 6h11v10h-11zM13.5 9.5h4l3 3.5v3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol><symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol><symbol id="i-bug" viewBox="0 0 24 24"><rect x="7" y="8" width="10" height="13" rx="5"/><path d="M9 8V6a3 3 0 0 1 6 0v2M3 13h4M17 13h4M4 7l3 3M20 7l-3 3M4 20l3-3M20 20l-3-3M12 12v9"/></symbol><symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M16 7l3 3M14 9l2 2"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></symbol><symbol id="i-shield-plus" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="M12 9v6M9 12h6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.6 3.3-5.5 6.5-5.5s5.8 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></symbol><symbol id="i-device" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol><symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.3"/></symbol><symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol><symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v2M11 10v7M15 12v5M19 6v11"/></symbol><symbol id="i-user-cog" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21c.6-3.8 3.4-6 7-6 1.1 0 2.1.2 3 .6"/><circle cx="18" cy="17" r="2.5"/><path d="M18 13v1.5M18 19.5V21M14 17h1.5M20.5 17H22"/></symbol><symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9.5V21h16V9.5"/><path d="M2.5 9.5 4.5 3h15l2 6.5c0 1.6-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-1-3-2.5c0 1.5-1.4 2.5-3 2.5s-3-.9-3-2.5z"/><path d="M9.5 21v-5h5v5"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></symbol><symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 1 5-3.3l-2.7 2.7.6 2.4 2.4.6 2.7-2.7a4 4 0 0 1-5.3 5L9 18.4a2.1 2.1 0 0 1-3-3z"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol><symbol id="i-coin" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17.5h2"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v10.5H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol><symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="10" rx="1.5"/><rect x="16" y="4" width="5" height="13" rx="1.5"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.5 6h11v10h-11zM13.5 9.5h4l3 3.5v3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol><symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol><symbol id="i-bug" viewBox="0 0 24 24"><rect x="7" y="8" width="10" height="13" rx="5"/><path d="M9 8V6a3 3 0 0 1 6 0v2M3 13h4M17 13h4M4 7l3 3M20 7l-3 3M4 20l3-3M20 20l-3-3M12 12v9"/></symbol><symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M16 7l3 3M14 9l2 2"/></symbol><symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol></svg>
 
 <!-- ================= ĐĂNG NHẬP ================= -->
 <div class="login" id="loginView" hidden>
@@ -240,8 +257,11 @@ html[data-theme=dark] .light-only{background:#fff!important;color:#0f172a}
     <div class="brand" style="padding:0 0 22px"><i></i><span><span id="loginShop">Bảo hành điện tử</span><small>Đăng nhập dành cho nhân viên</small></span></div>
     <h1>Chào mừng trở lại 👋</h1>
     <p class="sub">Đăng nhập để tiếp tục làm việc.</p>
-    <div class="f"><label for="lu">Tên đăng nhập</label><input id="lu" autocomplete="username" required placeholder="vd: admin"></div>
-    <div class="f"><label for="lp">Mật khẩu</label><input id="lp" type="password" autocomplete="current-password" required placeholder="••••••"></div>
+    <div class="f l1"><label for="lu">Tên đăng nhập</label><input id="lu" autocomplete="username" required placeholder="vd: admin"></div>
+    <div class="f l1"><label for="lp">Mật khẩu</label><input id="lp" type="password" autocomplete="current-password" required placeholder="••••••"></div>
+    <div id="l2" hidden><div class="hint">🔐 Tài khoản này đã bật <b>xác thực 2 lớp</b>. Mở ứng dụng <b>Google Authenticator</b> trên điện thoại và nhập mã 6 số đang hiện (hoặc một mã khôi phục dạng <span class="mono">abcd-efgh</span>).</div>
+      <div class="f"><label for="lc">Mã xác thực</label><input id="lc" class="mono" inputmode="numeric" autocomplete="one-time-code" placeholder="123 456" maxlength="12" style="font-size:20px;letter-spacing:.2em;text-align:center"></div>
+      <button type="button" class="btn ghost sm" id="lBack" style="margin-bottom:10px">← Quay lại nhập mật khẩu</button></div>
     <div class="hint" id="loginErr" style="display:none;color:var(--bad);background:var(--bads);border-color:#f8caca"></div>
     <button class="btn acc" style="width:100%;margin-top:4px">Đăng nhập</button>
     <p class="small" style="margin:18px 0 0">Tài khoản mẫu: <b>admin</b>/admin123 · <b>tiepnhan</b>/123456 · <b>ktv1</b>/123456</p>
@@ -256,8 +276,8 @@ html[data-theme=dark] .light-only{background:#fff!important;color:#0f172a}
   <div>
     <div class="top">
       <div class="row"><button class="btn ghost sm menu-btn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button><b id="pageTitle"></b></div>
-      <div class="who"><button class="btn ghost sm themeBtn" type="button" data-theme-toggle aria-label="Đổi giao diện sáng / tối" title="Chế độ sáng / tối"></button><div class="nm"><div class="avatar" id="meAv"></div><span><b id="meName"></b><small id="meRole"></small></span></div>
-        <button class="btn ghost sm" id="pwBtn">Đổi mật khẩu</button><button class="btn ghost sm" id="logoutBtn">Đăng xuất</button></div>
+      <div class="who"><span class="alW"><button class="btn ghost sm alBtn" type="button" id="alBtn" title="Nhắc việc" aria-label="Nhắc việc"><svg class="i"><use href="#i-bell"/></svg><span class="cnt" hidden>0</span></button></span><button class="btn ghost sm themeBtn" type="button" data-theme-toggle aria-label="Đổi giao diện sáng / tối" title="Chế độ sáng / tối"></button><div class="nm"><div class="avatar" id="meAv"></div><span><b id="meName"></b><small id="meRole"></small></span></div>
+        <button class="btn ghost sm" id="secBtn" title="Xác thực 2 lớp">Bảo mật</button><button class="btn ghost sm" id="pwBtn">Đổi mật khẩu</button><button class="btn ghost sm" id="logoutBtn">Đăng xuất</button></div>
     </div>
     <main id="main"></main>
   </div>
@@ -289,7 +309,7 @@ async function api(path, opt = {}) {
   const res = await fetch(path, {method: opt.method || 'GET', credentials: 'same-origin',
     headers: {'Content-Type': 'application/json', 'X-App': '1'}, body: opt.body ? JSON.stringify(opt.body) : undefined});
   const data = await res.json().catch(() => ({error: 'Phản hồi không hợp lệ từ máy chủ'}));
-  if (res.status === 401 && path !== '/api/login' && path !== '/api/me') { showLogin(); throw new Error(data.error); }
+  if (res.status === 401 && !path.startsWith('/api/login') && path !== '/api/me') { showLogin(); throw new Error(data.error); }
   if (!res.ok) throw new Error(data.error || ('Lỗi ' + res.status));
   return data;
 }
@@ -322,6 +342,17 @@ function wPill(w) { if (!w.active) return '<span class="pill bad">Hết hạn</s
 /** Nút cần bấm 2 lần để xác nhận (không dùng hộp thoại confirm của trình duyệt). */
 function confirmBtn(btn) { if (!btn) return true; if (btn.dataset.sure === '1') return true; btn.dataset.sure = '1'; btn.dataset.label = btn.textContent; btn.textContent = 'Bấm lần nữa để xác nhận'; setTimeout(() => { btn.dataset.sure = ''; btn.textContent = btn.dataset.label; }, 4000); return false; }
 const debounce = (fn, ms = 250) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+/** Thanh phân trang: res = {total, page, pages, size}; go(n) nạp trang n. */
+function pager(el, res, go, unit = 'dòng') {
+  if (!el) return;
+  const from = res.total ? (res.page - 1) * res.size + 1 : 0, to = Math.min(res.total, res.page * res.size);
+  el.innerHTML = `<span>${num(from)}–${num(to)} / <b>${num(res.total)}</b> ${unit}</span>` + (res.pages > 1 ? `<span class="pgBtns">
+    <button class="btn ghost sm" data-pg="1" ${res.page <= 1 ? 'disabled' : ''} title="Trang đầu">«</button><button class="btn ghost sm" data-pg="${res.page - 1}" ${res.page <= 1 ? 'disabled' : ''}>‹ Trước</button>
+    <span>Trang <input type="number" min="1" max="${res.pages}" value="${res.page}" class="pgIn" aria-label="Số trang"> / ${num(res.pages)}</span>
+    <button class="btn ghost sm" data-pg="${res.page + 1}" ${res.page >= res.pages ? 'disabled' : ''}>Sau ›</button><button class="btn ghost sm" data-pg="${res.pages}" ${res.page >= res.pages ? 'disabled' : ''} title="Trang cuối">»</button></span>` : '');
+  $$('[data-pg]', el).forEach(b => b.onclick = () => go(+b.dataset.pg));
+  const inp = $('.pgIn', el); if (inp) inp.onchange = () => go(Math.min(res.pages, Math.max(1, +inp.value || 1)));
+}
 
 /* =================== ĐĂNG NHẬP =================== */
 function showLogin() {
@@ -329,11 +360,86 @@ function showLogin() {
   api('/api/public/shop').then(s => { if (s.name) { $('#loginShop').textContent = s.name; $$('.shopname').forEach(x => x.textContent = s.name); } }).catch(() => {});
   setTimeout(() => $('#lu').focus(), 50);
 }
+let LOGIN_TOKEN = null;
+function loginStep2(on) {
+  $$('#loginForm .l1').forEach(x => x.hidden = on); $('#l2').hidden = !on; $('#lc').value = '';
+  if (on) setTimeout(() => $('#lc').focus(), 30); else LOGIN_TOKEN = null;
+}
+$('#lBack').onclick = () => { loginStep2(false); $('#loginErr').style.display = 'none'; $('#lp').focus(); };
 $('#loginForm').addEventListener('submit', async e => {
   e.preventDefault(); $('#loginErr').style.display = 'none';
-  try { await post('/api/login', {username: $('#lu').value, password: $('#lp').value}); $('#lp').value = ''; await boot(); }
-  catch (err) { $('#loginErr').textContent = err.message; $('#loginErr').style.display = 'block'; }
+  try {
+    if (LOGIN_TOKEN) await post('/api/login/2fa', {token: LOGIN_TOKEN, code: $('#lc').value});
+    else {
+      const r = await post('/api/login', {username: $('#lu').value, password: $('#lp').value});
+      if (r.need_2fa) { LOGIN_TOKEN = r.token; loginStep2(true); return; }
+    }
+    loginStep2(false); $('#lp').value = ''; await boot();
+  } catch (err) {
+    if (LOGIN_TOKEN && /hết hạn|đăng nhập lại|Tạm khóa/.test(err.message)) { loginStep2(false); $('#lp').value = ''; }
+    $('#loginErr').textContent = err.message; $('#loginErr').style.display = 'block';
+  }
 });
+/* ---------- Xác thực 2 lớp (Google Authenticator) ---------- */
+$('#secBtn').onclick = () => openSecurity();
+function codesHtml(codes) {
+  return `<div class="hint" style="background:var(--warns);border-color:#fde1a8;color:inherit"><b>Mã khôi phục – chỉ hiện một lần.</b> In ra hoặc chép cất nơi an toàn. Mất điện thoại thì dùng một mã này thay cho mã 6 số (mỗi mã dùng 1 lần).</div>
+    <div class="rcGrid mono">${codes.map(c => `<span>${h(c)}</span>`).join('')}</div>
+    <div class="row" style="margin-top:8px"><button type="button" class="btn ghost sm" id="rcCopy">Chép</button><button type="button" class="btn ghost sm" id="rcDl">Tải file .txt</button></div>`;
+}
+function bindCodes(b, codes) {
+  const txt = 'Ma khoi phuc xac thuc 2 lop – ' + (SHOP || 'Bao hanh dien tu') + ' – ' + ME.username + '\n\n' + codes.join('\n') + '\n';
+  $('#rcCopy', b).onclick = () => navigator.clipboard.writeText(txt).then(() => toast('Đã chép mã khôi phục'), () => toast('Trình duyệt không cho chép, hãy bấm Tải file', true));
+  $('#rcDl', b).onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], {type: 'text/plain'})); a.download = 'ma-khoi-phuc-' + ME.username + '.txt'; a.click(); };
+}
+async function openSecurity() {
+  let st; try { st = await api('/api/2fa'); } catch (e) { return fail(e); }
+  const admin = ME.role === 'ADMIN';
+  const b = openModal(`<h2>Bảo mật tài khoản</h2>
+    <div class="card" style="box-shadow:none;margin:0 0 12px"><div class="head" style="margin:0 0 4px"><b>Xác thực 2 lớp (2FA)</b>${st.enabled ? '<span class="pill ok">Đang bật</span>' : '<span class="pill bad">Chưa bật</span>'}</div>
+      <p class="small" style="margin:0 0 10px">Ngoài mật khẩu, mỗi lần đăng nhập phải nhập thêm mã 6 số đổi liên tục mỗi 30 giây trên điện thoại (ứng dụng <b>Google Authenticator</b>, Microsoft Authenticator hoặc Authy). Lộ mật khẩu kẻ gian vẫn không vào được.</p>
+      <div id="tfBody"></div></div>
+    ${admin ? '<div class="card" style="box-shadow:none;margin:0"><b>Nhân viên đã bật 2 lớp</b><p class="small" style="margin:4px 0 8px">Nhân viên mất điện thoại và hết mã khôi phục thì gỡ 2 lớp ở đây để họ đăng nhập bằng mật khẩu rồi bật lại.</p><div id="tfUsers" class="small">Đang tải…</div></div>' : ''}`, 'modal2');
+  const body = $('#tfBody', b);
+  if (!st.enabled) {
+    body.innerHTML = `${st.recommended ? '<div class="hint">Tài khoản <b>Quản lý</b> có toàn quyền (xóa dữ liệu, khôi phục sao lưu…) – nên bật 2 lớp.</div>' : ''}<button type="button" class="btn acc" id="tfStart">Bắt đầu cài đặt</button>`;
+    $('#tfStart', b).onclick = async () => {
+      let s; try { s = await post('/api/2fa/setup'); } catch (e) { return fail(e); }
+      body.innerHTML = `<ol class="tfSteps"><li>Cài <b>Google Authenticator</b> trên điện thoại (App Store / CH Play).</li>
+          <li>Trong ứng dụng bấm <b>+</b> → <b>Quét mã QR</b> và quét mã bên dưới.</li>
+          <li>Nhập mã 6 số ứng dụng hiện ra để xác nhận.</li></ol>
+        <div class="tfQr"><div class="qrBox">${s.qr_svg}</div><div class="small">Không quét được? Chọn <b>Nhập khóa thiết lập</b> và gõ:<div class="mono tfKey">${h(s.secret)}</div>Tài khoản: <b>${h(s.account)}</b> · Loại: <b>Dựa trên thời gian</b></div></div>
+        <form id="tfOn" class="row" style="margin-top:10px"><input name="code" class="mono" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="Mã 6 số" required style="max-width:150px;font-size:18px;letter-spacing:.15em"><button class="btn acc">Bật xác thực 2 lớp</button></form>`;
+      $('input', body).focus();
+      $('#tfOn', b).onsubmit = async e => { e.preventDefault();
+        try { const r = await post('/api/2fa/enable', formData(e.target)); META.twofa = true;
+          body.innerHTML = '<div class="hint" style="background:var(--oks);border-color:#bfe8cf;color:inherit">✅ Đã bật xác thực 2 lớp. Lần đăng nhập sau sẽ hỏi mã.</div>' + codesHtml(r.codes); bindCodes(b, r.codes);
+          b.closest('.modal').querySelector('.pill').outerHTML = '<span class="pill ok">Đang bật</span>';
+          const n = $('#tfNag'); if (n) n.remove();
+        } catch (err) { fail(err); } };
+    };
+  } else {
+    body.innerHTML = `<p class="small" style="margin:0 0 8px">Bật từ ${fdt(st.enabled_at)} · Còn <b>${st.recovery_left}</b>/8 mã khôi phục.</p>
+      <form id="tfAct" class="row"><input name="code" class="mono" autocomplete="one-time-code" maxlength="12" placeholder="Mã 6 số hoặc mã khôi phục" required style="max-width:230px">
+        <button type="button" class="btn ghost sm" data-a="recovery">Tạo lại mã khôi phục</button><button type="button" class="btn ghost sm" data-a="disable" style="color:var(--bad)">Tắt 2 lớp</button></form><div id="tfOut"></div>`;
+    $$('#tfAct [data-a]', b).forEach(btn => btn.onclick = async () => {
+      const code = $('#tfAct input', b).value; if (!code) return toast('Nhập mã xác thực trước', true);
+      if (btn.dataset.a === 'disable' && !confirmBtn(btn)) return;
+      try { const r = await post('/api/2fa/' + btn.dataset.a, {code});
+        if (btn.dataset.a === 'disable') { META.twofa = false; toast('Đã tắt xác thực 2 lớp'); openSecurity(); }
+        else { $('#tfOut', b).innerHTML = codesHtml(r.codes); bindCodes(b, r.codes); $('#tfAct input', b).value = ''; }
+      } catch (err) { fail(err); } });
+  }
+  if (admin) loadTfUsers(b);
+}
+async function loadTfUsers(b) {
+  let list; try { list = await api('/api/2fa/users'); } catch (e) { return; }
+  const el = $('#tfUsers', b); if (!el) return;
+  el.innerHTML = list.length ? `<div class="tbl"><table><tbody>${list.map(u => `<tr><td><b>${h(u.full_name)}</b> <span class="small">${h(u.username)}</span></td><td class="small">${fdt(u.enabled_at)}</td>
+    <td style="text-align:right">${u.id === ME.id ? '<span class="small">(bạn)</span>' : `<button type="button" class="btn ghost sm" data-rs="${u.id}">Gỡ 2 lớp</button>`}</td></tr>`).join('')}</tbody></table></div>` : 'Chưa có ai bật.';
+  $$('[data-rs]', el).forEach(x => x.onclick = async () => { if (!confirmBtn(x)) return;
+    try { await post(`/api/2fa/users/${x.dataset.rs}/reset`); toast('Đã gỡ xác thực 2 lớp'); loadTfUsers(b); } catch (err) { fail(err); } });
+}
 $('#logoutBtn').onclick = async () => { await post('/api/logout').catch(() => {}); ME = null; showLogin(); };
 $('#pwBtn').onclick = () => {
   const b = openModal(`<h2>Đổi mật khẩu</h2><form id="pwF">
@@ -376,8 +482,9 @@ let MODAL_CLOSED = null;
 new MutationObserver(() => { if (!$('#modal').classList.contains('open') && MODAL_CLOSED) { const f = MODAL_CLOSED; MODAL_CLOSED = null; f(); } })
   .observe($('#modal'), {attributes: true, attributeFilter: ['class']});
 setInterval(() => { if (ME) refreshBadges(); }, 60000);
-async function refreshBadges() { try { const d = await api('/api/dashboard'); BADGES = {open: d.open_tickets, low: d.low_stock, req: d.new_requests, ntf: d.notify_failed, msg: d.unread_messages, cal: d.today_events, po: d.parts_to_order}; renderSide(); } catch (e) {} }
+async function refreshBadges() { try { const d = await api('/api/dashboard'); BADGES = {open: d.open_tickets, low: d.low_stock, req: d.new_requests, ntf: d.notify_failed, msg: d.unread_messages, cal: d.today_events, po: d.parts_to_order}; ALERTS = d.alerts || 0; paintAlerts(); renderSide(); } catch (e) {} }
 $('#menuBtn').onclick = () => $('#side').classList.toggle('open');
+$('#alBtn').onclick = () => alertsPanel();
 $('#side').addEventListener('click', e => { if (e.target.closest('a')) $('#side').classList.remove('open'); });
 function route() {
   if (!ME) return;
@@ -421,6 +528,7 @@ VIEWS['tong-quan'] = async () => {
   if (can('REPORTS')) tiles.push(['Doanh thu dịch vụ tháng này', money(d.month_revenue), 'bao-cao', '', false, 'chart', '']);
   const max = Math.max(1, ...Object.values(d.by_status));
   $('#main').innerHTML = `<h1>Xin chào, ${h(ME.fullName.split(' ').pop())} 👋</h1><p class="sub">Hôm nay ${fd(d.today)} · ${d.month_received} phiếu nhận trong tháng · ${d.total_warranties} sản phẩm đã kích hoạt bảo hành</p>
+    ${ME.role === 'ADMIN' && !META.twofa ? `<div class="hint row" id="tfNag" style="justify-content:space-between;margin:0 0 12px"><span>🔐 Tài khoản quản lý chưa bật <b>xác thực 2 lớp</b>. Bật để lỡ lộ mật khẩu cũng không ai vào được.</span><button class="btn acc sm" type="button" id="tfNagB">Bật ngay</button></div>` : ''}
     <div class="grid tiles">${tiles.map((t, i) => `<div class="card tile ${t[4] ? 'hot' : ''}" data-i="${i}" tabindex="0"><div class="ic ${t[6]}">${icon(t[5])}</div><div><b class="${typeof t[1] === 'number' ? '' : 'long'}">${typeof t[1] === 'number' ? num(t[1]) : t[1]}</b><span>${t[0]}</span></div></div>`).join('')}</div>
     <div class="grid two" style="margin-top:12px">
       <div class="card"><div class="head" style="margin:0 0 6px"><h2 style="margin:0">Cần xử lý</h2>${can('RECEIVE') ? '<button class="btn acc sm" id="qRecv">' + icon('plus') + 'Tiếp nhận máy</button>' : ''}</div>
@@ -431,6 +539,7 @@ VIEWS['tong-quan'] = async () => {
   $$('.tile').forEach(el => el.onclick = el.onkeydown = e => { if (e.type === 'keydown' && e.key !== 'Enter') return; const t = tiles[el.dataset.i]; FILTER[t[2]] = t[3]; location.hash = t[2]; });
   $$('#main tr[data-id]').forEach(r => r.onclick = () => openTicket(r.dataset.id));
   const q = $('#qRecv'); if (q) q.onclick = () => openReceive();
+  const tn = $('#tfNagB'); if (tn) tn.onclick = () => openSecurity();
 };
 function todoHint(t) {
   if (t.quote_status === 'PENDING') return 'Gọi khách duyệt giá: ' + h(t.customer_phone) + ' · ' + money(t.total);
@@ -515,9 +624,13 @@ VIEWS['phieu'] = async () => {
     ${can('RECEIVE') ? '<button class="btn acc" id="recvBtn">+ Tiếp nhận máy</button>' : ''}</div>
     <div class="chips" id="tCh">${chips.map(([k, v]) => `<button class="chip ${k === FILTER.phieu ? 'on' : ''}" data-k="${k}">${h(v)}</button>`).join('')}</div>
     <input id="tQ" placeholder="Tìm mã phiếu, serial, tên, SĐT, kỹ thuật viên…" style="max-width:420px;margin-bottom:10px">
-    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã phiếu</th><th>Sản phẩm</th><th>Khách hàng</th><th>Nhận / Hẹn</th><th>Kỹ thuật viên</th><th class="r">Chi phí</th><th>Trạng thái</th></tr></thead><tbody id="tB"></tbody></table></div></div>`;
-  const load = async () => {
-    const list = await api(`/api/tickets?status=${FILTER.phieu}&q=${encodeURIComponent($('#tQ').value)}`);
+    <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã phiếu</th><th>Sản phẩm</th><th>Khách hàng</th><th>Nhận / Hẹn</th><th>Kỹ thuật viên</th><th class="r">Chi phí</th><th>Trạng thái</th></tr></thead><tbody id="tB"></tbody></table></div></div>
+    <div class="pager" id="tP"></div>`;
+  let page = 1;
+  const load = async (pg = page) => {
+    const res = await api(`/api/tickets?status=${FILTER.phieu}&q=${encodeURIComponent($('#tQ').value)}&page=${pg}&size=50`);
+    page = res.page; const list = res.rows;
+    pager($('#tP'), res, n => load(n).catch(fail), 'phiếu');
     $('#tB').innerHTML = list.length ? list.map(t => `<tr class="click" data-id="${t.id}">
       <td><b class="mono">${h(t.code)}</b>${t.in_warranty ? '' : '<div><span class="pill warn">Ngoài BH</span></div>'}</td>
       <td>${h(t.product_name)}<div class="small">${h(t.serial)}</div></td><td>${h(t.customer_name)}<div class="small">${h(t.customer_phone)}</div></td>
@@ -525,8 +638,8 @@ VIEWS['phieu'] = async () => {
       <td class="r">${t.total ? money(t.total) : '—'}</td><td>${statusPill(t)}</td></tr>`).join('') : '<tr><td colspan="7" class="empty">Không có phiếu nào.</td></tr>';
     $$('#tB tr[data-id]').forEach(r => r.onclick = () => openTicket(r.dataset.id));
   };
-  $$('#tCh .chip').forEach(c => c.onclick = () => { FILTER.phieu = c.dataset.k; $$('#tCh .chip').forEach(x => x.classList.toggle('on', x === c)); load().catch(fail); });
-  $('#tQ').oninput = debounce(() => load().catch(fail));
+  $$('#tCh .chip').forEach(c => c.onclick = () => { FILTER.phieu = c.dataset.k; $$('#tCh .chip').forEach(x => x.classList.toggle('on', x === c)); load(1).catch(fail); });
+  $('#tQ').oninput = debounce(() => load(1).catch(fail));
   const rb = $('#recvBtn'); if (rb) rb.onclick = () => openReceive();
   VIEWS._reloadTickets = load;
   await load();
@@ -536,7 +649,7 @@ async function openReceive(serial) {
   const techs = await api('/api/technicians');
   const b = openModal(`<h2>Tiếp nhận máy bảo hành</h2><form id="rcF">
     <div class="f"><label class="req" for="rs">Số Serial / IMEI</label><div class="inScan"><input id="rs" name="serial" required autocomplete="off" value="${h(serial || '')}">${scanBtn('#rs')}</div><div id="rsChk"></div></div>
-    <div class="f"><label class="req" for="ri">Lỗi khách báo</label><textarea id="ri" name="issue" required></textarea></div>
+    <div class="f"><label class="req" for="ri">Lỗi khách báo</label><textarea id="ri" name="issue" required></textarea><div id="dxR"></div></div>
     <div class="cols"><div class="f"><label for="ra">Phụ kiện kèm theo</label><input id="ra" name="accessories" placeholder="Máy, sạc, hộp…"></div>
       <div class="f"><label for="rc">Tình trạng ngoại quan</label><input id="rc" name="condition" placeholder="Trầy, móp…"></div>
       <div class="f"><label for="rd">Ngày hẹn trả</label><input id="rd" name="due_date" type="date" value="${plusDays(7)}" min="${today()}"></div>
@@ -551,7 +664,13 @@ async function openReceive(serial) {
     box.innerHTML = `<div class="hint"><b>${h(w.product_name)}</b> – ${h(w.customer_name)} (${h(w.customer_phone)})<br>${wPill(w)} hết hạn ${fd(w.expiry_date)}${w.active ? '' : ' · <b>Sửa có tính phí, cần báo giá</b>'}
       ${open ? `<br><span style="color:var(--bad)">Đang có phiếu chưa đóng: ${h(open.code)}</span>` : ''}</div>`;
   };
-  $('#rs', b).oninput = debounce(chk, 300); if (serial) chk(); else $('#rs', b).focus();
+  const dxLoad = debounce(async () => {
+    const s = $('#rs', b).value.trim(), is = $('#ri', b).value.trim(), box = $('#dxR', b);
+    if (!box || s.length < 3 || is.length < 4) { if (box) box.innerHTML = ''; return; }
+    try { box.innerHTML = dxHtml(await post('/api/diagnosis/suggest', {serial: s, issue: is}), true); } catch (e) { box.innerHTML = ''; }
+  }, 600);
+  $('#rs', b).oninput = debounce(() => { chk(); dxLoad(); }, 300); $('#ri', b).oninput = dxLoad;
+  if (serial) chk(); else $('#rs', b).focus();
   $('#rcF', b).onsubmit = async e => {
     e.preventDefault();
     try { const t = await post('/api/tickets', formData(e.target)); toast('Đã tạo phiếu ' + t.code); if ($('#rp', b).checked) printDoc('tiep-nhan', t.id);
@@ -582,6 +701,7 @@ async function openTicket(id) {
       <div><span>Ngoại quan</span><b>${h(t.condition_note || '—')}</b></div>${t.service_center_name ? `<div><span>Gửi hãng</span><b>${h(t.service_center_name)}</b></div>` : ''}
       ${t.invoice_no ? `<div><span>Hóa đơn sửa chữa</span><b>${h(t.invoice_no)}</b></div>` : ''}</div>
     <p style="margin:6px 0"><span class="small">Lỗi khách báo</span><br>${h(t.issue)}</p>
+    ${can('REPAIR') && !['RETURNED','CANCELLED'].includes(t.status) ? '<div id="dxT"><div class="small">Đang tìm phiếu tương tự…</div></div>' : ''}
     ${t.review ? `<div class="box" style="background:var(--warns);border-color:#fde7b0;margin-top:8px"><div class="row" style="justify-content:space-between"><b>Khách đánh giá</b>${starStr(t.review.stars)}</div>${t.review.comment ? `<div style="margin-top:4px">${h(t.review.comment)}</div>` : ''}<div class="small">${fdt(t.review.updated_at || t.review.created_at)}</div></div>` : ''}
     ${t.diagnosis ? `<p style="margin:6px 0"><span class="small">Kết luận kỹ thuật</span><br>${h(t.diagnosis)}</p>` : ''}
 
@@ -634,6 +754,8 @@ async function openTicket(id) {
   window.CHAT_POLL = setInterval(() => { if (!$('#modal').classList.contains('open') || !$('#chT', b)) return clearInterval(window.CHAT_POLL);
     api(`/api/tickets/${id}/messages`).then(drawChat).catch(() => {}); }, 15000);
   $('#chB', b).onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) $('#chF', b).requestSubmit(); };
+  if ($('#dxT', b)) post('/api/diagnosis/suggest', {ticket_id: t.id}).then(d => { if ($('#dxT', b)) $('#dxT', b).innerHTML = dxHtml(d, false); })
+    .catch(() => { if ($('#dxT', b)) $('#dxT', b).innerHTML = ''; });
   $('#chF', b).onsubmit = async e => { e.preventDefault(); const ta = $('#chB', b); if (!ta.value.trim()) return;
     try { drawChat(await post(`/api/tickets/${id}/messages`, {body: ta.value})); ta.value = ''; toast('Đã gửi cho khách'); } catch (err) { fail(err); } };
   const act = async (p, msg) => { try { await p; await reload(); if (msg) toast(msg); } catch (e) { fail(e); } };
@@ -748,10 +870,12 @@ VIEWS['bao-hanh'] = async () => {
     <div class="chips" id="wCh">${chips.map(([k, v]) => `<button class="chip ${k === FILTER['bao-hanh'] ? 'on' : ''}" data-k="${k}">${v}</button>`).join('')}</div>
     <input id="wQ" placeholder="Tìm serial, mã BH, tên khách, SĐT, sản phẩm, hóa đơn…" style="max-width:420px;margin-bottom:10px">
     <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã BH</th><th>Sản phẩm / Serial</th><th>Khách hàng</th><th>Ngày mua</th><th>Hết hạn</th><th>Tình trạng</th></tr></thead><tbody id="wB"></tbody></table></div></div>
-    <p class="small" id="wN"></p>`;
-  const load = async () => {
-    const list = await api(`/api/warranties?filter=${FILTER['bao-hanh']}&q=${encodeURIComponent($('#wQ').value)}`);
-    $('#wN').textContent = list.length + ' bảo hành';
+    <div class="pager" id="wN"></div>`;
+  let page = 1;
+  const load = async (pg = page) => {
+    const res = await api(`/api/warranties?filter=${FILTER['bao-hanh']}&q=${encodeURIComponent($('#wQ').value)}&page=${pg}&size=50`);
+    page = res.page; const list = res.rows;
+    pager($('#wN'), res, n => load(n).catch(fail), 'bảo hành');
     $('#wB').innerHTML = list.length ? list.map(w => `<tr class="click" data-id="${w.id}"><td class="mono">${h(w.code)}</td>
       <td>${h(w.product_name)}<div class="small">${h(w.serial)}</div></td><td>${h(w.customer_name)}<div class="small">${h(w.customer_phone)}</div></td>
       <td class="mono">${fd(w.purchase_date)}</td><td class="mono">${fd(w.expiry_date)}</td><td>${wPill(w)}</td></tr>`).join('') : '<tr><td colspan="6" class="empty">Không có bảo hành nào.</td></tr>';
@@ -759,8 +883,8 @@ VIEWS['bao-hanh'] = async () => {
       try { const w = await api('/api/warranties/' + r.dataset.id); const b = openModal(warrantyBlock(w)); bindWarrantyBlock(b, load); } catch (e) { fail(e); }
     });
   };
-  $$('#wCh .chip').forEach(c => c.onclick = () => { FILTER['bao-hanh'] = c.dataset.k; $$('#wCh .chip').forEach(x => x.classList.toggle('on', x === c)); load().catch(fail); });
-  $('#wQ').oninput = debounce(() => load().catch(fail));
+  $$('#wCh .chip').forEach(c => c.onclick = () => { FILTER['bao-hanh'] = c.dataset.k; $$('#wCh .chip').forEach(x => x.classList.toggle('on', x === c)); load(1).catch(fail); });
+  $('#wQ').oninput = debounce(() => load(1).catch(fail));
   await load();
 };
 
@@ -782,10 +906,12 @@ VIEWS.catalog = async key => {
     ${d.canWrite ? '<button class="btn acc" id="cAdd">+ Thêm mới</button>' : ''}</div></div>
     <input id="cQ" placeholder="Tìm kiếm…" style="max-width:420px;margin-bottom:10px">
     <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr>${d.columns.map(c => `<th class="${['money','int'].includes(c.format) ? 'r' : ''}">${h(c.label)}</th>`).join('')}${isPart && can('STOCK') ? '<th></th>' : ''}</tr></thead><tbody id="cB"></tbody></table></div></div>
-    <p class="small" id="cN"></p>`;
-  const load = async () => {
-    const list = await api(`/api/catalog/${key}?q=${encodeURIComponent($('#cQ').value)}`);
-    $('#cN').textContent = list.length + ' dòng' + (d.canWrite ? ' · bấm vào một dòng để sửa' : '');
+    <div class="pager" id="cN"></div>`;
+  let page = 1;
+  const load = async (pg = page) => {
+    const res = await api(`/api/catalog/${key}?q=${encodeURIComponent($('#cQ').value)}&page=${pg}&size=50`);
+    page = res.page; const list = res.rows;
+    pager($('#cN'), res, n => load(n).catch(fail), 'dòng' + (d.canWrite ? ' · bấm vào một dòng để sửa' : ''));
     $('#cB').innerHTML = list.length ? list.map(r => `<tr class="${d.canWrite ? 'click' : ''}" data-id="${r.id}">${d.columns.map(c => cell(r, c)).join('')}
       ${isPart && can('STOCK') ? `<td class="r" style="white-space:nowrap"><button class="btn ghost sm" data-in="${r.id}">Nhập</button> <button class="btn ghost sm" data-adj="${r.id}" data-stock="${r.stock}">Kiểm kê</button></td>` : ''}</tr>`).join('')
       : `<tr><td colspan="${d.columns.length + 1}" class="empty">Chưa có dữ liệu.</td></tr>`;
@@ -793,7 +919,7 @@ VIEWS.catalog = async key => {
     $$('[data-in]').forEach(x => x.onclick = () => stockDialog('in', x.dataset.in, list.find(r => r.id == x.dataset.in), load));
     $$('[data-adj]').forEach(x => x.onclick = () => stockDialog('adjust', x.dataset.adj, list.find(r => r.id == x.dataset.adj), load));
   };
-  $('#cQ').oninput = debounce(() => load().catch(fail));
+  $('#cQ').oninput = debounce(() => load(1).catch(fail));
   if ($('#cAdd')) $('#cAdd').onclick = () => editEntity(key, 0, load);
   if ($('#cImp')) $('#cImp').onclick = () => importDialog(key, () => load().catch(fail));
   await load();
@@ -992,23 +1118,56 @@ async function requestDialog(r, after) {
 /* =================== SAO LƯU =================== */
 VIEWS['sao-luu'] = async () => {
   $('#main').innerHTML = `<div class="head"><div><h1>Sao lưu dữ liệu</h1><p class="sub" style="margin:0">Tự động sao lưu mỗi 24 giờ (giữ 20 bản gần nhất). Mỗi bản gồm CSDL và ảnh, lưu ở thư mục data/backup.</p></div>
-    <button class="btn acc" id="bkNow">Sao lưu ngay</button></div>
+    <div class="row"><label class="btn ghost" style="cursor:pointer">${icon('upload')}Thêm file từ USB<input type="file" id="bkUp" accept=".zip,.enc" hidden></label><button class="btn acc" id="bkNow">Sao lưu ngay</button></div></div>
+    <div class="card" id="bkEnc" style="margin:0 0 10px"></div>
     <div class="hint">Nên chép thư mục <b>data/backup</b> sang USB hoặc Google Drive định kỳ – hỏng ổ cứng thì bản sao lưu trên cùng máy cũng mất.</div>
-    <div class="card" style="padding:4px 10px;margin-top:10px"><div class="tbl"><table class="stack"><thead><tr><th>Bản sao lưu</th><th>Loại</th><th>Thời gian</th><th class="r">Dung lượng</th><th></th></tr></thead><tbody id="bkB"></tbody></table></div></div>`;
+    <div class="card" style="padding:4px 10px;margin-top:10px"><div class="tbl"><table class="stack"><thead><tr><th>Bản sao lưu</th><th>Loại</th><th>Mã hóa</th><th>Thời gian</th><th class="r">Dung lượng</th><th></th></tr></thead><tbody id="bkB"></tbody></table></div></div>`;
+  const encCard = async () => {
+    const c = await api('/api/backup-config');
+    $('#bkEnc').innerHTML = `<div class="head" style="margin:0 0 4px"><b>Mã hóa bản sao lưu bằng mật khẩu</b>${c.encrypted ? '<span class="pill ok">🔒 Đang bật</span>' : '<span class="pill bad">Chưa bật</span>'}</div>
+      <p class="small" style="margin:0 0 10px">${c.encrypted ? 'Bản sao lưu mới (cả bản tự động) được khóa bằng AES-256. Lỡ mất USB, không có mật khẩu thì không ai đọc được dữ liệu khách.'
+        : 'Hiện ai cầm được file sao lưu (USB, Google Drive…) đều mở được toàn bộ dữ liệu khách hàng. Đặt mật khẩu để mã hóa AES-256.'}
+        <b>Quên mật khẩu này thì không khôi phục được các bản đã mã hóa</b> – hãy ghi lại cất kỹ.</p>
+      <form id="bkPw" class="row"><input type="password" name="password" autocomplete="new-password" placeholder="Mật khẩu mới (≥ ${c.min_length} ký tự)" style="max-width:220px">
+        <input type="password" name="confirm" autocomplete="new-password" placeholder="Nhập lại" style="max-width:180px"><button class="btn acc sm">${c.encrypted ? 'Đổi mật khẩu' : 'Bật mã hóa'}</button>
+        ${c.encrypted ? '<button type="button" class="btn ghost sm" id="bkOff">Tắt mã hóa</button>' : ''}</form>`;
+    $('#bkPw').onsubmit = async e => { e.preventDefault(); const b = formData(e.target); if (!b.password) return toast('Nhập mật khẩu', true);
+      try { await api('/api/backup-config', {method: 'PUT', body: b}); toast('Đã lưu – bản sao lưu mới sẽ được mã hóa'); encCard(); } catch (err) { fail(err); } };
+    const off = $('#bkOff'); if (off) off.onclick = async () => { if (!confirmBtn(off)) return;
+      try { await api('/api/backup-config', {method: 'PUT', body: {password: ''}}); toast('Đã tắt mã hóa sao lưu'); encCard(); } catch (err) { fail(err); } };
+  };
+  const restore = async (name, password, btn) => {
+    try { const r = await post(`/api/backups/${encodeURIComponent(name)}/restore`, {password}); closeModal('modal2'); toast('Đã khôi phục. Trạng thái trước đó được lưu ở ' + r.safety); load(); refreshBadges(); }
+    catch (e) { fail(e); if (btn) btn.disabled = false; }
+  };
   const load = async () => {
     const list = await api('/api/backups');
-    $('#bkB').innerHTML = list.length ? list.map(x => `<tr><td class="mono">${h(x.name)}</td><td>${h(x.kind)}</td><td>${fdt(x.time)}</td><td class="r">${(x.size / 1024).toFixed(0)} KB</td>
-      <td style="white-space:nowrap"><a class="btn ghost sm" style="text-decoration:none;display:inline-flex;align-items:center" href="/api/backups/${encodeURIComponent(x.name)}">Tải về</a> <button class="btn danger sm" data-rs="${h(x.name)}">Khôi phục</button></td></tr>`).join('')
-      : '<tr><td colspan="5" class="empty">Chưa có bản sao lưu nào.</td></tr>';
+    $('#bkB').innerHTML = list.length ? list.map(x => `<tr><td class="mono">${h(x.name)}</td><td>${h(x.kind)}</td><td>${x.encrypted ? '<span class="pill ok">🔒 Có</span>' : '<span class="small">Không</span>'}</td><td>${fdt(x.time)}</td><td class="r">${(x.size / 1024).toFixed(0)} KB</td>
+      <td style="white-space:nowrap"><a class="btn ghost sm" style="text-decoration:none;display:inline-flex;align-items:center" href="/api/backups/${encodeURIComponent(x.name)}">Tải về</a> <button class="btn danger sm" data-rs="${h(x.name)}" data-enc="${x.encrypted ? 1 : ''}">Khôi phục</button></td></tr>`).join('')
+      : '<tr><td colspan="6" class="empty">Chưa có bản sao lưu nào.</td></tr>';
     $$('[data-rs]').forEach(x => x.onclick = async () => {
+      if (x.dataset.enc) {
+        const b = openModal(`<h2>Khôi phục bản đã mã hóa</h2><p class="small mono">${h(x.dataset.rs)}</p><p>Toàn bộ dữ liệu sẽ quay về thời điểm đó (trạng thái hiện tại được tự sao lưu trước).</p>
+          <form id="rsF"><div class="f"><label for="rsP">Mật khẩu sao lưu</label><input id="rsP" type="password" autocomplete="off" placeholder="Để trống = dùng mật khẩu đang cài trên máy này"></div>
+          <button class="btn danger">Giải mã và khôi phục</button></form>`, 'modal2');
+        $('#rsF', b).onsubmit = e => { e.preventDefault(); e.submitter.disabled = true; restore(x.dataset.rs, $('#rsP', b).value, e.submitter); };
+        $('#rsP', b).focus(); return;
+      }
       if (x.dataset.sure !== '1') { x.dataset.sure = '1'; x.textContent = 'Toàn bộ dữ liệu sẽ quay về lúc này – bấm lần nữa'; return; }
-      x.disabled = true;
-      try { const r = await post(`/api/backups/${encodeURIComponent(x.dataset.rs)}/restore`); toast('Đã khôi phục. Trạng thái trước đó được lưu ở ' + r.safety); load(); refreshBadges(); }
-      catch (e) { fail(e); x.disabled = false; }
+      x.disabled = true; restore(x.dataset.rs, '', x);
     });
   };
   $('#bkNow').onclick = async () => { try { const r = await post('/api/backups'); toast('Đã sao lưu: ' + r.name); load(); } catch (e) { fail(e); } };
-  await load();
+  $('#bkUp').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const res = await fetch('/api/backups/upload?name=' + encodeURIComponent(f.name), {method: 'POST', credentials: 'same-origin', headers: {'X-App': '1', 'Content-Type': 'application/octet-stream'}, body: f});
+      const d = await res.json().catch(() => ({})); if (!res.ok) throw new Error(d.error || 'Lỗi ' + res.status);
+      toast('Đã thêm ' + d.name + ' – bấm Khôi phục ở dòng đó'); load();
+    } catch (err) { fail(err); }
+    e.target.value = '';
+  };
+  await Promise.all([load(), encCard()]);
 };
 
 /* =================== ĐẶT HÀNG LINH KIỆN =================== */
@@ -1016,8 +1175,9 @@ const PO_PILL = {DRAFT: '', ORDERED: 'warn', RECEIVED: 'ok', CANCELLED: 'bad'};
 let PO_FILTER = '';
 VIEWS['dat-hang'] = async () => {
   const admin = can('PURCHASE');
-  $('#main').innerHTML = `<div class="head"><div><h1>Đặt hàng linh kiện</h1><p class="sub" style="margin:0">Linh kiện dưới mức tồn tối thiểu được gợi ý sẵn số lượng. Nhận hàng sẽ tự cộng tồn kho và ghi thẻ kho.</p></div></div>
+  $('#main').innerHTML = `<div class="head"><div><h1>Đặt hàng linh kiện</h1><p class="sub" style="margin:0">Gợi ý theo mức tồn tối thiểu và theo dự báo: linh kiện sẽ hết trước khi kịp đặt hàng về cũng được nhắc đặt sớm. Nhận hàng sẽ tự cộng tồn kho và ghi thẻ kho.</p></div></div>
     <div class="card" id="poS"><div class="empty">Đang tải…</div></div>
+    <div class="card" id="poFc" style="margin-top:14px"><div class="empty">Đang tính dự báo…</div></div>
     <div class="head" style="margin-top:20px"><h2 style="margin:0">Đơn đặt hàng</h2><div class="chips" style="margin:0">${[['', 'Tất cả'], ...Object.entries(META.po_status || {})].map(([k, v]) => `<button class="chip ${PO_FILTER === k ? 'on' : ''}" data-pf="${k}">${h(v)}</button>`).join('')}</div></div>
     <div class="card" style="padding:4px 10px"><div class="tbl"><table class="stack"><thead><tr><th>Mã đơn</th><th>Nhà cung cấp</th><th>Ngày lập</th><th class="r">Số dòng</th><th class="r">Tổng tiền</th><th>Trạng thái</th></tr></thead><tbody id="poL"></tbody></table></div></div>`;
   $$('[data-pf]').forEach(c => c.onclick = () => { PO_FILTER = c.dataset.pf; VIEWS['dat-hang'](); });
@@ -1025,10 +1185,11 @@ VIEWS['dat-hang'] = async () => {
   if (!$('#poS')) return;
   $('#poS').innerHTML = `<div class="row" style="justify-content:space-between"><h2 style="margin:0">Cần đặt thêm (${sug.length})</h2>
       ${sug.length ? '' : '<span class="pill ok">Kho đủ hàng</span>'}</div>
-    ${sug.length ? `<form id="poF"><div class="tbl"><table class="stack"><thead><tr><th></th><th>Linh kiện</th><th class="r">Tồn / tối thiểu</th><th class="r">Đang về</th><th class="r">Số đặt</th><th class="r">Giá nhập</th></tr></thead><tbody>
+    ${sug.length ? `<form id="poF"><div class="tbl"><table class="stack"><thead><tr><th></th><th>Linh kiện</th><th class="r">Tồn / tối thiểu</th><th>Lý do</th><th class="r">Đang về</th><th class="r">Số đặt</th><th class="r">Giá nhập</th></tr></thead><tbody>
       ${sug.map(p => `<tr><td data-l="Chọn"><input type="checkbox" name="pick" value="${p.id}" ${p.suggest_qty > 0 && admin ? 'checked' : ''} ${admin ? '' : 'disabled'}></td>
         <td data-l="Linh kiện"><b>${h(p.name)}</b><div class="small">${h(p.code)}${p.brand_name ? ' · ' + h(p.brand_name) : ''}</div></td>
         <td class="r" data-l="Tồn / tối thiểu"><b style="color:${p.stock === 0 ? 'var(--bad)' : 'var(--warn)'}">${p.stock}</b> / ${p.min_stock} ${h(p.unit)}</td>
+        <td data-l="Lý do"><span class="small">${h(p.reason)}${p.daily_use > 0 ? `<br>Dùng ~${p.monthly_use} ${h(p.unit)}/tháng` : ''}</span></td>
         <td class="r" data-l="Đang về">${p.incoming || '–'}</td>
         <td class="r" data-l="Số đặt"><input type="number" min="0" max="100000" value="${p.suggest_qty}" data-q="${p.id}" style="width:90px;text-align:right" ${admin ? '' : 'disabled'}></td>
         <td class="r" data-l="Giá nhập"><input type="number" min="0" step="1000" value="${p.cost_price}" data-c="${p.id}" style="width:120px;text-align:right" ${admin ? '' : 'disabled'}></td></tr>`).join('')}</tbody></table></div>
@@ -1037,7 +1198,15 @@ VIEWS['dat-hang'] = async () => {
         <div class="f"><label for="poExp">Ngày cần hàng</label><input id="poExp" type="date" min="${today()}"></div></div>
         <div class="f"><label for="poNote">Ghi chú cho nhà cung cấp</label><input id="poNote" placeholder="vd: giao giờ hành chính, kèm hóa đơn VAT"></div>
         <div class="row"><button class="btn acc">Tạo đơn đặt hàng</button><span class="small" id="poSum"></span></div>` : '<p class="small">Chỉ quản lý được tạo đơn đặt hàng.</p>'}</form>`
-      : '<p class="small" style="margin:6px 0 0">Không có linh kiện nào dưới mức tồn tối thiểu (hoặc đã có đơn đang về).</p>'}`;
+      : '<p class="small" style="margin:6px 0 0">Không có linh kiện nào dưới mức tồn tối thiểu hay sắp hết theo dự báo (hoặc đã có đơn đang về).</p>'}`;
+  api('/api/purchase/forecast').then(f => { if (!$('#poFc')) return;
+    $('#poFc').innerHTML = `<div class="row" style="justify-content:space-between"><h2 style="margin:0">Dự báo tồn kho</h2><span class="small">Theo lượng dùng 30 & 90 ngày gần nhất · hàng về mất ${f.lead_days} ngày · đặt đủ dùng ${f.cover_days} ngày (đổi ở Thông tin cửa hàng)</span></div>
+      ${f.rows.length ? `<div class="tbl"><table class="stack"><thead><tr><th>Linh kiện</th><th class="r">Tồn</th><th class="r">Dùng / tháng</th><th>Còn đủ dùng</th><th>Dự kiến hết</th></tr></thead><tbody>
+      ${f.rows.map(r => { const d = r.days_left, pc = d == null ? 0 : Math.max(4, Math.min(100, d / 90 * 100)), col = d == null ? 'var(--mute)' : d <= f.lead_days + 7 ? 'var(--bad)' : d <= 45 ? 'var(--warn)' : 'var(--ok)';
+        return `<tr><td data-l="Linh kiện"><b>${h(r.name)}</b><div class="small">${h(r.code)}</div></td><td class="r" data-l="Tồn">${r.stock} ${h(r.unit)}</td><td class="r" data-l="Dùng/tháng">${r.monthly_use || '–'}</td>
+          <td data-l="Còn đủ dùng" style="min-width:180px">${d == null ? '<span class="small">Chưa dùng gần đây</span>' : `<div class="dxBar" style="grid-template-columns:1fr 70px;margin:0"><i><b style="width:${pc}%;background:${col}"></b></i><em style="color:${col}">${d > 999 ? '> 999' : d} ngày</em></div>`}</td>
+          <td data-l="Dự kiến hết">${r.stockout_date ? fd(r.stockout_date) : '–'}${r.need ? ` <span class="pill ${r.stock <= 0 ? 'bad' : 'warn'}">Cần đặt</span>` : ''}</td></tr>`; }).join('')}</tbody></table></div>` : '<p class="small">Chưa có dữ liệu sử dụng linh kiện.</p>'}`;
+  }).catch(() => { if ($('#poFc')) $('#poFc').innerHTML = ''; });
   const sumUp = () => { if (!$('#poSum')) return; let n = 0, t = 0;
     $$('input[name=pick]:checked').forEach(c => { const q = +$(`[data-q="${c.value}"]`).value || 0, cost = +$(`[data-c="${c.value}"]`).value || 0; if (q > 0) { n++; t += q * cost; } });
     $('#poSum').textContent = `${n} linh kiện · tạm tính ${money(t)}`; };
@@ -1109,6 +1278,51 @@ VIEWS['kpi'] = async () => {
       Điểm = phiếu × 10 + điểm đánh giá × 10 + % đúng hẹn × 0,3 − số ngày sửa TB × 2. Thời gian sửa tính từ lúc nhận máy tới khi sửa xong.
       ${d.admin ? 'Đổi mức hoa hồng ở <a href="#cai-dat">Thông tin cửa hàng</a>.' : 'Bạn chỉ xem được doanh thu và hoa hồng của chính mình.'}</div>`;
 };
+
+/* =================== GỢI Ý CHẨN ĐOÁN =================== */
+function dxHtml(d, compact) {
+  if (!d || !d.ready) return '';
+  if (!d.count) return `<div class="dx"><div class="dxH">${icon('bulb')}<b>Gợi ý từ lịch sử sửa chữa</b></div><div class="small">${h(d.summary)}</div></div>`;
+  const conf = {'Cao': 'ok', 'Trung bình': 'warn', 'Thấp': ''}[d.confidence] || '';
+  return `<div class="dx"><div class="dxH">${icon('bulb')}<b>Gợi ý từ lịch sử sửa chữa</b><span class="pill ${conf}">Độ tin cậy: ${h(d.confidence)}</span>
+      <span class="small">${d.count} phiếu tương tự${d.same_model ? ` · ${d.same_model} cùng model` : ''}</span></div>
+    <p class="dxS">${h(d.summary)}</p>
+    <div class="dxG">
+      ${d.parts.length ? `<div><div class="small">Linh kiện hay phải thay</div>${d.parts.slice(0, compact ? 3 : 5).map(p => `<div class="dxBar"><span>${h(p.name)}${p.part_id != null ? ` <span class="small">· tồn ${p.stock}${p.stock <= 0 ? ' ⚠' : ''}</span>` : ''}</span>
+        <i><b style="width:${p.pct}%"></b></i><em>${p.pct}%</em></div>`).join('')}</div>` : ''}
+      ${d.diagnoses.length ? `<div><div class="small">Kết luận thường gặp</div>${d.diagnoses.map(x => `<div class="dxBar"><span>${h(x.text)}</span><i><b style="width:${x.pct}%;background:var(--ok)"></b></i><em>${x.pct}%</em></div>`).join('')}</div>` : ''}
+    </div>
+    <div class="dxF">${d.cost_mid != null ? `<span>💰 Chi phí ước tính <b>${money(d.cost_mid)}</b>${d.in_warranty ? ' <span class="small">(máy còn BH – thường miễn phí)</span>' : ''}<br><span class="small">${h(d.cost_basis)}</span></span>` : ''}
+      ${d.days_mid != null ? `<span>⏱ Thường sửa mất <b>${d.days_mid} ngày</b></span>` : ''}
+      ${d.rejected_pct >= 30 ? `<span style="color:var(--bad)">⚠ ${d.rejected_pct}% ca tương tự bị từ chối bảo hành</span>` : ''}</div>
+    ${!compact && d.examples.length ? `<details><summary class="small">Xem ${d.examples.length} phiếu tương tự</summary><div class="tbl"><table><thead><tr><th>Phiếu</th><th>Lỗi</th><th>Xử lý</th><th class="r">Chi phí</th></tr></thead><tbody>
+      ${d.examples.map(x => `<tr><td><a href="#" data-dxo="${x.id}">${h(x.code)}</a><div class="small">${h(x.product)}</div></td><td>${h(x.issue)}</td><td>${h(x.diagnosis)}${x.parts ? `<div class="small">${h(x.parts)}</div>` : ''}</td>
+        <td class="r">${x.in_warranty ? '<span class="small">Bảo hành</span>' : money(x.total)}</td></tr>`).join('')}</tbody></table></div></details>` : ''}</div>`;
+}
+document.addEventListener('click', e => { const a = e.target.closest('[data-dxo]'); if (a) { e.preventDefault(); openTicket(a.dataset.dxo); } });
+
+/* =================== NHẮC VIỆC =================== */
+let ALERTS = 0;
+async function alertsPanel() {
+  const old = $('#alP'); if (old) { old.remove(); return; }
+  const p = document.createElement('div'); p.id = 'alP'; p.className = 'card alP'; p.innerHTML = '<div class="empty">Đang tải…</div>';
+  $('#alBtn').after(p);
+  const close = ev => { if (!p.contains(ev.target) && !ev.target.closest('#alBtn')) { p.remove(); document.removeEventListener('click', close); } };
+  setTimeout(() => document.addEventListener('click', close));
+  let d; try { d = await api('/api/alerts'); } catch (e) { p.innerHTML = `<div class="empty">${h(e.message)}</div>`; return; }
+  const IC = {DUE_SOON: ['clock', 'warn'], OVERDUE: ['alert', 'bad'], STOCK: ['box', '']};
+  p.innerHTML = `<div class="row" style="justify-content:space-between;margin-bottom:6px"><b>Nhắc việc</b>${d.unread ? '<button class="btn ghost sm" id="alAll">Đánh dấu đã đọc hết</button>' : ''}</div>
+    ${d.rows.length ? d.rows.map(r => `<button type="button" class="alI ${r.read_at ? '' : 'new'}" data-al="${r.id}" data-t="${r.ticket_id || ''}" data-k="${r.kind}">
+      <span class="ic ${IC[r.kind][1]}">${icon(IC[r.kind][0])}</span><span><b>${h(r.kind_label)}</b> <span class="small">${fdt(r.created_at)}</span><br>${h(r.message)}</span></button>`).join('')
+      : '<div class="empty" style="padding:20px">Không có việc cần nhắc 🎉</div>'}
+    <div class="small" style="margin-top:6px">Tự quét mỗi 30 phút: phiếu sắp đến hạn (nhắc KTV), quá hạn (báo quản lý + gửi tin xin lỗi khách), linh kiện sắp hết.</div>`;
+  if ($('#alAll', p)) $('#alAll', p).onclick = async () => { await post('/api/alerts/read-all').catch(fail); p.remove(); refreshBadges(); };
+  $$('[data-al]', p).forEach(b => b.onclick = async () => {
+    post(`/api/alerts/${b.dataset.al}/read`).then(refreshBadges).catch(() => {}); p.remove();
+    if (b.dataset.t) openTicket(b.dataset.t); else if (b.dataset.k === 'STOCK') location.hash = can('PURCHASE_VIEW') ? '#dat-hang' : '#dm-part';
+  });
+}
+function paintAlerts() { const b = $('#alBtn'); if (!b) return; b.querySelector('.cnt').textContent = ALERTS > 99 ? '99+' : ALERTS; b.querySelector('.cnt').hidden = !ALERTS; }
 
 /* =================== QUÉT MÃ VẠCH / IMEI =================== */
 const scanBtn = (sel, submit) => `<button type="button" class="btn ghost scanB" data-scan="${sel}"${submit ? ' data-scan-submit="1"' : ''} title="Quét mã vạch / IMEI bằng camera">${icon('scan')}<span>Quét</span></button>`;

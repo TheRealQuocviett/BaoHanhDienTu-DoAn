@@ -36,6 +36,7 @@ public class CatalogView extends MainFrame.View {
     private final JTable table;
     private final JTextField q;
     private final JLabel count = Ui.sub(" ");
+    private final Pager pager = new Pager("dòng", this::refresh);
 
     public CatalogView(Ui.Ctx ctx, String key) {
         super(ctx);
@@ -50,7 +51,7 @@ public class CatalogView extends MainFrame.View {
         model = new Ui.RowModel(cols);
         boolean canWrite = def.canWrite(ctx.user());
         table = Ui.table(model, canWrite ? r -> edit(r.lng("id")) : null);
-        q = Ui.search("Tìm kiếm…", s -> refresh());
+        q = Ui.search("Tìm kiếm…", s -> { pager.reset(); refresh(); });
 
         List<Component> btns = new ArrayList<>();
         if ("part".equals(key)) {
@@ -72,14 +73,16 @@ public class CatalogView extends MainFrame.View {
         c.setOpaque(false);
         c.add(Ui.flow(new JLabel("Tìm:"), q, count), BorderLayout.NORTH);
         c.add(Ui.scroll(table), BorderLayout.CENTER);
+        c.add(pager, BorderLayout.SOUTH);
         add(c, BorderLayout.CENTER);
     }
 
     @Override
     public void refresh() {
         Ui.run(this, () -> {
-            model.setRows(ctx.app().catalog.list(user(), def.key, q.getText()));
-            count.setText("   " + model.getRowCount() + " dòng");
+            Row res = ctx.app().catalog.page(user(), def.key, q.getText(), pager.page(), Pager.SIZE);
+            model.setRows(rows(res));
+            pager.update(res);
         });
     }
 

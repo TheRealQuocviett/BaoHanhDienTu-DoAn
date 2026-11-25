@@ -50,6 +50,9 @@ public class NotificationService implements Notifier {
                 "{cua_hang} trả lời về phiếu {ma_phieu} ({san_pham}): \"{loi_nhan}\". Xem và nhắn lại tại {link}"),
         EXPIRING("Sắp hết hạn bảo hành (30 ngày)", false, "[{cua_hang}] Bảo hành {san_pham} sắp hết hạn",
                 "{cua_hang}: Bảo hành {san_pham} của quý khách sẽ hết hạn ngày {han_bh}. Quý khách có thể mua gói bảo hành mở rộng tại cửa hàng. Liên hệ {sdt_cua_hang}."),
+        OVERDUE("Xin lỗi trễ hẹn", true, "[{cua_hang}] Xin lỗi về việc trễ hẹn – phiếu {ma_phieu}",
+                "{cua_hang} xin lỗi quý khách {ten_khach}: {san_pham} (phiếu {ma_phieu}) chưa kịp sửa xong đúng hẹn {ngay_hen}. "
+                + "Cửa hàng đang ưu tiên xử lý và sẽ báo ngay khi máy sửa xong. Tra cứu tiến độ: {link}. Liên hệ {sdt_cua_hang}."),
         TEST("Tin thử", true, "[{cua_hang}] Tin thử từ hệ thống bảo hành",
                 "Đây là tin thử từ hệ thống quản lý bảo hành của {cua_hang}. Nếu bạn nhận được tin này thì cấu hình đã đúng.");
 
@@ -191,6 +194,11 @@ public class NotificationService implements Notifier {
         String b = body == null ? "" : body.replaceAll("\\s+", " ").trim();
         if (b.length() > 160) b = b.substring(0, 157) + "…";
         ticketEvent("MESSAGE", ticketId, b, "MESSAGE:M" + messageId);
+    }
+
+    /** Phiếu quá hạn trả: gửi tin xin lỗi khách (mỗi ngày hẹn chỉ gửi một lần). */
+    public void onOverdue(long ticketId, String dueDate) {
+        ticketEvent("OVERDUE", ticketId, null, "OVERDUE:T" + ticketId + ":" + dueDate);
     }
 
     private void ticketEvent(String event, long ticketId, String note, String dedupKey) {
@@ -397,6 +405,18 @@ public class NotificationService implements Notifier {
             }
             default -> throw new IllegalArgumentException("Kênh không hỗ trợ: " + channel);
         }
+    }
+
+    /** Cửa hàng đã bật và cấu hình gửi email chưa (dùng cho OTP quên mật khẩu). */
+    public boolean emailReady() throws SQLException {
+        Map<String, String> c = config();
+        return on(c, "ntf_email_on") && !c.getOrDefault("ntf_smtp_host", "").isBlank() && !c.getOrDefault("ntf_smtp_user", "").isBlank();
+    }
+
+    /** Gửi email ngay, không qua hàng đợi (mã OTP không được lưu trong bảng notification). */
+    public String sendEmailNow(String to, String subject, String body) throws Exception {
+        if (!EmailSender.validAddress(to)) throw new AppException("Email nhận không hợp lệ");
+        return send(config(), "EMAIL", to, subject, body, null);
     }
 
     /** Gửi tin thử ngay (không qua hàng đợi) để kiểm tra cấu hình. */

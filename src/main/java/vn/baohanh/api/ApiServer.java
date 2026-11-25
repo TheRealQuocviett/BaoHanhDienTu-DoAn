@@ -103,11 +103,13 @@ public class ApiServer {
         get("/api/public/shop", false, r -> app.portal.shopInfo());
         get("/api/public/shop-page", false, r -> app.portal.shopPage());
         routes.add(new Route("POST", Pattern.compile("/api/login"), false, r -> {
-            User u = app.auth.login(Json.str(r.body, "username"), Json.str(r.body, "password"));
-            String token = app.auth.createSession(u);
-            r.ex.getResponseHeaders().add("Set-Cookie", "sid=" + token + "; Path=/; HttpOnly; SameSite=Strict; Max-Age=43200");
-            return u.toMap();
+            vn.baohanh.service.Auth.LoginStep st = app.auth.begin(Json.str(r.body, "username"), Json.str(r.body, "password"));
+            if (st.needCode()) return Map.of("need_2fa", true, "token", st.pendingToken());
+            return startSession(r, st.user());
         }));
+        // Bước 2 khi tài khoản bật xác thực 2 lớp
+        routes.add(new Route("POST", Pattern.compile("/api/login/2fa"), false, r ->
+                startSession(r, app.twoFactor.finishPending(Json.str(r.body, "token"), Json.str(r.body, "code")))));
 
         // ---------- Phiên làm việc ----------
         get("/api/me", true, r -> r.user.toMap());
@@ -121,10 +123,19 @@ public class ApiServer {
             return Map.of("ok", true);
         });
         get("/api/meta", true, r -> meta(r.user));
+        // ---------- Xác thực 2 lớp ----------
+        get("/api/2fa", true, r -> app.twoFactor.status(r.user));
+        post("/api/2fa/setup", r -> app.twoFactor.setup(r.user));
+        post("/api/2fa/enable", r -> Map.of("codes", app.twoFactor.enable(r.user, Json.str(r.body, "code"))));
+        post("/api/2fa/disable", r -> { app.twoFactor.disable(r.user, Json.str(r.body, "code")); return Map.of("ok", true); });
+        post("/api/2fa/recovery", r -> Map.of("codes", app.twoFactor.regenerate(r.user, Json.str(r.body, "code"))));
+        get("/api/2fa/users", true, r -> app.twoFactor.enabledUsers(r.user));
+        post("/api/2fa/users/(\\d+)/reset", r -> { app.twoFactor.adminReset(r.user, r.id(1)); return Map.of("ok", true); });
         get("/api/dashboard", true, r -> app.warranty.dashboard(r.user));
 
         // ---------- Danh mục ----------
-        get("/api/catalog/(\\w+)", true, r -> app.catalog.list(r.user, r.m.group(1), r.q("q")));
+        get("/api/catalog/(\\w+)", true, r -> r.q("page").isEmpty() ? app.catalog.list(r.user, r.m.group(1), r.q("q"))
+                : app.catalog.page(r.user, r.m.group(1), r.q("q"), (int) parseLong(r.q("page")), (int) parseLong(r.q("size"))));
         get("/api/catalog/(\\w+)/(\\d+)", true, r -> app.catalog.get(r.user, r.m.group(1), r.id(2)));
         post("/api/catalog/(\\w+)", r -> app.catalog.save(r.user, r.m.group(1), 0, r.body));
         put("/api/catalog/(\\w+)/(\\d+)", r -> app.catalog.save(r.user, r.m.group(1), r.id(2), r.body));
@@ -137,7 +148,8 @@ public class ApiServer {
         });
 
         // ---------- Bảo hành ----------
-        get("/api/warranties", true, r -> app.warranty.listWarranties(r.user, r.q("q"), r.q("filter")));
+        get("/api/warranties", true, r -> r.q("page").isEmpty() ? app.warranty.listWarranties(r.user, r.q("q"), r.q("filter"))
+                : app.warranty.pageWarranties(r.user, r.q("q"), r.q("filter"), (int) parseLong(r.q("page")), (int) parseLong(r.q("size"))));
         get("/api/warranties/(\\d+)", true, r -> app.warranty.getWarranty(r.user, r.id(1)));
         post("/api/warranties", r -> app.warranty.activate(r.user, r.body));
         delete("/api/warranties/(\\d+)", r -> { app.warranty.deleteWarranty(r.user, r.id(1)); return Map.of("ok", true); });
@@ -148,7 +160,8 @@ public class ApiServer {
         });
 
         // ---------- Phiếu ----------
-        get("/api/tickets", true, r -> app.warranty.listTickets(r.user, r.q("status"), r.q("q")));
+        get("/api/tickets", true, r -> r.q("page").isEmpty() ? app.warranty.listTickets(r.user, r.q("status"), r.q("q"))
+                : app.warranty.pageTickets(r.user, r.q("status"), r.q("q"), (int) parseLong(r.q("page")), (int) parseLong(r.q("size"))));
         post("/api/tickets", r -> app.warranty.createTicket(r.user, r.body));
         get("/api/tickets/(\\d+)", true, r -> app.warranty.getTicket(r.user, r.id(1)));
         post("/api/tickets/(\\d+)/status", r -> app.warranty.changeStatus(r.user, r.id(1), r.body));
@@ -200,6 +213,11 @@ public class ApiServer {
         post("/api/purchase/(\\d+)/order", r -> app.purchases.markOrdered(r.user, r.id(1)));
         post("/api/purchase/(\\d+)/cancel", r -> app.purchases.cancel(r.user, r.id(1), Json.str(r.body, "note")));
         post("/api/purchase/(\\d+)/receive", r -> app.purchases.receive(r.user, r.id(1), r.body));
+        post("/api/diagnosis/suggest", r -> app.diagnosis.suggest(r.user, r.body));
+        get("/api/purchase/forecast", true, r -> app.purchases.forecast(r.user));
+        get("/api/alerts", true, r -> app.alerts.list(r.user, "1".equals(r.q("unread"))));
+        post("/api/alerts/(\\d+)/read", r -> { app.alerts.markRead(r.user, r.id(1)); return Map.of("ok", true); });
+        post("/api/alerts/read-all", r -> { app.alerts.markRead(r.user, 0); return Map.of("ok", true); });
         get("/api/permissions", true, r -> app.permissions.matrix(r.user));
         put("/api/permissions/(\\d+)", r -> app.permissions.save(r.user, r.id(1), r.body));
         post("/api/permissions/(\\d+)/reset", r -> app.permissions.reset(r.user, r.id(1)));
@@ -243,8 +261,11 @@ public class ApiServer {
         // ---------- Sao lưu ----------
         get("/api/backups", true, r -> app.backup.list(r.user));
         post("/api/backups", r -> app.backup.create(r.user, "thu-cong"));
-        post("/api/backups/([\\w.-]+)/restore", r -> Map.of("safety", app.backup.restore(r.user, r.m.group(1))));
-        get("/api/backups/([\\w.-]+\\.zip)", true, r -> {
+        post("/api/backups/([\\w.-]+)/restore", r -> Map.of("safety", app.backup.restore(r.user, r.m.group(1), Json.str(r.body, "password"))));
+        get("/api/backup-config", true, r -> app.backup.config(r.user));
+        postRaw("/api/backups/upload", r -> app.backup.importFile(r.user, r.q("name"), limited(r.ex.getRequestBody(), 1L << 30)));
+        put("/api/backup-config", r -> app.backup.setPassword(r.user, Json.str(r.body, "password"), Json.str(r.body, "confirm")));
+        get("/api/backups/([\\w.-]+\\.zip(?:\\.enc)?)", true, r -> {
             java.nio.file.Path f = app.backup.file(r.user, r.m.group(1));
             r.ex.getResponseHeaders().set("Content-Disposition", "attachment; filename=\"" + f.getFileName() + "\"");
             return new Binary("application/zip", Files.readAllBytes(f));
@@ -254,6 +275,10 @@ public class ApiServer {
         kh("POST", "/api/kh/register", r -> customerLogin(r, app.customers.register(Json.str(r.body, "phone"),
                 Json.str(r.body, "serial"), Json.str(r.body, "password"))));
         kh("POST", "/api/kh/login", r -> customerLogin(r, app.customers.login(Json.str(r.body, "phone"), Json.str(r.body, "password"))));
+        kh("POST", "/api/kh/forgot", r -> Map.of("message", app.customers.forgot(Json.str(r.body, "phone"),
+                "en".equalsIgnoreCase(r.ex.getRequestHeaders().getFirst("X-Lang")))));
+        kh("POST", "/api/kh/reset", r -> customerLogin(r, app.customers.resetWithOtp(Json.str(r.body, "phone"),
+                Json.str(r.body, "code"), Json.str(r.body, "password"))));
         kh("POST", "/api/kh/logout", r -> {
             app.customers.logout(cookie(r.ex, "ksid"));
             r.ex.getResponseHeaders().add("Set-Cookie", "ksid=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
@@ -323,10 +348,16 @@ public class ApiServer {
         });
         get("/api/settings", true, r -> {
             Map<String, Object> m = new LinkedHashMap<>(app.settings.all());
+            // Không gửi mật khẩu / khóa bí mật ra trình duyệt (mật khẩu email, khóa SMS/Zalo, mật khẩu sao lưu)
+            m.keySet().removeIf(k -> k.matches(".*(password|secret|token|api_key).*"));
             m.put("_portal_base", app.settings.portalBase());
             return m;
         });
-        put("/api/settings", r -> app.settings.save(r.user, r.body));
+        put("/api/settings", r -> {
+            Map<String, String> m = new LinkedHashMap<>(app.settings.save(r.user, r.body));
+            m.keySet().removeIf(k -> k.matches(".*(password|secret|token|api_key).*"));
+            return m;
+        });
         get("/api/audit", true, r -> app.audit.list(r.user, r.q("q"), 500));
 
         // ---------- Thông báo cho khách ----------
@@ -363,10 +394,17 @@ public class ApiServer {
 
     private record Binary(String contentType, byte[] data) {}
 
+    private Map<String, Object> startSession(Req r, User u) {
+        String token = app.auth.createSession(u);
+        r.ex.getResponseHeaders().add("Set-Cookie", "sid=" + token + "; Path=/; HttpOnly; SameSite=Strict; Max-Age=43200");
+        return u.toMap();
+    }
+
     private Map<String, Object> meta(User u) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("user", u.toMap());
         m.put("perms", vn.baohanh.model.Perm.of(u));
+        try { m.put("twofa", app.twoFactor.isEnabled(u.id())); } catch (java.sql.SQLException e) { m.put("twofa", false); }
         Map<String, Object> st = new LinkedHashMap<>();
         for (TicketStatus s : TicketStatus.values()) st.put(s.name(), s.getLabel());
         m.put("statuses", st);
@@ -461,6 +499,18 @@ public class ApiServer {
     }
 
     /** Thân yêu cầu nhị phân (ảnh, file Excel), giới hạn kích thước. */
+    /** Luồng đọc có giới hạn dung lượng (file sao lưu có thể lớn, không nạp hết vào RAM). */
+    private static InputStream limited(InputStream in, long max) {
+        return new java.io.FilterInputStream(in) {
+            long n;
+            private void count(long k) throws IOException {
+                if (k > 0 && (n += k) > max) throw new AppException(413, "File quá lớn (tối đa " + (max >> 20) + " MB)");
+            }
+            @Override public int read() throws IOException { int b = super.read(); if (b >= 0) count(1); return b; }
+            @Override public int read(byte[] b, int off, int len) throws IOException { int k = super.read(b, off, len); count(k); return k; }
+        };
+    }
+
     private static byte[] rawBody(Req r, int max) throws IOException {
         try (InputStream in = r.ex.getRequestBody()) {
             byte[] b = in.readNBytes(max + 1);
@@ -534,6 +584,7 @@ public class ApiServer {
         String file = switch (path) {
             case "/", "/index.html" -> "index.html";
             case "/tra-cuu", "/tra-cuu/", "/portal.html" -> "portal.html";
+            case "/logo.svg", "/favicon.ico" -> "logo.svg";
             default -> path.matches("/quet/[0-9a-f]{32}") ? "quet.html" : null;
         };
         if (file == null) { sendText(ex, 404, "Không tìm thấy"); return; }
@@ -547,7 +598,8 @@ public class ApiServer {
             }
         }
         if (bytes == null) { sendText(ex, 404, "Thiếu file web/" + file); return; }
-        ex.getResponseHeaders().set("Cache-Control", "no-cache");
-        sendBytes(ex, 200, "text/html; charset=utf-8", bytes);
+        boolean svg = file.endsWith(".svg");
+        ex.getResponseHeaders().set("Cache-Control", svg ? "max-age=86400" : "no-cache");
+        sendBytes(ex, 200, svg ? "image/svg+xml" : "text/html; charset=utf-8", bytes);
     }
 }

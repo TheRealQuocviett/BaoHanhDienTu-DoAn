@@ -42,6 +42,20 @@ public class CustomerService {
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();
     private final Map<String, Fails> fails = new ConcurrentHashMap<>();
 
+    // ----- Quên mật khẩu (OTP qua email) -----
+    public static final int OTP_MINUTES = 10;
+    public static final int OTP_MAX_ATTEMPTS = 5;
+    public static final long OTP_GAP_MS = 60_000;          // tối thiểu 60 giây giữa 2 lần gửi
+    public static final int OTP_PER_HOUR = 5;
+    private final Map<String, java.util.Deque<Long>> otpSent = new ConcurrentHashMap<>();
+    private vn.baohanh.notify.NotificationService notify;
+    /** Gửi email trong luồng riêng để thời gian phản hồi không lộ SĐT có tồn tại hay không. */
+    private java.util.concurrent.Executor otpExecutor = r -> { Thread t = new Thread(r, "gui-otp"); t.setDaemon(true); t.start(); };
+
+    public void setNotify(vn.baohanh.notify.NotificationService n) { this.notify = n; }
+    /** Kiểm thử: gửi đồng bộ để đọc được email ngay. */
+    public void setOtpExecutor(java.util.concurrent.Executor e) { this.otpExecutor = e; }
+
     public CustomerService(Database db, WarrantyService warranty, AuditService audit) {
         this.db = db;
         this.warranty = warranty;
@@ -103,6 +117,95 @@ public class CustomerService {
         fails.remove(key);
         db.update("UPDATE customer_account SET last_login = ? WHERE customer_id = ?", Database.now(), a.lng("customer_id"));
         return newSession(a.lng("customer_id"));
+    }
+
+    /**
+     * Bước 1 quên mật khẩu: gửi mã 6 số tới email trong hồ sơ khách.
+     * Luôn trả cùng một thông báo dù SĐT có tồn tại / có email hay không (không cho dò danh sách khách).
+     */
+    public String forgot(String phoneIn, boolean english) throws SQLException {
+        String p = phone(phoneIn);
+        if (notify == null || !notify.emailReady())
+            throw new AppException("Cửa hàng chưa bật gửi email nên chưa lấy lại mật khẩu online được. Vui lòng gọi cửa hàng để được hỗ trợ.");
+        long now = System.currentTimeMillis();
+        java.util.Deque<Long> q = otpSent.computeIfAbsent(p, k -> new java.util.ArrayDeque<>());
+        synchronized (q) {
+            while (!q.isEmpty() && now - q.peekFirst() > 3_600_000) q.pollFirst();
+            if (!q.isEmpty() && now - q.peekLast() < OTP_GAP_MS)
+                throw new AppException(429, "Vui lòng đợi " + ((OTP_GAP_MS - (now - q.peekLast())) / 1000 + 1) + " giây rồi gửi lại mã");
+            if (q.size() >= OTP_PER_HOUR) throw new AppException(429, "Bạn đã yêu cầu mã quá nhiều lần, vui lòng thử lại sau 1 giờ");
+            q.addLast(now);
+        }
+        Row c = db.one("SELECT id, name, email FROM customer WHERE phone = ?", p);
+        if (c != null && vn.baohanh.notify.EmailSender.validAddress(c.str("email"))) {
+            String code = String.format("%06d", random.nextInt(1_000_000));
+            long id = c.lng("id");
+            String nowTs = Database.now();
+            db.update("UPDATE customer_otp SET used_at = ? WHERE customer_id = ? AND used_at IS NULL", nowTs, id);   // mã cũ hết hiệu lực
+            db.update("INSERT INTO customer_otp (customer_id, code_hash, created_at, expires_at) VALUES (?, ?, ?, ?)",
+                    id, otpHash(id, code), nowTs,
+                    java.time.LocalDateTime.now().plusMinutes(OTP_MINUTES).format(Database.TS));
+            audit.log(null, "KHÁCH XIN MÃ OTP", "customer", id, maskEmail(c.str("email")));
+            String to = c.str("email"), name = c.str("name");
+            String subject = english ? "Password reset code: " + code : "Mã lấy lại mật khẩu: " + code;
+            String body = english
+                    ? "Hello " + name + ",\n\nYour password reset code is: " + code + "\nIt is valid for " + OTP_MINUTES
+                      + " minutes. Do not share it with anyone – the shop will never ask for it.\n\nIf you did not request this, simply ignore this email."
+                    : "Chào " + name + ",\n\nMã lấy lại mật khẩu cổng khách hàng của bạn là: " + code + "\nMã có hiệu lực " + OTP_MINUTES
+                      + " phút. Tuyệt đối không đưa mã cho người khác – cửa hàng không bao giờ hỏi mã này.\n\nNếu bạn không yêu cầu, hãy bỏ qua email này.";
+            otpExecutor.execute(() -> {
+                try { notify.sendEmailNow(to, subject, body); }
+                catch (Exception e) { System.err.println("Gui OTP loi: " + e.getMessage()); }
+            });
+        }
+        return english
+                ? "If this phone number has an email on file, a 6-digit code has been sent to it (valid " + OTP_MINUTES + " minutes). Check your spam folder too."
+                : "Nếu số điện thoại này có email trong hồ sơ, cửa hàng đã gửi mã 6 số tới email đó (hiệu lực " + OTP_MINUTES
+                  + " phút). Không thấy thư? Xem cả mục Thư rác / Spam.";
+    }
+
+    /** Bước 2: nhập mã + mật khẩu mới. Đúng thì đặt mật khẩu (tạo tài khoản nếu chưa có), đăng xuất mọi nơi và đăng nhập luôn. */
+    public String resetWithOtp(String phoneIn, String code, String newPassword) throws SQLException {
+        String p = phone(phoneIn);
+        String key = "otp:" + p;
+        throttle(key);
+        Auth.checkStrength(newPassword);
+        String c = code == null ? "" : code.replaceAll("\\s", "");
+        Row cu = db.one("SELECT id, name FROM customer WHERE phone = ?", p);
+        Row otp = cu == null ? null : db.one("SELECT id, code_hash, attempts FROM customer_otp WHERE customer_id = ? AND used_at IS NULL "
+                + "AND expires_at >= ? ORDER BY id DESC LIMIT 1", cu.lng("id"), Database.now());
+        if (otp == null || otp.lng("attempts") >= OTP_MAX_ATTEMPTS) {
+            fail(key);
+            throw new AppException("Mã không đúng hoặc đã hết hạn. Bấm \"Gửi lại mã\" để nhận mã mới.");
+        }
+        long cid = cu.lng("id");
+        if (!java.security.MessageDigest.isEqual(otpHash(cid, c).getBytes(java.nio.charset.StandardCharsets.US_ASCII),
+                otp.str("code_hash").getBytes(java.nio.charset.StandardCharsets.US_ASCII))) {
+            db.update("UPDATE customer_otp SET attempts = attempts + 1 WHERE id = ?", otp.lng("id"));
+            fail(key);
+            long left = OTP_MAX_ATTEMPTS - otp.lng("attempts") - 1;
+            throw new AppException(left > 0 ? "Mã không đúng (còn " + left + " lần thử)" : "Mã không đúng hoặc đã hết hạn. Bấm \"Gửi lại mã\" để nhận mã mới.");
+        }
+        fails.remove(key);
+        String now = Database.now();
+        db.update("UPDATE customer_otp SET used_at = ? WHERE customer_id = ? AND used_at IS NULL", now, cid);
+        String hash = PasswordHasher.hash(newPassword);
+        if (db.scalar("SELECT COUNT(*) FROM customer_account WHERE customer_id = ?", cid) > 0)
+            db.update("UPDATE customer_account SET password_hash = ?, last_login = ? WHERE customer_id = ?", hash, now, cid);
+        else db.update("INSERT INTO customer_account (customer_id, password_hash, created_at, last_login) VALUES (?, ?, ?, ?)", cid, hash, now, now);
+        sessions.values().removeIf(s -> s.customerId() == cid);   // đăng xuất các thiết bị khác
+        audit.log(null, "KHÁCH ĐẶT LẠI MẬT KHẨU (OTP)", "customer", cid, cu.str("name") + " – " + p);
+        return newSession(cid);
+    }
+
+    public static String otpHash(long customerId, String code) {
+        return TwoFactorService.sha256("otp:" + customerId + ":" + code);
+    }
+
+    static String maskEmail(String e) {
+        int at = e.indexOf('@');
+        if (at <= 1) return "***" + e.substring(Math.max(0, at));
+        return e.charAt(0) + "***" + e.substring(at);
     }
 
     private String newSession(long customerId) {

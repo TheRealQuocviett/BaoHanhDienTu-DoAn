@@ -19,6 +19,8 @@ public final class I18n {
             new Rule(Pattern.compile("Mỗi yêu cầu tối đa (\\d+) ảnh"), "Up to $1 photos per request"),
             new Rule(Pattern.compile("Tin nhắn tối đa (\\d+) ký tự"), "Messages are limited to $1 characters"),
             new Rule(Pattern.compile("Bạn nhập sai quá nhiều lần, vui lòng thử lại sau (.+)"), "Too many failed attempts, please try again in $1"),
+            new Rule(Pattern.compile("Vui lòng đợi (\\d+) giây rồi gửi lại mã"), "Please wait $1 seconds before requesting a new code"),
+            new Rule(Pattern.compile("Mã không đúng \\(còn (\\d+) lần thử\\)"), "Wrong code ($1 attempts left)"),
             new Rule(Pattern.compile("Không tìm thấy (.+)"), "Not found: $1"));
 
     static {
@@ -62,6 +64,10 @@ public final class I18n {
             {"Phiếu đã thanh toán", "This ticket has been paid"},
             {"Phiếu không phải trả tiền", "Nothing to pay for this ticket"},
             {"Chưa đến bước thanh toán", "Not ready for payment yet"},
+            {"Cửa hàng chưa bật gửi email nên chưa lấy lại mật khẩu online được. Vui lòng gọi cửa hàng để được hỗ trợ.",
+             "The store has not enabled email yet, so passwords cannot be reset online. Please call the store for help."},
+            {"Bạn đã yêu cầu mã quá nhiều lần, vui lòng thử lại sau 1 giờ", "Too many code requests, please try again in 1 hour"},
+            {"Mã không đúng hoặc đã hết hạn. Bấm \"Gửi lại mã\" để nhận mã mới.", "The code is wrong or has expired. Click \"Resend code\" to get a new one."},
         };
         for (String[] p : t) EN.put(p[0], p[1]);
     }

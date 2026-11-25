@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tra cứu bảo hành</title>
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>try { const t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.dataset.theme = t; } catch (e) {}</script>
@@ -18,8 +18,7 @@ header{background:radial-gradient(900px 500px at 10% -10%,#3b82f6 0%,#1d4ed8 50%
 header::after{content:"";position:absolute;right:-90px;top:-90px;width:300px;height:300px;border-radius:50%;border:46px solid #ffffff12}
 .wrap{max-width:780px;margin:0 auto;position:relative;z-index:1}
 .shop{display:flex;align-items:center;gap:11px;font-weight:700}
-.shop i{width:38px;height:38px;border-radius:11px;background:#fff;flex:none;display:grid;place-items:center}
-.shop i::after{content:"";width:15px;height:17px;background:#2563eb;clip-path:polygon(50% 0,100% 18%,100% 55%,50% 100%,0 55%,0 18%)}
+.shop i{width:40px;height:40px;border-radius:11px;background:#fff url("/logo.svg") center/28px no-repeat;flex:none}
 .shop small{display:block;font-weight:400;color:#dbe6ff;font-size:13px}
 h1{font-size:clamp(26px,5.5vw,38px);line-height:1.2;margin:26px 0 8px;letter-spacing:-.02em;text-wrap:balance}
 header p{color:#dbe6ff;margin:0}
@@ -148,7 +147,20 @@ html[data-theme=dark] .stars button,html[data-theme=dark] .stars b{color:#3a4d70
         <form id="lf"><label for="lph">Số điện thoại</label><input id="lph" inputmode="tel" autocomplete="tel" required>
           <label for="lpw">Mật khẩu</label><input id="lpw" type="password" autocomplete="current-password" required>
           <div class="err" id="lerr"></div><button style="width:100%">Đăng nhập</button></form>
-        <p class="muted">Chưa có tài khoản hoặc quên mật khẩu? <a href="#" id="toReg">Đăng ký / đặt lại mật khẩu</a></p>
+        <p class="muted"><a href="#" id="toOtp">Quên mật khẩu?</a> <span>·</span> <span>Chưa có tài khoản?</span> <a href="#" id="toReg">Đăng ký / đặt lại mật khẩu</a></p>
+      </div>
+      <div id="otpBox" hidden>
+        <h2 style="margin:0 0 4px">Quên mật khẩu</h2>
+        <p class="muted" style="margin:0">Nhập số điện thoại, cửa hàng sẽ gửi mã 6 số tới email trong hồ sơ của bạn.</p>
+        <form id="of1"><label for="oph">Số điện thoại</label><input id="oph" inputmode="tel" autocomplete="tel" required>
+          <div class="err" id="oerr1"></div><button style="width:100%">Gửi mã qua email</button></form>
+        <form id="of2" hidden><div class="note" id="omsg"></div>
+          <label for="ocd">Mã 6 số trong email</label><input id="ocd" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required style="font-size:20px;letter-spacing:.25em;text-align:center">
+          <label for="opw">Mật khẩu mới (ít nhất 6 ký tự)</label><input id="opw" type="password" minlength="6" autocomplete="new-password" required>
+          <label for="opw2">Nhập lại mật khẩu</label><input id="opw2" type="password" autocomplete="new-password" required>
+          <div class="err" id="oerr2"></div><button style="width:100%">Đặt mật khẩu mới</button>
+          <p class="muted"><a href="#" id="oResend">Gửi lại mã</a></p></form>
+        <p class="muted"><span>Không có email trong hồ sơ?</span> <a href="#" id="toReg2">Dùng số Serial của máy</a><br><a href="#" id="toLogin2">← Quay lại đăng nhập</a></p>
       </div>
       <div id="regBox" hidden>
         <h2 style="margin:0 0 4px">Đăng ký / đặt lại mật khẩu</h2>
@@ -193,6 +205,11 @@ const EN = {
   'Đăng nhập': 'Sign in', 'Xem tất cả máy của bạn, duyệt báo giá sửa chữa, đặt lịch bảo hành online.': 'See all your devices, approve repair quotes and book warranty service online.',
   'Số điện thoại': 'Phone number', 'Mật khẩu': 'Password', 'Chưa có tài khoản hoặc quên mật khẩu?': 'No account yet or forgot your password?',
   'Đăng ký / đặt lại mật khẩu': 'Register / reset password',
+  'Quên mật khẩu?': 'Forgot password?', '·': '·', 'Chưa có tài khoản?': 'No account yet?', 'Quên mật khẩu': 'Forgot password',
+  'Nhập số điện thoại, cửa hàng sẽ gửi mã 6 số tới email trong hồ sơ của bạn.': 'Enter your phone number and the store will email a 6-digit code to the address on file.',
+  'Gửi mã qua email': 'Email me a code', 'Mã 6 số trong email': '6-digit code from the email', 'Đặt mật khẩu mới': 'Set new password',
+  'Gửi lại mã': 'Resend code', 'Không có email trong hồ sơ?': 'No email on file?', 'Dùng số Serial của máy': 'Use your device serial',
+  'Đã gửi lại mã': 'Code sent again', 'Đã đặt mật khẩu mới': 'New password set',
   'Nhập số điện thoại đã dùng khi mua hàng và số Serial/IMEI của một máy bạn đã mua tại cửa hàng (in trên hộp máy hoặc phiếu bảo hành).':
     'Enter the phone number you used when buying and the serial/IMEI of a device you bought at our store (printed on the box or warranty card).',
   'Số Serial / IMEI của máy': 'Device serial / IMEI', 'Mật khẩu mới (ít nhất 6 ký tự)': 'New password (at least 6 characters)', 'Nhập lại mật khẩu': 'Confirm password',
@@ -218,7 +235,7 @@ const EN = {
   'Chờ cửa hàng xác nhận': 'Waiting for confirmation', 'Đã hẹn lịch': 'Appointment set', 'Đã tiếp nhận máy': 'Device received', 'Cửa hàng từ chối': 'Declined by store', 'Khách đã hủy': 'Cancelled by you',
   'Tiền mặt': 'Cash', 'Chuyển khoản': 'Bank transfer', 'Quẹt thẻ': 'Card',
   'Có báo giá sửa chữa': 'Repair quote', 'Sửa xong – mời nhận máy': 'Ready for pickup', 'Hẹn lịch yêu cầu online': 'Appointment confirmed',
-  'Từ chối yêu cầu online': 'Request declined', 'Cửa hàng trả lời tin nhắn': 'Store replied', 'Sắp hết hạn bảo hành (30 ngày)': 'Warranty expiring (30 days)', 'Tin thử': 'Test message',
+  'Từ chối yêu cầu online': 'Request declined', 'Cửa hàng trả lời tin nhắn': 'Store replied', 'Sắp hết hạn bảo hành (30 ngày)': 'Warranty expiring (30 days)', 'Tin thử': 'Test message', 'Xin lỗi trễ hẹn': 'Delay apology',
   'Cửa hàng chưa cài đặt tài khoản ngân hàng': 'The store has not set up a bank account', 'Phiếu đã thanh toán': 'This ticket has been paid',
   'Phiếu không phải trả tiền': 'Nothing to pay for this ticket', 'Chưa đến bước thanh toán': 'Not ready for payment yet',
   // tài khoản
@@ -338,8 +355,27 @@ $('#f').addEventListener('submit', e => { e.preventDefault(); const q = $('#q').
 
 /* ---------- tài khoản ---------- */
 let ME = null;
-$('#toReg').onclick = e => { e.preventDefault(); $('#loginBox').hidden = true; $('#regBox').hidden = false; $('#rph').value = $('#lph').value; $('#rph').focus(); };
-$('#toLogin').onclick = e => { e.preventDefault(); $('#loginBox').hidden = false; $('#regBox').hidden = true; };
+$('#toReg').onclick = e => { e.preventDefault(); showBox('regBox'); $('#rph').value = $('#lph').value; $('#rph').focus(); };
+$('#toLogin').onclick = e => { e.preventDefault(); showBox('loginBox'); };
+/* ---------- quên mật khẩu: mã OTP qua email ---------- */
+function showBox(id) { ['loginBox', 'regBox', 'otpBox'].forEach(x => $('#' + x).hidden = x !== id); }
+$('#toOtp').onclick = e => { e.preventDefault(); showBox('otpBox'); $('#of1').hidden = false; $('#of2').hidden = true; $('#oph').value = $('#lph').value; $('#oph').focus(); };
+$('#toLogin2').onclick = e => { e.preventDefault(); showBox('loginBox'); };
+$('#toReg2').onclick = e => { e.preventDefault(); showBox('regBox'); $('#rph').value = $('#oph').value; $('#rph').focus(); };
+async function sendOtp(errEl) {
+  errEl.textContent = '';
+  const r = await api('/api/kh/forgot', 'POST', {phone: $('#oph').value});
+  $('#omsg').textContent = r.message; $('#of1').hidden = true; $('#of2').hidden = false; $('#ocd').value = ''; $('#ocd').focus();
+}
+$('#of1').onsubmit = async e => { e.preventDefault(); try { await sendOtp($('#oerr1')); } catch (err) { $('#oerr1').textContent = err.message; } };
+$('#oResend').onclick = async e => { e.preventDefault(); try { await sendOtp($('#oerr2')); toast(T('Đã gửi lại mã')); } catch (err) { $('#oerr2').textContent = err.message; } };
+$('#of2').onsubmit = async e => {
+  e.preventDefault(); $('#oerr2').textContent = '';
+  if ($('#opw').value !== $('#opw2').value) { $('#oerr2').textContent = T('Mật khẩu nhập lại không khớp'); return; }
+  try { ME = await api('/api/kh/reset', 'POST', {phone: $('#oph').value, code: $('#ocd').value, password: $('#opw').value});
+    $('#opw').value = $('#opw2').value = ''; showBox('loginBox'); toast(T('Đã đặt mật khẩu mới')); renderMe(); }
+  catch (err) { $('#oerr2').textContent = err.message; }
+};
 $('#lf').onsubmit = async e => {
   e.preventDefault(); $('#lerr').textContent = '';
   try { ME = await api('/api/kh/login', 'POST', {phone: $('#lph').value, password: $('#lpw').value}); $('#lpw').value = ''; renderMe(); }

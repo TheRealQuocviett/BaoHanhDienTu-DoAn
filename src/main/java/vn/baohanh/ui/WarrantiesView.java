@@ -20,6 +20,7 @@ public class WarrantiesView extends MainFrame.View {
     private final JComboBox<Ui.Item> filter = new JComboBox<>();
     private final JTextField q;
     private final JLabel count = Ui.sub(" ");
+    private final Pager pager = new Pager("bảo hành", this::refresh);
 
     public WarrantiesView(Ui.Ctx ctx) {
         super(ctx);
@@ -27,8 +28,8 @@ public class WarrantiesView extends MainFrame.View {
         filter.addItem(new Ui.Item("active", "Còn hạn"));
         filter.addItem(new Ui.Item("expiring", "Sắp hết hạn (≤ 30 ngày)"));
         filter.addItem(new Ui.Item("expired", "Hết hạn"));
-        filter.addActionListener(e -> refresh());
-        q = Ui.search("Tìm serial, mã BH, tên, SĐT…", s -> refresh());
+        filter.addActionListener(e -> { pager.reset(); refresh(); });
+        q = Ui.search("Tìm serial, mã BH, tên, SĐT…", s -> { pager.reset(); refresh(); });
         JTable t = Ui.table(model, r -> WarrantyPanel.dialog(ctx, r.lng("id"), this::refresh));
         add(Ui.header("Danh sách bảo hành", "Nhấp đúp để xem chi tiết, lịch sử sửa chữa, in phiếu bảo hành.",
                 vn.baohanh.model.Perm.ACTIVATE.allows(ctx.user()) ? Ui.primary("+ Kích hoạt", () -> ctx.frame().navigate("kich-hoat", null)) : new JLabel()),
@@ -37,6 +38,7 @@ public class WarrantiesView extends MainFrame.View {
         c.setOpaque(false);
         c.add(Ui.flow(new JLabel("Lọc:"), filter, new JLabel("  Tìm:"), q, count), BorderLayout.NORTH);
         c.add(Ui.scroll(t), BorderLayout.CENTER);
+        c.add(pager, BorderLayout.SOUTH);
         add(c, BorderLayout.CENTER);
     }
 
@@ -46,8 +48,9 @@ public class WarrantiesView extends MainFrame.View {
     @Override
     public void refresh() {
         Ui.run(this, () -> {
-            model.setRows(ctx.app().warranty.listWarranties(user(), q.getText(), String.valueOf(Ui.selectedId(filter))));
-            count.setText("   " + model.getRowCount() + " bảo hành");
+            vn.baohanh.db.Row res = ctx.app().warranty.pageWarranties(user(), q.getText(), String.valueOf(Ui.selectedId(filter)), pager.page(), Pager.SIZE);
+            model.setRows(rows(res));
+            pager.update(res);
         });
     }
 }

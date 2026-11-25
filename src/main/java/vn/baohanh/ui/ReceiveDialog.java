@@ -72,8 +72,28 @@ public final class ReceiveDialog {
         });
         if (serial != null) doCheck.run();
 
+        javax.swing.JLabel dx = DiagnosisPanel.create();
+        Timer dxTimer = new Timer(700, e -> {
+            String s = sf.getText().trim(), is = issue.getText().trim();
+            if (s.length() < 3 || is.length() < 4) { DiagnosisPanel.show(dx, null, 0); return; }
+            try {
+                DiagnosisPanel.show(dx, ctx.app().diagnosis.suggest(ctx.user(), Map.of("serial", s, "issue", is)), 470);
+            } catch (Exception ex) {
+                DiagnosisPanel.show(dx, null, 0);
+            }
+            d.pack();
+        });
+        dxTimer.setRepeats(false);
+        DocumentListener dxL = new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { dxTimer.restart(); }
+            public void removeUpdate(DocumentEvent e) { dxTimer.restart(); }
+            public void changedUpdate(DocumentEvent e) { dxTimer.restart(); }
+        };
+        sf.getDocument().addDocumentListener(dxL);
+        issue.getDocument().addDocumentListener(dxL);
+
         Ui.Form f = new Ui.Form();
-        f.add("Số Serial / IMEI *", ScanDialog.field(ctx, sf, null)).full(check).add("Lỗi khách báo *", new JScrollPane(issue))
+        f.add("Số Serial / IMEI *", ScanDialog.field(ctx, sf, null)).full(check).add("Lỗi khách báo *", new JScrollPane(issue)).full(dx)
          .add("Phụ kiện kèm theo", acc).add("Tình trạng ngoại quan", cond).add("Ngày hẹn trả (dd/MM/yyyy)", due)
          .add("Phân công kỹ thuật viên", tech).full(print);
 

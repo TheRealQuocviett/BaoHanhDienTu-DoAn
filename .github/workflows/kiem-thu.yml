@@ -11,7 +11,7 @@ jobs:
   kiem-thu:
     name: Biên dịch & chạy kiểm thử
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - name: Lấy mã nguồn
         uses: actions/checkout@v4
@@ -37,3 +37,23 @@ jobs:
           rm -rf bin-test
           javac -encoding UTF-8 -d bin-test $(find src -name '*.java')
           java -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -cp "bin-test:lib/*" vn.baohanh.test.KiemThu
+
+      # Thử tải 50.000 phiếu (CSDL tạm, driver SQLite thật). Bảng kết quả hiện ở trang tóm tắt của lần chạy
+      # (tab Actions → bấm vào lần chạy → kéo xuống "Summary") và tải được ở mục Artifacts.
+      - name: Thử tải 50.000 phiếu
+        continue-on-error: true
+        timeout-minutes: 15
+        env:
+          TZ: Asia/Ho_Chi_Minh
+        run: |
+          java -Xmx1g -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -cp "bin:lib/*" vn.baohanh.tools.ThuTai 50000 --out thu-tai-ket-qua.md
+          cat thu-tai-ket-qua.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Lưu bảng kết quả thử tải
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: thu-tai-ket-qua
+          path: thu-tai-ket-qua.md
+          if-no-files-found: ignore

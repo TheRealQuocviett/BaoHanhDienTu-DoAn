@@ -362,6 +362,57 @@ CREATE TABLE IF NOT EXISTS user_permission (
 );
 
 -- ---------------------------------------------------------------------
+-- 7f. Nhắc việc cho nhân viên (v9): phiếu sắp đến hạn trả, quá hạn, linh kiện sắp hết.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS staff_alert (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id         INTEGER NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,   -- người nhận
+    kind            TEXT NOT NULL CHECK (kind IN ('DUE_SOON','OVERDUE','STOCK')),
+    ticket_id       INTEGER REFERENCES ticket(id) ON DELETE CASCADE,
+    part_id         INTEGER REFERENCES part(id) ON DELETE CASCADE,
+    message         TEXT NOT NULL,
+    created_at      TEXT NOT NULL,
+    read_at         TEXT,
+    dedup_key       TEXT NOT NULL UNIQUE                   -- mỗi việc chỉ nhắc một lần cho mỗi người
+);
+CREATE INDEX IF NOT EXISTS idx_alert_user ON staff_alert(user_id, read_at);
+
+-- ---------------------------------------------------------------------
+-- 7d. BẢO MẬT (phiên bản 10): xác thực 2 lớp, OTP quên mật khẩu, chỉ mục tăng tốc
+-- ---------------------------------------------------------------------
+-- Xác thực 2 lớp (TOTP – Google Authenticator) cho tài khoản nhân viên
+CREATE TABLE IF NOT EXISTS user_2fa (
+    user_id         INTEGER PRIMARY KEY REFERENCES app_user(id) ON DELETE CASCADE,
+    secret          TEXT NOT NULL,                         -- khóa bí mật Base32
+    enabled         INTEGER NOT NULL DEFAULT 0 CHECK (enabled IN (0,1)),
+    created_at      TEXT NOT NULL,
+    enabled_at      TEXT,
+    recovery        TEXT NOT NULL DEFAULT '',              -- băm SHA-256 của các mã khôi phục, cách nhau dấu phẩy
+    last_step       INTEGER NOT NULL DEFAULT 0             -- bước thời gian đã dùng gần nhất (chống dùng lại mã)
+);
+
+-- Mã OTP khách tự lấy lại mật khẩu qua email
+CREATE TABLE IF NOT EXISTS customer_otp (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id     INTEGER NOT NULL REFERENCES customer(id) ON DELETE CASCADE,
+    code_hash       TEXT NOT NULL,                         -- không lưu mã gốc
+    created_at      TEXT NOT NULL,
+    expires_at      TEXT NOT NULL,
+    attempts        INTEGER NOT NULL DEFAULT 0,
+    used_at         TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_otp_customer ON customer_otp(customer_id, created_at);
+
+-- Chỉ mục thêm sau khi thử tải 50.000 phiếu (xem docs/thu-tai-ket-qua.md, chạy thu-tai.bat để đo lại)
+CREATE INDEX IF NOT EXISTS idx_ticket_part_ticket ON ticket_part(ticket_id);
+CREATE INDEX IF NOT EXISTS idx_ticket_received    ON ticket(received_at, id);
+CREATE INDEX IF NOT EXISTS idx_ticket_tech        ON ticket(technician_id, status);
+CREATE INDEX IF NOT EXISTS idx_ticket_due         ON ticket(due_date);
+CREATE INDEX IF NOT EXISTS idx_warranty_created   ON warranty(created_at, id);
+CREATE INDEX IF NOT EXISTS idx_stock_ticket       ON stock_movement(ticket_id);
+CREATE INDEX IF NOT EXISTS idx_request_customer   ON service_request(customer_id);
+
+-- ---------------------------------------------------------------------
 -- 8. VIEW tiện tra cứu (dùng trong báo cáo / xem nhanh bằng DB Browser)
 -- ---------------------------------------------------------------------
 CREATE VIEW IF NOT EXISTS v_warranty AS

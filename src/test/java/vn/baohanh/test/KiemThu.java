@@ -664,6 +664,266 @@ public final class KiemThu {
                 List<String> noEn = labels.stream().filter(l -> !portal.contains("'" + l + "':")).toList();
                 check("Nhãn trạng thái / thanh toán / thông báo từ máy chủ đều có bản tiếng Anh" + (noEn.isEmpty() ? "" : " – thiếu: " + noEn), noEn.isEmpty());
             }
+
+            section("23. Gợi ý chẩn đoán từ lịch sử");
+            {
+                long cap = app.catalog.save(admin, "part", 0, m("code", "CAP-M1", "name", "Cáp màn hình M1", "sell_price", 400000, "cost_price", 200000, "stock", 20, "min_stock", 1)).lng("id");
+                long pinDx = app.catalog.save(admin, "part", 0, m("code", "PIN-DX", "name", "Pin M1 đời mới", "sell_price", 500000, "cost_price", 300000, "stock", 20, "min_stock", 1)).lng("id");
+                String[][] hx = {{"DX1", "Màn hình chớp nháy liên tục", "Cáp màn hình hỏng – thay cáp màn hình", "cap"},
+                        {"DX2", "Màn hình nhấp nháy khi mở khóa", "Cáp màn hình lỏng – thay cáp màn hình", "cap"},
+                        {"DX3", "Chớp màn hình, có sọc", "Cáp màn hình đứt ngầm – thay cáp màn hình", "cap"},
+                        {"DX4", "Pin tụt nhanh", "Pin chai – thay pin", "pin"}};
+                for (String[] x : hx) {
+                    app.warranty.activate(rec, m("serial", x[0], "product_id", prod, "customer_phone", "0901111222"));
+                    long tx = app.warranty.createTicket(rec, m("serial", x[0], "issue", x[1], "technician_id", tech.id())).lng("id");
+                    app.warranty.changeStatus(tech, tx, m("status", "DIAGNOSING"));
+                    app.warranty.updateCost(tech, tx, m("labor_cost", 0, "diagnosis", x[2]));
+                    app.warranty.addPart(tech, tx, "cap".equals(x[3]) ? cap : pinDx, 1);
+                    app.warranty.changeStatus(tech, tx, m("status", "REPAIRING"));
+                    app.warranty.changeStatus(tech, tx, m("status", "READY"));
+                }
+                Row dx = app.diagnosis.suggest(rec, m("serial", "SN002", "issue", "Màn hình bị chớp nháy"));
+                @SuppressWarnings("unchecked") List<Row> dxParts = (List<Row>) dx.get("parts");
+                @SuppressWarnings("unchecked") List<Row> dxDiag = (List<Row>) dx.get("diagnoses");
+                check("Tìm được các phiếu tương tự (≥ 3)", dx.lng("count") >= 3);
+                check("Gợi ý đúng linh kiện hay thay (Cáp màn hình M1, ≥ 60%)", !dxParts.isEmpty() && "Cáp màn hình M1".equals(dxParts.get(0).str("name")) && dxParts.get(0).lng("pct") >= 60);
+                check("Gom kết luận theo cách xử lý", !dxDiag.isEmpty() && "Thay cáp màn hình".equals(dxDiag.get(0).str("text")));
+                check("Có chi phí ước tính và câu tóm tắt", dx.get("cost_mid") != null && dx.str("summary").contains("Cáp màn hình M1"));
+                check("Lỗi chưa từng gặp → báo ca mới", app.diagnosis.suggest(rec, m("serial", "SN002", "issue", "abc xyz qwe")).lng("count") == 0);
+                check("Serial chưa kích hoạt → không gợi ý", !Boolean.TRUE.equals(app.diagnosis.suggest(rec, m("serial", "KHONG-CO", "issue", "Màn hình chớp")).get("ready")));
+                check("Phân loại lỗi không dấu vẫn nhận ra", app.diagnosis.suggest(rec, m("serial", "SN002", "issue", "man hinh chop nhay")).lng("count") >= 3);
+                long dxT = db.scalar("SELECT id FROM ticket WHERE warranty_id = (SELECT id FROM warranty WHERE serial = 'DX1')");
+                Row dxSelf = app.diagnosis.suggest(tech, m("ticket_id", dxT));
+                @SuppressWarnings("unchecked") List<Row> dxEx = (List<Row>) dxSelf.get("examples");
+                check("Xem gợi ý trong một phiếu thì không tự so với chính nó", dxSelf.lng("count") >= 2 && dxEx.stream().noneMatch(x -> x.lng("id") == dxT));
+            }
+
+            section("24. Dự báo linh kiện cần đặt");
+            {
+                long fc = app.catalog.save(admin, "part", 0, m("code", "LK-FC", "name", "Linh kiện dự báo", "sell_price", 100000, "cost_price", 50000, "stock", 6, "min_stock", 1)).lng("id");
+                for (int i = 1; i <= 5; i++)
+                    db.insert("INSERT INTO stock_movement (part_id, time, qty, type, note) VALUES (?, ?, -1, 'OUT', 'thử')", fc, Database.ts(java.time.LocalDateTime.now().minusDays(i * 3)));
+                Row f0 = ((List<Row>) app.purchases.forecast(admin).get("rows")).stream().filter(x -> x.lng("id") == fc).findFirst().orElseThrow();
+                check("Tính lượng dùng / ngày và số ngày còn đủ dùng", ((Number) f0.get("daily_use")).doubleValue() > 0.1 && f0.lng("days_left") > 40 && f0.lng("days_left") < 70);
+                check("Còn đủ dùng lâu → chưa cần đặt", !Boolean.TRUE.equals(f0.get("need")));
+                app.settings.put("po_lead_days", "60");
+                Row f1 = app.purchases.suggestions(admin).stream().filter(x -> x.lng("id") == fc).findFirst().orElse(null);
+                check("Hàng về lâu hơn số ngày còn dùng → gợi ý đặt sớm dù chưa chạm mức tối thiểu",
+                        f1 != null && f1.str("reason").startsWith("Dự báo hết") && f1.lng("suggest_qty") >= 5);
+                check("Dự kiến ngày hết hàng", f1 != null && f1.str("stockout_date").equals(LocalDate.now().plusDays(f1.lng("days_left")).toString()));
+                check("Đếm vào số linh kiện cần đặt trên menu", app.warranty.dashboard(admin).lng("parts_to_order") >= 1);
+                app.settings.put("po_lead_days", "");
+            }
+
+            section("25. Nhắc trễ hẹn tự động");
+            {
+                app.warranty.activate(rec, m("serial", "AL1", "product_id", prod, "customer_phone", "0901111222"));
+                app.warranty.activate(rec, m("serial", "AL2", "product_id", prod, "customer_phone", "0901111222"));
+                long dueT = app.warranty.createTicket(rec, m("serial", "AL1", "issue", "Thử nhắc hẹn", "technician_id", tech.id(),
+                        "due_date", LocalDate.now().plusDays(1).toString())).lng("id");
+                long late = app.warranty.createTicket(rec, m("serial", "AL2", "issue", "Thử quá hạn", "technician_id", tech.id())).lng("id");
+                db.update("UPDATE ticket SET due_date = ? WHERE id = ?", LocalDate.now().minusDays(2).toString(), late);
+                db.update("UPDATE ticket SET due_date = ? WHERE due_date < ? AND id <> ?", LocalDate.now().plusDays(30).toString(), LocalDate.now().toString(), late);
+                long ntfBefore = db.scalar("SELECT COUNT(*) FROM notification WHERE event = 'OVERDUE'");
+                app.alerts.scan();
+                check("Nhắc kỹ thuật viên phiếu sắp đến hạn", db.scalar("SELECT COUNT(*) FROM staff_alert WHERE kind = 'DUE_SOON' AND ticket_id = ? AND user_id = ?", dueT, tech.id()) == 1);
+                check("Phiếu quá hạn: báo quản lý + kỹ thuật viên", db.scalar("SELECT COUNT(*) FROM staff_alert WHERE kind = 'OVERDUE' AND ticket_id = ? AND user_id IN (?, ?)", late, admin.id(), tech.id()) == 2);
+                long ntfAfter = db.scalar("SELECT COUNT(*) FROM notification WHERE event = 'OVERDUE' AND ticket_id = ?", late);
+                check("Tự gửi tin xin lỗi khách", ntfAfter >= 1 && db.scalar("SELECT COUNT(*) FROM notification WHERE event = 'OVERDUE'") > ntfBefore);
+                check("Tin xin lỗi có mã phiếu và ngày hẹn", db.one("SELECT body FROM notification WHERE event = 'OVERDUE' AND ticket_id = ? AND channel = 'SMS'", late).str("body")
+                        .contains(vn.baohanh.util.Fmt.date(LocalDate.now().minusDays(2).toString())));
+                long alertCount = db.scalar("SELECT COUNT(*) FROM staff_alert");
+                app.alerts.scan();
+                check("Quét lại không nhắc / gửi trùng", db.scalar("SELECT COUNT(*) FROM staff_alert") == alertCount
+                        && db.scalar("SELECT COUNT(*) FROM notification WHERE event = 'OVERDUE' AND ticket_id = ?", late) == ntfAfter);
+                check("Bảng điều khiển đếm nhắc việc chưa đọc", app.warranty.dashboard(tech).lng("alerts") >= 2);
+                app.alerts.markRead(tech, 0);
+                check("Đánh dấu đã đọc hết", app.alerts.unread(tech) == 0);
+                db.update("UPDATE ticket SET due_date = ? WHERE id = ?", LocalDate.now().minusDays(1).toString(), late);
+                app.alerts.scan();
+                check("Đổi ngày hẹn rồi vẫn trễ → nhắc lại theo hẹn mới", db.scalar("SELECT COUNT(*) FROM staff_alert WHERE kind = 'OVERDUE' AND ticket_id = ? AND user_id = ?", late, tech.id()) == 2);
+                app.warranty.changeStatus(tech, late, m("status", "DIAGNOSING"));
+                app.warranty.changeStatus(tech, late, m("status", "REPAIRING"));
+                app.warranty.changeStatus(tech, late, m("status", "READY"));
+                app.alerts.closeFinished();
+                check("Phiếu sửa xong → nhắc việc liên quan tự đóng", db.scalar("SELECT COUNT(*) FROM staff_alert WHERE ticket_id = ? AND read_at IS NULL", late) == 0);
+            }
+
+            section("26. Xác thực 2 lớp (Google Authenticator / TOTP)");
+            {
+                String rfc = vn.baohanh.util.Totp.base32Encode("12345678901234567890".getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+                check("Base32 đúng chuẩn RFC 4648", "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ".equals(rfc));
+                check("Mã TOTP khớp bộ thử của RFC 6238 (T = 59 giây)", "287082".equals(vn.baohanh.util.Totp.code(rfc, 59 / 30)));
+                check("Mã TOTP khớp bộ thử của RFC 6238 (T = 1111111109)", "081804".equals(vn.baohanh.util.Totp.code(rfc, 1111111109L / 30)));
+                String sec = vn.baohanh.util.Totp.newSecret();
+                check("Khóa bí mật 160 bit, giải mã Base32 ngược lại được", sec.length() == 32 && vn.baohanh.util.Totp.base32Decode(sec).length == 20);
+                Row st = app.twoFactor.setup(admin);
+                String secret = db.one("SELECT secret FROM user_2fa WHERE user_id = ?", admin.id()).str("secret");
+                check("Cài đặt: trả mã QR (otpauth://) có khóa bí mật", st.str("otpauth").startsWith("otpauth://totp/") && st.str("otpauth").contains("secret=" + secret)
+                        && st.str("qr_svg").startsWith("<svg"));
+                check("Chưa xác nhận mã thì chưa bật", !app.twoFactor.isEnabled(admin.id()) && app.auth.login("admin", "admin123") != null);
+                expectError("Nhập sai mã khi bật → báo lỗi", "không đúng", () -> app.twoFactor.enable(admin, "000000".equals(vn.baohanh.util.Totp.code(secret, vn.baohanh.util.Totp.currentStep())) ? "111111" : "000000"));
+                List<String> codes = app.twoFactor.enable(admin, vn.baohanh.util.Totp.code(secret, vn.baohanh.util.Totp.currentStep()));
+                check("Bật thành công, nhận 8 mã khôi phục", codes.size() == 8 && app.twoFactor.isEnabled(admin.id()) && codes.get(0).matches("[a-z2-9]{4}-[a-z2-9]{4}"));
+                check("Mã khôi phục chỉ lưu bản băm", !db.one("SELECT recovery FROM user_2fa WHERE user_id = ?", admin.id()).str("recovery").contains(codes.get(0)));
+                expectError("Đã bật 2 lớp: đăng nhập chỉ bằng mật khẩu bị từ chối", "xác thực 2 lớp", () -> app.auth.login("admin", "admin123"));
+                vn.baohanh.service.Auth.LoginStep step = app.auth.begin("admin", "admin123");
+                check("Đúng mật khẩu → chuyển sang bước nhập mã (chưa có phiên)", step.needCode() && step.user() == null);
+                expectError("Sai mật khẩu vẫn bị chặn ở bước 1", "Sai tên đăng nhập", () -> app.auth.begin("admin", "sai-mk"));
+                expectError("Nhập sai mã → còn 4 lần thử", "còn 4 lần", () -> app.twoFactor.finishPending(step.pendingToken(), "12345"));
+                String next = vn.baohanh.util.Totp.code(secret, vn.baohanh.util.Totp.currentStep() + 1);
+                check("Đúng mã 6 số → đăng nhập được", app.twoFactor.finishPending(step.pendingToken(), next).id() == admin.id());
+                expectError("Phiếu chờ đã dùng thì hết hiệu lực", "hết hạn", () -> app.twoFactor.finishPending(step.pendingToken(), next));
+                vn.baohanh.service.Auth.LoginStep step2 = app.auth.begin("admin", "admin123");
+                expectError("Không dùng lại được mã vừa dùng (chống phát lại)", "không đúng", () -> app.twoFactor.finishPending(step2.pendingToken(), next));
+                check("Mã khôi phục đăng nhập được (viết hoa, không gạch cũng nhận)", app.twoFactor.finishPending(step2.pendingToken(),
+                        codes.get(1).toUpperCase().replace("-", "")).id() == admin.id());
+                check("Còn 7 mã khôi phục", app.twoFactor.status(admin).lng("recovery_left") == 7);
+                vn.baohanh.service.Auth.LoginStep step3 = app.auth.begin("admin", "admin123");
+                expectError("Mã khôi phục chỉ dùng 1 lần", "không đúng", () -> app.twoFactor.finishPending(step3.pendingToken(), codes.get(1)));
+                for (int i = 0; i < 3; i++) try { app.twoFactor.finishPending(step3.pendingToken(), "99999" + i); } catch (AppException ignored) { }
+                expectError("Sai 5 lần → phải nhập lại mật khẩu", "đăng nhập lại", () -> app.twoFactor.finishPending(step3.pendingToken(), "123456"));
+                check("Danh sách tài khoản đã bật 2 lớp (cho quản lý)", app.twoFactor.enabledUsers(admin).size() == 1
+                        && app.catalog.list(admin, "user", "admin").get(0).bool("twofa"));
+                expectError("Nhân viên không gỡ 2 lớp của người khác được", "quyền", () -> app.twoFactor.adminReset(rec, admin.id()));
+                app.twoFactor.setup(tech);
+                String tsec = db.one("SELECT secret FROM user_2fa WHERE user_id = ?", tech.id()).str("secret");
+                app.twoFactor.enable(tech, vn.baohanh.util.Totp.code(tsec, vn.baohanh.util.Totp.currentStep()));
+                app.twoFactor.adminReset(admin, tech.id());
+                check("Quản lý gỡ 2 lớp cho KTV mất điện thoại → KTV đăng nhập lại bằng mật khẩu", !app.twoFactor.isEnabled(tech.id())
+                        && app.auth.login("ktv", "123456").id() == tech.id());
+                expectError("Tắt 2 lớp cần mã đúng", "không đúng", () -> app.twoFactor.disable(admin, "abcd-efgh"));
+                app.twoFactor.disable(admin, codes.get(2));
+                check("Tắt 2 lớp → đăng nhập lại bằng mật khẩu", !app.twoFactor.isEnabled(admin.id()) && app.auth.login("admin", "admin123").id() == admin.id());
+            }
+
+            section("27. Khách quên mật khẩu – mã OTP qua email");
+            {
+                app.customers.setOtpExecutor(Runnable::run);
+                app.warranty.activate(rec, m("serial", "OTP1", "product_id", prod, "customer_phone", "0977000111", "customer_name", "Chị Quên Mật Khẩu",
+                        "customer_email", "quen@example.com"));
+                app.warranty.activate(rec, m("serial", "OTP2", "product_id", prod, "customer_phone", "0977000222", "customer_name", "Anh Không Email"));
+                gia.received.clear();
+                String msg = app.customers.forgot("0977000111", false);
+                String mail = gia.received.stream().filter(x -> x.startsWith("EMAIL|quen@example.com")).findFirst().orElse("");
+                java.util.regex.Matcher mm = java.util.regex.Pattern.compile("là: (\\d{6})").matcher(mail);
+                check("Gửi mã 6 số tới email trong hồ sơ", mm.find());
+                String otp = mm.group(1);
+                check("CSDL không lưu mã gốc", db.scalar("SELECT COUNT(*) FROM customer_otp WHERE code_hash = ?", otp) == 0
+                        && db.scalar("SELECT COUNT(*) FROM customer_otp WHERE used_at IS NULL") == 1);
+                check("SĐT không có email / không tồn tại → cùng một câu trả lời, không gửi gì",
+                        msg.equals(app.customers.forgot("0977000222", false)) && msg.equals(app.customers.forgot("0977999999", false))
+                        && gia.received.size() == 1);
+                expectError("Xin mã liên tục → phải đợi 60 giây", "Vui lòng đợi", () -> app.customers.forgot("0977000111", false));
+                check("Thông báo lỗi có bản tiếng Anh", vn.baohanh.util.I18n.en("Vui lòng đợi 42 giây rồi gửi lại mã").equals("Please wait 42 seconds before requesting a new code")
+                        && vn.baohanh.util.I18n.en("Mã không đúng (còn 3 lần thử)").equals("Wrong code (3 attempts left)"));
+                expectError("Sai mã → báo số lần thử còn lại", "còn 4 lần", () -> app.customers.resetWithOtp("0977000111", "000000".equals(otp) ? "111111" : "000000", "moi123456"));
+                expectError("Mật khẩu mới quá ngắn", "ít nhất 6", () -> app.customers.resetWithOtp("0977000111", otp, "123"));
+                String otpTok = app.customers.resetWithOtp("0977000111", otp, "moi123456");
+                check("Đúng mã → đặt mật khẩu mới và đăng nhập luôn", app.customers.require(otpTok) > 0 && app.customers.login("0977000111", "moi123456") != null);
+                expectError("Mã đã dùng không dùng lại được", "hết hạn", () -> app.customers.resetWithOtp("0977000111", otp, "khac123456"));
+                long cid = db.one("SELECT id FROM customer WHERE phone = '0977000111'").lng("id");
+                db.update("INSERT INTO customer_otp (customer_id, code_hash, created_at, expires_at) VALUES (?, ?, ?, ?)", cid,
+                        vn.baohanh.service.CustomerService.otpHash(cid, "424242"), Database.now(), "2000-01-01T00:00:00");
+                expectError("Mã quá 10 phút thì hết hạn", "hết hạn", () -> app.customers.resetWithOtp("0977000111", "424242", "khac123456"));
+                long cid2 = db.one("SELECT id FROM customer WHERE phone = '0977000222'").lng("id");
+                db.update("INSERT INTO customer_otp (customer_id, code_hash, created_at, expires_at, attempts) VALUES (?, ?, ?, ?, 5)", cid2,
+                        vn.baohanh.service.CustomerService.otpHash(cid2, "135790"), Database.now(), "2999-01-01T00:00:00");
+                expectError("Sai 5 lần thì mã bị hủy dù sau đó nhập đúng", "hết hạn", () -> app.customers.resetWithOtp("0977000222", "135790", "khac123456"));
+                app.notify.saveConfig(admin, m("ntf_email_on", false));
+                expectError("Cửa hàng chưa bật email → hướng dẫn gọi cửa hàng", "chưa bật gửi email", () -> app.customers.forgot("0977000333", false));
+                app.notify.saveConfig(admin, m("ntf_email_on", true));
+            }
+
+            section("28. Mã hóa file sao lưu (AES-256-GCM + PBKDF2)");
+            {
+                byte[] data = new byte[(3 << 20) + 12345];
+                new java.util.Random(7).nextBytes(data);
+                java.io.ByteArrayOutputStream enc = new java.io.ByteArrayOutputStream();
+                vn.baohanh.util.BackupCrypto.encrypt(new ByteArrayInputStream(data), enc, "mat-khau-usb".toCharArray(), 20_000);
+                byte[] encB = enc.toByteArray();
+                java.io.ByteArrayOutputStream dec = new java.io.ByteArrayOutputStream();
+                vn.baohanh.util.BackupCrypto.decrypt(new ByteArrayInputStream(encB), dec, "mat-khau-usb".toCharArray());
+                check("Mã hóa rồi giải mã ra đúng dữ liệu gốc (3 MB, nhiều khối)", java.util.Arrays.equals(data, dec.toByteArray()));
+                boolean wrong = false;
+                try { vn.baohanh.util.BackupCrypto.decrypt(new ByteArrayInputStream(encB), new java.io.ByteArrayOutputStream(), "sai".toCharArray()); }
+                catch (vn.baohanh.util.BackupCrypto.BadPasswordException x) { wrong = true; }
+                check("Sai mật khẩu → báo lỗi, không ra dữ liệu", wrong);
+                byte[] tamp = encB.clone();
+                tamp[tamp.length / 2] ^= 1;
+                boolean tamper = false;
+                try { vn.baohanh.util.BackupCrypto.decrypt(new ByteArrayInputStream(tamp), new java.io.ByteArrayOutputStream(), "mat-khau-usb".toCharArray()); }
+                catch (vn.baohanh.util.BackupCrypto.BadPasswordException x) { tamper = true; }
+                check("Sửa 1 byte trong file → phát hiện", tamper);
+                boolean cut = false;
+                try { vn.baohanh.util.BackupCrypto.decrypt(new ByteArrayInputStream(java.util.Arrays.copyOf(encB, encB.length - (1 << 20) / 2)), new java.io.ByteArrayOutputStream(), "mat-khau-usb".toCharArray()); }
+                catch (java.io.IOException x) { cut = true; }
+                check("Cắt bớt cuối file → phát hiện", cut);
+
+                expectError("Mật khẩu sao lưu quá ngắn", "ít nhất 8", () -> app.backup.setPassword(admin, "1234567", "1234567"));
+                expectError("Nhập lại không khớp", "không khớp", () -> app.backup.setPassword(admin, "12345678", "12345679"));
+                expectError("Nhân viên không đặt được mật khẩu sao lưu", "quyền", () -> app.backup.setPassword(rec, "12345678", "12345678"));
+                app.backup.setPassword(admin, "Usb@2026-bh", "Usb@2026-bh");
+                check("Không bao giờ trả mật khẩu ra ngoài", !app.backup.config(admin).toString().contains("Usb@2026"));
+                app.catalog.save(admin, "customer", 0, m("name", "Khách Đánh Dấu Sao Lưu", "phone", "0966123123"));
+                String bkName = app.backup.create(admin, "thu-cong").str("name");
+                Path bkFile = app.backup.dir().resolve(bkName);
+                byte[] raw = Files.readAllBytes(bkFile);
+                String rawText = new String(raw, java.nio.charset.StandardCharsets.ISO_8859_1);
+                check("Bản sao lưu có đuôi .zip.enc và bắt đầu bằng chữ ký mã hóa", bkName.endsWith(".zip.enc") && vn.baohanh.util.BackupCrypto.isEncrypted(bkFile));
+                check("Mở file thô không thấy CSDL / tên khách", !rawText.contains("SQLite format 3") && !rawText.contains("baohanh.db")
+                        && !new String(raw, java.nio.charset.StandardCharsets.UTF_8).contains("Đánh Dấu"));
+                check("Danh sách sao lưu đánh dấu bản đã mã hóa", app.backup.list(admin).stream().anyMatch(r -> r.str("name").equals(bkName) && r.bool("encrypted")));
+                db.update("DELETE FROM customer WHERE phone = '0966123123'");
+                expectError("Khôi phục với mật khẩu sai → từ chối, dữ liệu giữ nguyên", "Sai mật khẩu", () -> app.backup.restore(admin, bkName, "sai-mat-khau"));
+                check("Dữ liệu chưa bị đổi sau khi khôi phục thất bại", db.scalar("SELECT COUNT(*) FROM customer WHERE phone = '0966123123'") == 0);
+                app.backup.restore(admin, bkName, "Usb@2026-bh");
+                check("Đúng mật khẩu → khôi phục được dữ liệu", db.scalar("SELECT COUNT(*) FROM customer WHERE phone = '0966123123'") == 1);
+                db.update("DELETE FROM customer WHERE phone = '0966123123'");
+                app.backup.restore(admin, bkName, "");
+                check("Để trống mật khẩu → dùng mật khẩu đang cài trên máy", db.scalar("SELECT COUNT(*) FROM customer WHERE phone = '0966123123'") == 1);
+                String usb = "sao-luu-20991231-235959-tu-usb.zip.enc";
+                try (java.io.InputStream in = Files.newInputStream(bkFile)) { app.backup.importFile(admin, "E:\\\\USB\\\\" + usb, in); }
+                check("Thêm file sao lưu mang từ USB vào danh sách", app.backup.list(admin).stream().anyMatch(r -> r.str("name").equals(usb)));
+                expectError("File mang vào phải đúng tên dạng sao-luu-....zip(.enc)", "Tên file", () -> app.backup.importFile(admin, "virus.exe", new ByteArrayInputStream(new byte[]{1})));
+                expectError("File không mã hóa mà mang đuôi .enc bị từ chối", "không phải bản mã hóa",
+                        () -> app.backup.importFile(admin, "sao-luu-1-x.zip.enc", new ByteArrayInputStream("PKxxxx".getBytes())));
+                app.backup.setPassword(admin, "", "");
+                check("Tắt mã hóa → bản mới là .zip thường", app.backup.create(admin, "thu-cong").str("name").endsWith(".zip"));
+            }
+
+            section("29. Phân trang & chỉ mục CSDL");
+            {
+                for (int i = 0; i < 12; i++) {
+                    app.warranty.activate(rec, m("serial", "PG" + i, "product_id", prod, "customer_phone", "09550000" + String.format("%02d", i), "customer_name", "Khách Trang " + i));
+                    app.warranty.createTicket(rec, m("serial", "PG" + i, "issue", "Thử phân trang " + i));
+                }
+                List<Row> allT = app.warranty.listTickets(admin, "", "");
+                Row pg1 = app.warranty.pageTickets(admin, "", "", 1, 5), pg2 = app.warranty.pageTickets(admin, "", "", 2, 5);
+                @SuppressWarnings("unchecked") List<Row> rw1 = (List<Row>) pg1.get("rows");
+                @SuppressWarnings("unchecked") List<Row> rw2 = (List<Row>) pg2.get("rows");
+                check("Trang 1 có đúng 5 phiếu, tổng số khớp danh sách đầy đủ", rw1.size() == 5 && pg1.lng("total") == allT.size()
+                        && pg1.lng("pages") == (allT.size() + 4) / 5);
+                check("Trang 1 + trang 2 đúng thứ tự như danh sách đầy đủ", rw1.get(0).lng("id") == allT.get(0).lng("id")
+                        && rw2.get(0).lng("id") == allT.get(5).lng("id") && rw2.get(4).lng("id") == allT.get(9).lng("id"));
+                check("Trang vượt quá → về trang cuối", app.warranty.pageTickets(admin, "", "", 9999, 5).lng("page") == pg1.lng("pages"));
+                Row pgS = app.warranty.pageTickets(admin, "", "khach trang", 1, 5);
+                check("Tìm không dấu + phân trang", pgS.lng("total") == 12 && app.warranty.listTickets(admin, "", "khach trang").size() == 12
+                        && ((List<?>) pgS.get("rows")).size() == 5);
+                check("Lọc trạng thái + phân trang", app.warranty.pageTickets(admin, "OPEN", "", 1, 500).lng("total") == app.warranty.listTickets(admin, "OPEN", "").size());
+                check("Kỹ thuật viên: phiếu của tôi theo trang", app.warranty.pageTickets(tech, "MINE", "", 1, 50).lng("total") == app.warranty.listTickets(tech, "MINE", "").size());
+                Row pgW = app.warranty.pageWarranties(admin, "", "", 1, 7);
+                check("Danh sách bảo hành theo trang", ((List<?>) pgW.get("rows")).size() == 7 && pgW.lng("total") == app.warranty.listWarranties(admin, "", "").size());
+                check("Tìm bảo hành theo trang", app.warranty.pageWarranties(admin, "PG1", "", 1, 50).lng("total") == app.warranty.listWarranties(admin, "PG1", "").size());
+                Row pgC = app.catalog.page(admin, "customer", "", 2, 4);
+                check("Danh mục khách hàng theo trang", ((List<?>) pgC.get("rows")).size() == 4 && pgC.lng("total") == app.catalog.list(admin, "customer", "").size()
+                        && app.catalog.page(admin, "customer", "khach trang", 1, 50).lng("total") == 12);
+                check("Đủ 7 chỉ mục mới trong CSDL", db.scalar("SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name IN ('idx_ticket_part_ticket',"
+                        + "'idx_ticket_received','idx_ticket_tech','idx_ticket_due','idx_warranty_created','idx_stock_ticket','idx_request_customer')") == 7);
+                StringBuilder plan = new StringBuilder();
+                for (Row r : db.query("EXPLAIN QUERY PLAN SELECT t.id FROM ticket t ORDER BY t.received_at DESC, t.id DESC LIMIT 50")) plan.append(r.str("detail"));
+                check("SQLite dùng chỉ mục để lấy 50 phiếu mới nhất (không sắp xếp cả bảng)", plan.toString().contains("idx_ticket_received") && !plan.toString().contains("TEMP B-TREE"));
+            }
         }
 
         db.close();

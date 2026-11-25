@@ -30,6 +30,9 @@ public class AppContext {
     public final ImportService imports;
     public final ScanService scan;
     public final PermissionService permissions;
+    public final DiagnosisService diagnosis;
+    public final AlertService alerts;
+    public final TwoFactorService twoFactor;
 
     public AppContext(Database db, int port) {
         this.db = db;
@@ -48,6 +51,7 @@ public class AppContext {
         this.customers = new CustomerService(db, warranty, audit);
         this.requests = new RequestService(db, warranty, audit);
         this.backup = new BackupService(db, photos, audit);
+        this.backup.setSettings(settings);
         this.notify = new vn.baohanh.notify.NotificationService(db, settings, audit);
         this.warranty.setNotifier(notify);
         this.requests.setNotifier(notify);
@@ -57,10 +61,18 @@ public class AppContext {
         this.calendar = new CalendarService(db);
         this.purchases = new PurchaseService(db, audit);
         this.print.setPurchases(purchases);
+        this.purchases.setSettings(settings);
         this.customers.setPhotos(photos);
+        this.customers.setNotify(notify);
         this.faults = new FaultService(db);
         this.imports = new ImportService(db, catalog, audit);
         this.scan = new ScanService(settings);
         this.permissions = new PermissionService(db, audit);
+        this.diagnosis = new DiagnosisService(db);
+        this.alerts = new AlertService(db, settings);
+        this.alerts.setNotify(notify);
+        this.twoFactor = new TwoFactorService(db, audit);
+        this.twoFactor.setSettings(settings);
+        this.auth.setTwoFactor(twoFactor);
     }
 }

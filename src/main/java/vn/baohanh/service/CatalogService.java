@@ -152,8 +152,9 @@ public class CatalogService {
          .field(new Field("active", "Đang hoạt động", Type.BOOL).def("true"))
          .field(new Field("password", "Mật khẩu (để trống nếu không đổi)", Type.PASSWORD));
         d.col("username", "Tên đăng nhập").col("full_name", "Họ tên").col("role_label", "Vai trò")
-         .col("phone", "Điện thoại").col("active", "Hoạt động", "bool");
-        d.listSql = "SELECT id, username, full_name, phone, role, active, created_at, CASE role "
+         .col("phone", "Điện thoại").col("active", "Hoạt động", "bool").col("twofa", "Xác thực 2 lớp", "bool");
+        d.listSql = "SELECT id, username, full_name, phone, role, active, created_at, "
+                + "COALESCE((SELECT f.enabled FROM user_2fa f WHERE f.user_id = app_user.id), 0) AS twofa, CASE role "
                 + "WHEN 'ADMIN' THEN 'Quản lý' WHEN 'RECEPTION' THEN 'Nhân viên tiếp nhận' ELSE 'Kỹ thuật viên' END AS role_label "
                 + "FROM app_user";
         d.labelSql = "full_name";
@@ -188,6 +189,22 @@ public class CatalogService {
         return out;
     }
 
+    /** Danh mục theo trang (khách hàng có thể lên tới hàng chục nghìn). */
+    public Row page(User u, String key, String q, int page, int size) throws SQLException {
+        Auth.require(u);
+        EntityDef d = def(key);
+        int sz = size <= 0 ? WarrantyService.PAGE_SIZE : Math.min(size, WarrantyService.MAX_PAGE_SIZE), pg = Math.max(1, page);
+        if (norm(q).isEmpty()) {
+            long total = db.scalar("SELECT COUNT(*) FROM " + d.table);
+            pg = WarrantyService.clampPage(pg, total, sz);
+            List<Row> rows = db.query("SELECT * FROM (" + d.listSql + ") ORDER BY " + d.orderBy + " LIMIT ? OFFSET ?", sz, (long) (pg - 1) * sz);
+            return WarrantyService.pageResult(rows, total, pg, sz);
+        }
+        List<Row> all = list(u, key, q);
+        pg = WarrantyService.clampPage(pg, all.size(), sz);
+        return WarrantyService.pageResult(new ArrayList<>(WarrantyService.slice(all, pg, sz)), all.size(), pg, sz);
+    }
+
     public Row get(User u, String key, long id) throws SQLException {
         Auth.require(u);
         EntityDef d = def(key);
@@ -218,9 +235,17 @@ public class CatalogService {
         return p.isEmpty() ? null : db.one("SELECT id, name, phone, email, address FROM customer WHERE phone = ?", p);
     }
 
+    /** Chuẩn hóa để tìm kiếm: chữ thường, bỏ dấu tiếng Việt ("Nguyễn Đức" → "nguyen duc") – gõ không dấu vẫn tìm ra. */
     public static String norm(String s) {
-        return s == null ? "" : s.trim().toLowerCase(Locale.forLanguageTag("vi"));
+        if (s == null) return "";
+        String x = s.trim().toLowerCase(Locale.forLanguageTag("vi")).replace('đ', 'd');
+        boolean ascii = true;
+        for (int i = 0; i < x.length() && ascii; i++) ascii = x.charAt(i) < 128;
+        if (ascii) return x;
+        return NON_SPACING.matcher(java.text.Normalizer.normalize(x, java.text.Normalizer.Form.NFD)).replaceAll("");
     }
+
+    private static final Pattern NON_SPACING = Pattern.compile("\\p{M}+");
 
     // ===================== GHI =====================
 

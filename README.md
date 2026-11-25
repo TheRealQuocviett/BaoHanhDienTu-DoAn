@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo/logo-ngang.png" alt="Bảo hành điện tử" width="420"></p>
+
 # Hệ thống quản lý bảo hành điện tử (Java + SQLite)
 
 [![Kiểm thử tự động](https://github.com/TheRealQuocviett/BaoHanhDienTu-DoAn/actions/workflows/kiem-thu.yml/badge.svg)](https://github.com/TheRealQuocviett/BaoHanhDienTu-DoAn/actions/workflows/kiem-thu.yml)
@@ -52,7 +54,7 @@ Nên đổi mật khẩu sau khi đăng nhập (nút **Đổi mật khẩu**).
 
 Với CSDL mẫu tạo từ bản cũ, các tài khoản này được thêm tự động một lần khi chạy (khách đã tự đăng ký thì giữ nguyên mật khẩu của họ). Khách khác tự đăng ký bằng SĐT + số Serial của máy đã mua.
 
-**Kiểm thử tự động:** trong VS Code chọn cấu hình *Chạy kiểm thử tự động* rồi nhấn F5 (kết quả hiện ở tab **Debug Console**), hoặc nhấp đúp `run-tests.bat`. Chương trình chạy 225 kiểm thử nghiệp vụ (kể cả gửi email/SMS/Zalo qua máy chủ giả) trên một CSDL tạm, không đụng tới dữ liệu thật.
+**Kiểm thử tự động:** trong VS Code chọn cấu hình *Chạy kiểm thử tự động* rồi nhấn F5 (kết quả hiện ở tab **Debug Console**), hoặc nhấp đúp `run-tests.bat`. Chương trình chạy 314 kiểm thử nghiệp vụ (kể cả gửi email/SMS/Zalo qua máy chủ giả) trên một CSDL tạm, không đụng tới dữ liệu thật.
 
 Nếu bạn đã dùng phiên bản trước, CSDL được **tự nâng cấp và giữ nguyên dữ liệu**. Dữ liệu mẫu cho các chức năng mới chỉ có khi tạo CSDL mới.
 
@@ -114,6 +116,9 @@ Lần chạy đầu, phần mềm tự tạo CSDL và **dữ liệu mẫu**: 7 h
 - **Đặt hàng linh kiện từ nhà cung cấp** (menu *Kho → Đặt hàng linh kiện*, *Nhà cung cấp*): linh kiện có tồn ≤ mức tối thiểu được gợi ý sẵn số lượng (đủ lên gấp đôi mức tối thiểu, trừ phần đang về). Quản lý chọn nhà cung cấp → *Tạo đơn* → in/lưu PDF gửi nhà cung cấp → *Đánh dấu đã gửi đơn* → khi hàng về bấm *Nhận hàng & nhập kho* (sửa được số thực nhận): tồn kho tự cộng, ghi thẻ kho "Nhập theo đơn DH-…", cập nhật giá nhập. Số trên menu là số linh kiện cần đặt.
 - **KPI / hoa hồng kỹ thuật viên** (menu *KPI kỹ thuật viên*): bảng xếp hạng theo kỳ với số phiếu hoàn thành, đang xử lý, thời gian sửa trung bình, % đúng hẹn, điểm đánh giá của khách, doanh thu và hoa hồng. Hoa hồng = thưởng mỗi phiếu + % tiền công các phiếu có phí (đổi ở *Thông tin cửa hàng*). Kỹ thuật viên xem được bảng xếp hạng nhưng chỉ thấy tiền của chính mình.
 - **Chế độ tối (dark mode)**: web nhân viên và cổng khách hàng bấm nút 🌙 / ☀️ góc trên (lần đầu tự theo cài đặt của máy); ứng dụng Swing bấm nút *Giao diện tối / Giao diện sáng* trên thanh trên cùng. Lựa chọn được ghi nhớ cho lần mở sau.
+- **Gợi ý chẩn đoán từ lịch sử sửa chữa**: khi tiếp nhận máy (gõ serial + lỗi khách báo) và trong chi tiết phiếu, hệ thống tìm các phiếu đã sửa có lỗi tương tự (cùng nhóm lỗi, trùng cụm từ; ưu tiên cùng model → cùng hãng → cùng loại) rồi gợi ý: linh kiện hay phải thay kèm tỷ lệ (tự chọn đúng mã linh kiện của model và báo tồn kho), kết luận kỹ thuật thường gặp, chi phí ước tính, thời gian sửa thường mất, cảnh báo nếu nhiều ca tương tự bị từ chối bảo hành, và các phiếu mẫu. Ví dụ: *iPhone 15 Pro Max báo “Màn hình chớp nháy” → 60% đã thay cáp màn hình, chi phí khoảng 1.050.000 đ, sửa ~2 ngày*.
+- **Dự báo linh kiện cần đặt**: tính lượng dùng mỗi ngày từ thẻ kho (trộn 30 và 90 ngày gần nhất), số ngày còn đủ dùng và ngày dự kiến hết hàng. Linh kiện sẽ hết trước khi hàng kịp về (thời gian chờ hàng + 7 ngày dự phòng) được gợi ý đặt sớm dù chưa chạm mức tối thiểu; số lượng gợi ý đủ dùng thêm N ngày. Xem ở *Đặt hàng linh kiện* (bảng *Dự báo tồn kho*); chỉnh thời gian chờ hàng / số ngày đủ dùng ở *Thông tin cửa hàng*.
+- **Nhắc việc & nhắc trễ hẹn tự động** (nút chuông 🔔 trên web, nút *Nhắc việc* trên Swing): mỗi 30 phút hệ thống quét — phiếu sắp đến hạn trả thì nhắc kỹ thuật viên phụ trách (chưa phân công thì nhắc quản lý); phiếu quá hạn thì báo quản lý + kỹ thuật viên và **tự gửi tin xin lỗi khách** qua email / SMS / Zalo (bật / tắt và sửa mẫu tin ở *Thông báo cho khách*); linh kiện sắp hết thì báo người đặt hàng. Mỗi việc chỉ nhắc một lần, đổi ngày hẹn mà vẫn trễ thì nhắc lại; phiếu sửa xong tự đóng nhắc việc.
 - **Phân quyền chi tiết** (menu *Quản trị → Phân quyền chi tiết*, chỉ Quản lý): chọn một tài khoản Tiếp nhận / Kỹ thuật viên rồi bật / tắt từng chức năng (23 quyền theo nhóm: tiếp nhận & bảo hành, danh mục, kho, báo cáo, quản trị). Mặc định mỗi tài khoản có quyền theo vai trò; quyền đã chỉnh riêng được đánh dấu, có nút *Về mặc định*. Thay đổi có hiệu lực ngay, kể cả với người đang đăng nhập; menu và nút trên web / Swing tự ẩn hiện theo quyền, máy chủ kiểm tra lại ở mọi thao tác. Quản lý luôn có mọi quyền để không ai tự khóa mình khỏi hệ thống.
 - **Cổng khách hàng song ngữ Việt / Anh**: nút **EN / VI** góc trên trang tra cứu; lần đầu tự chọn theo ngôn ngữ trình duyệt và ghi nhớ lựa chọn. Dịch cả giao diện, trạng thái phiếu, thông báo lỗi từ máy chủ (gửi header `X-Lang: en`). Nội dung do cửa hàng / khách nhập (tên sản phẩm, mô tả lỗi, chính sách) giữ nguyên.
 - **Quét mã vạch / IMEI khi tiếp nhận máy** (nút *Quét* cạnh ô Serial ở Tiếp nhận máy, Kích hoạt bảo hành, Tra cứu – cả web và Swing). Đọc được Code 128, Code 39 (serial, IMEI) và EAN-13; bộ giải mã viết thuần Java, không cần thư viện. Ba cách:
@@ -128,11 +133,15 @@ Lần chạy đầu, phần mềm tự tạo CSDL và **dữ liệu mẫu**: 7 h
 - **Tin nhắn giữa khách và cửa hàng trong phiếu:** khách bấm *💬 Nhắn tin với cửa hàng* ở từng phiếu trong cổng tra cứu; nhân viên trả lời ngay trong cửa sổ phiếu. Menu *Tin nhắn khách* gom các hội thoại, số trên menu là số phiếu có tin chưa trả lời. Khi nhân viên trả lời, khách được báo qua email / SMS / Zalo (nếu bật thông báo, sự kiện *Cửa hàng trả lời tin nhắn*). Chống spam: tối đa 10 tin / 10 phút mỗi khách.
 - **Đánh giá của khách trong báo cáo:** điểm trung bình, phân bố 1–5 sao, tỷ lệ khách đánh giá, điểm theo kỹ thuật viên, nhận xét gần đây; có thêm sheet *Đánh giá* trong file Excel. Nhân viên cũng thấy đánh giá ngay trong phiếu.
 - **Sao lưu & khôi phục:** tự động mỗi 24 giờ (giữ 20 bản), hoặc bấm *Sao lưu ngay*. Mỗi bản là một file `.zip` trong `data/backup/` gồm CSDL và ảnh. Trước khi khôi phục, hệ thống tự sao lưu trạng thái hiện tại để có thể quay lại.
+- **Mã hóa bản sao lưu bằng mật khẩu** (trang *Sao lưu dữ liệu* → *Mã hóa bản sao lưu*): đặt mật khẩu ≥ 8 ký tự, từ đó mọi bản sao lưu (cả bản tự động) thành file `.zip.enc` mã hóa **AES-256-GCM**, khóa sinh từ mật khẩu bằng **PBKDF2-HMAC-SHA256** (210.000 vòng, salt ngẫu nhiên). Lỡ mất USB, không có mật khẩu thì không đọc được dữ liệu khách; sửa hay cắt bớt file cũng bị phát hiện. Khôi phục bản mã hóa thì nhập mật khẩu (để trống = dùng mật khẩu đang cài trên máy). Nút *Thêm file từ USB* đưa file sao lưu từ máy khác vào để khôi phục. **Quên mật khẩu sao lưu thì không mở được các bản đã mã hóa.**
 - **Thông báo cho khách (Email / SMS / Zalo):** tự gửi khi *tiếp nhận máy*, *có báo giá*, *sửa xong*, *hẹn lịch / từ chối yêu cầu online* và *bảo hành sắp hết hạn (30 ngày)*. Tin được xếp hàng đợi và gửi ở nền nên không làm chậm thao tác; lỗi thì tự thử lại 4 lần, sau đó hiện ở trang **Thông báo cho khách** để bấm *Gửi lại*. Không gửi trùng; SMS/Zalo chỉ gửi 6h–22h. Nội dung tin sửa được. Xem cách cấu hình ở mục 6.
 - **Cổng tra cứu cho khách:** tra theo serial hoặc mã phiếu (không tra theo SĐT để không lộ thông tin người khác). Tên và SĐT được che bớt, không hiện ghi chú nội bộ, giới hạn 30 lượt/phút mỗi IP.
 
 ### Bảo mật
 
+- **Xác thực 2 lớp (2FA) bằng Google Authenticator** (nút *Bảo mật* trên thanh trên cùng, cả web lẫn Swing): quét mã QR, nhập mã 6 số để bật, nhận 8 mã khôi phục (chỉ hiện 1 lần, lưu dạng băm). Từ đó đăng nhập phải nhập thêm mã 6 số đổi mỗi 30 giây (chuẩn TOTP – RFC 6238, tự viết bằng `javax.crypto`). Chống dùng lại mã, sai 5 lần phải nhập lại mật khẩu, sai 10 lần khóa 15 phút. Tài khoản Quản lý chưa bật sẽ được nhắc ở trang Tổng quan. Nhân viên mất điện thoại: Quản lý gỡ 2 lớp cho họ trong cửa sổ *Bảo mật*.
+- **Khách quên mật khẩu tự lấy lại bằng mã OTP qua email** (cổng khách → *Quên mật khẩu?*): mã 6 số hạn 10 phút, chỉ lưu bản băm, sai 5 lần là hủy, tối đa 1 mã / 60 giây và 5 mã / giờ. Trả lời giống hệt nhau dù SĐT có tồn tại hay không (không dò được danh sách khách). Cần bật *Gửi qua email* ở trang Thông báo cho khách. Khách không có email vẫn đặt lại được bằng số Serial của máy.
+- `/api/settings` không bao giờ trả mật khẩu email, khóa SMS/Zalo hay mật khẩu sao lưu về trình duyệt.
 - Mật khẩu băm bằng **PBKDF2-HMAC-SHA256** (120.000 vòng, có salt) và không bao giờ trả về giao diện.
 - Nhập sai 5 lần thì tài khoản bị khóa tạm 2 phút. Không được tự hạ quyền hay tự khóa mình, và hệ thống luôn giữ ít nhất 1 Quản lý.
 - Web: phiên đăng nhập lưu trong cookie `HttpOnly; SameSite=Strict`, sống 12 giờ. Mọi yêu cầu ghi phải có header `X-App` (chống CSRF).
@@ -185,9 +194,22 @@ setting (thông tin cửa hàng)
 | `supplier` | Nhà cung cấp linh kiện |
 | `purchase_order`, `purchase_order_line` | Đơn đặt hàng (Nháp → Đã đặt → Đã nhận / Đã hủy) và các dòng linh kiện, số thực nhận |
 | `user_permission` | Quyền bật / tắt riêng cho từng tài khoản (chỉ lưu phần khác mặc định của vai trò) |
+| `staff_alert` | Nhắc việc cho nhân viên (sắp đến hạn, quá hạn, linh kiện sắp hết), chống nhắc trùng |
+| `user_2fa` | Xác thực 2 lớp: khóa bí mật TOTP, đã bật chưa, băm mã khôi phục, bước thời gian đã dùng (chống dùng lại) |
+| `customer_otp` | Mã OTP khách lấy lại mật khẩu (chỉ lưu băm, hạn, số lần thử, đã dùng) |
 | View `v_warranty`, `v_ticket_cost` | Bảo hành kèm tên sản phẩm/khách; chi phí từng phiếu |
 
 Ràng buộc: khóa ngoại (`ON DELETE RESTRICT` chặn xóa dữ liệu đang được dùng), `UNIQUE`, `CHECK` (trạng thái, số tháng 1–120, tồn kho ≥ 0…). Các thao tác nhiều bước chạy trong **transaction**.
+
+### Thử tải 50.000 phiếu, chỉ mục và phân trang
+
+Nhấp đúp **`thu-tai.bat`** (hoặc `sh thu-tai.sh`, thêm số để đổi số phiếu: `thu-tai.bat 100000`). Công cụ `vn.baohanh.tools.ThuTai` tạo một CSDL **tạm** với 50.000 phiếu, 40.000 bảo hành, 25.000 khách (không đụng tới `data/`), đo 20 thao tác chính hai lần – **A** chưa có và **B** đã có 7 chỉ mục mới – rồi ghi bảng kết quả vào `docs/thu-tai-ket-qua.md` để dán vào báo cáo. GitHub Actions cũng tự chạy bài thử này sau mỗi lần đưa code lên: xem bảng ở trang *Summary* của lần chạy (tab **Actions**).
+
+Kết quả mẫu (xem đầy đủ trong [docs/thu-tai-ket-qua.md](docs/thu-tai-ket-qua.md)): mở danh sách phiếu kiểu cũ (tải cả 50.000 phiếu, chưa có chỉ mục) mất khoảng **95 giây**; có chỉ mục + phân trang 50 dòng còn **khoảng 1 ms**. Trang tổng quan 4,7 giây → 71 ms, báo cáo năm 17,7 giây → 0,7 giây, gợi ý chẩn đoán 23,7 giây → 0,26 giây.
+
+- Nguyên nhân chậm chính: view `v_ticket_cost` tính chi phí từng phiếu bằng truy vấn con trên `ticket_part`, chưa có chỉ mục `ticket_part(ticket_id)` nên mỗi phiếu phải quét cả bảng linh kiện (50.000 × 23.000 lượt đọc).
+- Chỉ mục thêm ở phiên bản 10: `ticket_part(ticket_id)`, `ticket(received_at, id)`, `ticket(technician_id, status)`, `ticket(due_date)`, `warranty(created_at, id)`, `stock_movement(ticket_id)`, `service_request(customer_id)`.
+- **Phân trang** 50 dòng (web) / 100 dòng (Swing) cho danh sách phiếu, bảo hành và các danh mục (khách hàng…): không tìm kiếm thì đếm + `LIMIT/OFFSET` ngay trong SQL; có tìm kiếm thì lọc **không dấu** (gõ `nguyen van` ra *Nguyễn Văn*) rồi chỉ nạp đầy đủ các dòng của trang đang xem.
 
 Muốn xem hoặc sửa trực tiếp thì mở `data/baohanh.db` bằng [DB Browser for SQLite](https://sqlitebrowser.org/) hoặc extension *SQLite Viewer* (nên tắt chương trình trước khi sửa).
 
@@ -206,7 +228,9 @@ src/main/java/vn/baohanh/
 │              Auth, AuditService, CatalogService, WarrantyService (kèm gói BH mở rộng),
 │              InventoryService, ReportService, PortalService, SettingService, SeedData,
 │              CustomerService (cổng khách hàng), RequestService (yêu cầu online),
-│              PhotoService (ảnh), BackupService (sao lưu / khôi phục)
+│              PhotoService (ảnh), BackupService (sao lưu / khôi phục, mã hóa),
+│              TwoFactorService (2FA – TOTP)
+├── tools/     ThuTai           Công cụ thử tải 50.000 phiếu (thu-tai.bat)
 ├── notify/    NotificationService (hàng đợi, mẫu tin, thử lại, nhắc hết hạn),
 │              EmailSender (SMTP tự viết, SSL/STARTTLS), HttpSenders (eSMS, Zalo ZNS)
 ├── print/     PrintService     Mẫu phiếu in HTML (A5) + liên kết ký HMAC
@@ -215,10 +239,11 @@ src/main/java/vn/baohanh/
 │              TicketDialog, ReceiveDialog, ActivateView, WarrantiesView, LookupView,
 │              CatalogView, StockView, ReportsView, SettingsView, AuditView, RequestsView,
 │              BackupView, NotificationsView, PhotoPanel, Ui (bộ công cụ)
-└── util/      Json (đọc/ghi JSON), QrCode (tạo mã QR), Xlsx (xuất Excel), Fmt
+└── util/      Json (đọc/ghi JSON), QrCode (tạo mã QR), Xlsx (xuất Excel), Fmt,
+               Totp (Google Authenticator), BackupCrypto (AES-256-GCM + PBKDF2)
 web/index.html                  Giao diện web cho nhân viên
 web/portal.html                 Cổng khách hàng (tra cứu nhanh + tài khoản)
-src/test/java/.../KiemThu.java  Bộ kiểm thử tự động (225 kiểm thử) + MayChuGia.java (SMTP/eSMS/Zalo giả)
+src/test/java/.../KiemThu.java  Bộ kiểm thử tự động (314 kiểm thử) + MayChuGia.java (SMTP/eSMS/Zalo giả)
 database/schema.sql             Script tạo CSDL
 lib/                            Driver sqlite-jdbc + slf4j (tải bằng tai-thu-vien.bat)
 ```
@@ -252,6 +277,14 @@ Phần mềm không dùng framework ngoài nào: bộ tạo **mã QR**, file **E
 | POST/GET/DELETE | `/api/scan/decode`, `/api/scan/session[/{mã}]`; `/api/public/scan/{mã}[/text]`; trang `/quet/{mã}` | Quét mã vạch (ảnh, phiên quét bằng điện thoại) |
 | GET/POST | `/api/import/{customer,product,part}/template`, `/preview`, `/commit` | Nhập Excel |
 | GET/PUT/POST | `/api/permissions`, `/api/permissions/{id}`, `/api/permissions/{id}/reset` | Phân quyền chi tiết |
+| POST | `/api/diagnosis/suggest` | Gợi ý chẩn đoán `{serial, issue}` hoặc `{ticket_id}` |
+| GET | `/api/purchase/forecast` | Dự báo tồn kho |
+| GET/POST | `/api/alerts`, `/api/alerts/{id}/read`, `/api/alerts/read-all` | Nhắc việc |
+| POST | `/api/login` → `{need_2fa, token}`, `/api/login/2fa` `{token, code}` | Đăng nhập 2 bước |
+| GET/POST | `/api/2fa`, `/api/2fa/setup`, `/enable`, `/disable`, `/recovery`, `/api/2fa/users[/{id}/reset]` | Xác thực 2 lớp |
+| POST | `/api/kh/forgot` `{phone}`, `/api/kh/reset` `{phone, code, password}` | Khách lấy lại mật khẩu bằng OTP email |
+| GET/PUT/POST | `/api/backup-config`, `/api/backups/upload?name=` | Mật khẩu mã hóa sao lưu, thêm file sao lưu |
+| GET | `/api/tickets?page=&size=`, `/api/warranties?page=`, `/api/catalog/{x}?page=` | Phân trang (trả `{rows, total, page, pages, size}`) |
 
 ---
 

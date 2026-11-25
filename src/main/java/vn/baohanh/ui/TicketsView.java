@@ -23,6 +23,7 @@ public class TicketsView extends MainFrame.View {
     private final JComboBox<Ui.Item> filter = new JComboBox<>();
     private final JTextField q;
     private final JLabel count = Ui.sub(" ");
+    private final Pager pager = new Pager("phiếu", this::refresh);
 
     public TicketsView(Ui.Ctx ctx) {
         super(ctx);
@@ -33,8 +34,8 @@ public class TicketsView extends MainFrame.View {
         filter.addItem(new Ui.Item("", "Tất cả"));
         for (TicketStatus s : TicketStatus.values()) filter.addItem(new Ui.Item(s.name(), s.getLabel()));
         Ui.select(filter, ctx.user().is(Role.TECHNICIAN) ? "MINE" : "OPEN");
-        filter.addActionListener(e -> refresh());
-        q = Ui.search("Tìm mã phiếu, serial, tên, SĐT…", s -> refresh());
+        filter.addActionListener(e -> { pager.reset(); refresh(); });
+        q = Ui.search("Tìm mã phiếu, serial, tên, SĐT…", s -> { pager.reset(); refresh(); });
 
         JTable t = Ui.table(model, r -> TicketDialog.open(ctx, r.lng("id")));
         add(Ui.header("Phiếu bảo hành", "Nhấp đúp vào một phiếu để xem và xử lý.",
@@ -44,6 +45,7 @@ public class TicketsView extends MainFrame.View {
         center.setOpaque(false);
         center.add(Ui.flow(new JLabel("Lọc:"), filter, new JLabel("  Tìm:"), q, count), BorderLayout.NORTH);
         center.add(Ui.scroll(t), BorderLayout.CENTER);
+        center.add(pager, BorderLayout.SOUTH);
         add(center, BorderLayout.CENTER);
     }
 
@@ -55,8 +57,9 @@ public class TicketsView extends MainFrame.View {
     @Override
     public void refresh() {
         Ui.run(this, () -> {
-            model.setRows(ctx.app().warranty.listTickets(user(), String.valueOf(Ui.selectedId(filter)), q.getText()));
-            count.setText("   " + model.getRowCount() + " phiếu");
+            vn.baohanh.db.Row res = ctx.app().warranty.pageTickets(user(), String.valueOf(Ui.selectedId(filter)), q.getText(), pager.page(), Pager.SIZE);
+            model.setRows(rows(res));
+            pager.update(res);
         });
     }
 }

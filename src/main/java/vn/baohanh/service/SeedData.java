@@ -96,6 +96,129 @@ public final class SeedData {
         return addSampleAccounts(app.db);
     }
 
+
+    // ===================== Lịch sử sửa chữa cho gợi ý chẩn đoán & dự báo kho =====================
+
+    /** model, lỗi khách báo, kết luận kỹ thuật, mã linh kiện (null = không thay), tiền công, trong BH (1/0), cách đây bao nhiêu ngày, số ngày sửa */
+    private static final Object[][] REPAIRS = {
+        {"A3106", "Màn hình chớp nháy, có sọc xanh", "Cáp màn hình bị đứt ngầm – thay cáp màn hình", "CAP-MH-IP15PM", 300_000, 0, 5, 2},
+        {"A3106", "Màn hình nhấp nháy, tối màn", "Cáp màn hình tiếp xúc kém – thay cáp màn hình", "CAP-MH-IP15PM", 300_000, 0, 15, 2},
+        {"A3106", "Màn hình nháy liên tục khi mở khóa", "Cáp màn hình bị gập – thay cáp màn hình", "CAP-MH-IP15PM", 0, 1, 22, 2},
+        {"A3106", "Màn hình chớp, cảm ứng lúc được lúc không", "Cáp màn hình hỏng – thay cáp màn hình", "CAP-MH-IP15PM", 300_000, 0, 32, 3},
+        {"A3106", "Chớp màn hình khi để độ sáng thấp", "Cáp màn hình lỗi – thay cáp màn hình", "CAP-MH-IP15PM", 0, 1, 48, 2},
+        {"A3106", "Màn hình chớp nháy", "Lỗi phần mềm iOS – cập nhật iOS, theo dõi 1 ngày", null, 100_000, 0, 60, 1},
+        {"A3106", "Màn hình sọc và chớp nháy sau khi rơi", "Vỡ panel màn hình do rơi – thay màn hình", "MH-IP15PM", 400_000, 0, 95, 4},
+        {"A3106", "Pin tụt nhanh, sập nguồn", "Pin chai 76% – thay pin", "PIN-IP15PM", 0, 1, 12, 1},
+        {"A3106", "Máy tự tắt khi còn 30% pin", "Pin chai – thay pin", "PIN-IP15PM", 150_000, 0, 40, 1},
+        {"A3106", "Pin phồng, cấn màn hình", "Pin phồng – thay pin", "PIN-IP15PM", 0, 1, 55, 2},
+        {"SM-S928B", "Pin tụt nhanh, máy nóng khi sạc", "Pin chai – thay pin", "PIN-S24U", 0, 1, 18, 2},
+        {"SM-S928B", "Sạc không vào", "Chân sạc bám bẩn – vệ sinh cổng sạc", null, 50_000, 0, 44, 1},
+        {"SM-S928B", "Màn hình sọc xanh", "Lỗi màn hình AMOLED – thay màn hình", "MH-S24U", 0, 1, 100, 6},
+        {"SM-A556E", "Sạc chập chờn, phải giữ dây mới vào", "Cụm chân sạc hỏng – thay cụm chân sạc", "CHAN-SAC-A55", 150_000, 0, 9, 1},
+        {"SM-A556E", "Cắm sạc không nhận", "Cụm chân sạc hỏng – thay cụm chân sạc", "CHAN-SAC-A55", 0, 1, 27, 1},
+        {"SM-A556E", "Sạc chậm, lúc được lúc không", "Cụm chân sạc lỏng – thay cụm chân sạc", "CHAN-SAC-A55", 150_000, 0, 50, 1},
+        {"23129RAA4G", "Pin phồng, cấn màn hình", "Pin phồng – thay pin", "PIN-RN13", 100_000, 0, 20, 1},
+        {"23129RAA4G", "Pin tụt nhanh", "Pin chai – thay pin", "PIN-RN13", 0, 1, 66, 1},
+        {"15-EG3XXX", "Máy nóng, quạt kêu to", "Bụi quạt, khô keo tản nhiệt – vệ sinh, tra keo", "KEO-TN", 200_000, 0, 14, 1},
+        {"15-EG3XXX", "Laptop tắt đột ngột khi chơi game", "Quá nhiệt – tra lại keo tản nhiệt", "KEO-TN", 0, 1, 38, 2},
+        {"15-EG3XXX", "Không lên nguồn", "Hỏng mainboard – thay mainboard", "MB-HP15", 0, 1, 85, 7},
+        {"FV1409S4W", "Không xả nước, báo lỗi OE", "Bơm xả hỏng – thay bơm xả", "BOM-XA-LG", 0, 1, 25, 2},
+        {"FV1409S4W", "Máy giặt không xả, kêu ù ù", "Kẹt vật lạ, cánh bơm gãy – thay bơm xả", "BOM-XA-LG", 150_000, 0, 58, 2},
+        {"INS5430", "Liệt vài phím, gõ không ăn", "Bàn phím lỗi – thay bàn phím", "BP-DELL14", 0, 1, 35, 2}};
+
+    private static final String[] REPAIR_NAMES = {"Ngô Thanh Vân", "Trịnh Quốc Khánh", "Đỗ Hải Đăng", "Lưu Bích Ngân", "Huỳnh Tấn Phát",
+            "Văn Thị Mỹ", "Mạc Đăng Khoa", "Thái Hoàng Nam", "Bạch Tuyết Mai", "Triệu Vĩnh Phúc", "Giang Thu Trang", "Âu Dương Phong"};
+
+    /**
+     * Thêm ~24 phiếu đã sửa xong có kết luận kỹ thuật và linh kiện (trong 100 ngày gần đây), để chức năng gợi ý chẩn đoán và
+     * dự báo linh kiện có dữ liệu. Tồn kho hiện tại giữ nguyên (ghi thêm một lần nhập hàng trước đó bằng đúng số đã dùng).
+     */
+    static int addRepairHistory(AppContext app) throws SQLException {
+        Database db = app.db;
+        Row adminRow = db.one("SELECT id, username, full_name FROM app_user WHERE role = 'ADMIN' ORDER BY id LIMIT 1");
+        Row techRow = db.one("SELECT id FROM app_user WHERE role = 'TECHNICIAN' AND active = 1 ORDER BY id LIMIT 1");
+        if (adminRow == null) return 0;
+        User adm = new User(adminRow.lng("id"), adminRow.str("username"), adminRow.str("full_name"), vn.baohanh.model.Role.ADMIN);
+        Long techId = techRow == null ? null : techRow.lng("id");
+        Row appleRow = db.one("SELECT id FROM brand WHERE name = 'Apple'");
+        Long apple = appleRow == null ? null : appleRow.lng("id");
+        Object[][] newParts = {{"CAP-MH-IP15PM", "Cáp màn hình iPhone 15 Pro Max", 350_000, 750_000, 1, 0},
+                {"MH-IP15PM", "Màn hình iPhone 15 Pro Max", 6_200_000, 7_600_000, 1, 1}};
+        for (Object[] p : newParts)
+            if (db.one("SELECT id FROM part WHERE code = ?", p[0]) == null)
+                app.catalog.save(adm, "part", 0, m("code", p[0], "name", p[1], "brand_id", apple, "unit", "cái",
+                        "cost_price", p[2], "sell_price", p[3], "stock", p[4], "min_stock", p[5]));
+        Map<Long, Long> used = new LinkedHashMap<>();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now().withSecond(0).withNano(0);
+        java.util.Random rnd = new java.util.Random(2026);
+        int n = 0;
+        for (Object[] r : REPAIRS) {
+            Row prod = db.one("SELECT id, default_months FROM product WHERE model_code = ?", r[0]);
+            if (prod == null) continue;
+            Row part = r[3] == null ? null : db.one("SELECT id, sell_price FROM part WHERE code = ?", r[3]);
+            if (r[3] != null && part == null) continue;
+            int daysAgo = (int) r[6], repairDays = (int) r[7];
+            boolean inW = ((int) r[5]) == 1;
+            java.time.LocalDateTime recv = now.minusDays(daysAgo + repairDays).withHour(9 + rnd.nextInt(8)).withMinute(rnd.nextInt(60));
+            java.time.LocalDateTime ready = recv.plusDays(repairDays).withHour(10 + rnd.nextInt(7));
+            java.time.LocalDateTime back = ready.plusHours(3 + rnd.nextInt(30));
+            if (back.isAfter(now)) back = now.minusHours(1);
+            int months = (int) prod.lng("default_months");
+            LocalDate purchase = inW ? recv.toLocalDate().minusMonths(Math.max(1, months / 2)) : recv.toLocalDate().minusMonths(months).minusDays(20 + rnd.nextInt(90));
+            String name = REPAIR_NAMES[n % REPAIR_NAMES.length];
+            String phone;
+            do phone = "097" + (1000000 + rnd.nextInt(8999999)); while (db.one("SELECT id FROM customer WHERE phone = ?", phone) != null);
+            long cid = db.insert("INSERT INTO customer (name, phone, address, created_at) VALUES (?, ?, ?, ?)", name, phone,
+                    STREETS[(n * 7) % STREETS.length] + ", TP. Hồ Chí Minh", Database.ts(purchase.atTime(10, 0)));
+            String serial;
+            do serial = ((String) r[0]).replaceAll("[^A-Z0-9]", "") + "-R" + (10000 + rnd.nextInt(89999));
+            while (db.one("SELECT id FROM warranty WHERE serial = ?", serial) != null);
+            long wid = db.insert("INSERT INTO warranty (code, serial, product_id, customer_id, purchase_date, months, expiry_date, created_by, created_at) "
+                    + "VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)", serial, prod.lng("id"), cid, purchase.toString(), months,
+                    purchase.plusMonths(months).toString(), adm.id(), Database.ts(purchase.atTime(10, 0)));
+            db.update("UPDATE warranty SET code = ? WHERE id = ?", "BH" + purchase.format(java.time.format.DateTimeFormatter.ofPattern("yyMM")) + "-" + String.format("%04d", wid), wid);
+            long price = part == null ? 0 : part.lng("sell_price");
+            long labor = ((Number) r[4]).longValue();
+            long paid = inW ? 0 : labor + price;
+            long tid = db.insert("INSERT INTO ticket (code, warranty_id, issue, accessories, in_warranty, received_at, received_by, due_date, status, technician_id, "
+                    + "diagnosis, labor_cost, quote_status, paid_amount, payment_method, returned_at) VALUES (NULL, ?, ?, 'Máy', ?, ?, ?, ?, 'RETURNED', ?, ?, ?, ?, ?, ?, ?)",
+                    wid, r[1], inW ? 1 : 0, Database.ts(recv), adm.id(), recv.toLocalDate().plusDays(repairDays + 1).toString(), techId, r[2], labor,
+                    inW ? "NONE" : "APPROVED", paid, paid > 0 ? "CASH" : null, Database.ts(back));
+            db.update("UPDATE ticket SET code = ? WHERE id = ?", String.format("PBH-%06d", tid), tid);
+            String[][] steps = {{"RECEIVED", "Tiếp nhận máy"}, {"DIAGNOSING", "Kiểm tra lỗi"}, {"REPAIRING", (String) r[2]}, {"READY", "Sửa xong, đã kiểm tra"},
+                    {"RETURNED", "Đã trả máy cho khách"}};
+            java.time.LocalDateTime[] times = {recv, recv.plusHours(2), recv.plusHours(5), ready, back};
+            for (int i = 0; i < steps.length; i++)
+                db.insert("INSERT INTO ticket_history (ticket_id, time, status, note, user_id) VALUES (?, ?, ?, ?, ?)", tid, Database.ts(times[i]),
+                        steps[i][0], steps[i][1], i == 0 || i == 4 ? adm.id() : techId);
+            if (part != null) {
+                db.insert("INSERT INTO ticket_part (ticket_id, part_id, qty, unit_price, charged) VALUES (?, ?, 1, ?, ?)", tid, part.lng("id"), price, inW ? 0 : 1);
+                db.insert("INSERT INTO stock_movement (part_id, time, qty, type, ticket_id, user_id, note) VALUES (?, ?, -1, 'OUT', ?, ?, ?)",
+                        part.lng("id"), Database.ts(recv.plusHours(5)), tid, techId, "Dùng cho phiếu " + String.format("PBH-%06d", tid));
+                used.merge(part.lng("id"), 1L, Long::sum);
+            }
+            n++;
+        }
+        // Nhập hàng đợt trước đúng bằng số đã dùng → tồn kho hiện tại không đổi
+        for (var e : used.entrySet())
+            db.insert("INSERT INTO stock_movement (part_id, time, qty, type, user_id, note) VALUES (?, ?, ?, 'IN', ?, ?)",
+                    e.getKey(), Database.ts(now.minusDays(110)), e.getValue(), adm.id(), "Nhập hàng đợt trước");
+        return n;
+    }
+
+    /** CSDL mẫu từ bản cũ: thêm lịch sử sửa chữa một lần. */
+    public static int upgradeRepairHistory(AppContext app) throws SQLException {
+        if ("true".equals(app.settings.get("sample_repairs_done"))) return 0;
+        app.settings.put("sample_repairs_done", "true");
+        if (app.db.scalar("SELECT COUNT(*) FROM audit_log WHERE action = 'KHỞI TẠO' AND detail = 'Tạo dữ liệu mẫu'") == 0) return 0;
+        try {
+            return app.db.tx(() -> addRepairHistory(app));
+        } catch (Exception e) {
+            System.err.println("Khong them duoc phieu sua chua mau: " + e.getMessage());
+            return 0;
+        }
+    }
+
     private static Map<String, Object> m(Object... kv) {
         Map<String, Object> m = new LinkedHashMap<>();
         for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);
@@ -376,6 +499,8 @@ public final class SeedData {
         app.settings.put("sample_addresses_done", "true");
         addSampleAccounts(db);
         app.settings.put("sample_accounts_done", "true");
+        addRepairHistory(app);
+        app.settings.put("sample_repairs_done", "true");
 
         // Khách mẫu Phạm Thu Hà: một lần sửa đã xong (để thấy hóa đơn, phiếu in, chức năng đánh giá)
         long haMac = db.scalar("SELECT id FROM warranty WHERE serial = 'C02FK1ZQMD6M'");

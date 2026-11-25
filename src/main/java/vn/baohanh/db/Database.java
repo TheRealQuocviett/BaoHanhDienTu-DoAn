@@ -28,7 +28,7 @@ import java.util.List;
  */
 public final class Database implements AutoCloseable {
 
-    public static final int SCHEMA_VERSION = 8;
+    public static final int SCHEMA_VERSION = 10;
     public static final DateTimeFormatter TS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     /** Một khối công việc chạy trong transaction. */

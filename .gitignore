@@ -1,6 +1,7 @@
 # Kết quả biên dịch
 bin/
 bin-test/
+bin-tai/
 *.class
 
 # Dữ liệu chạy thật: CSDL, ảnh, bản sao lưu, cấu hình email (có mật khẩu) – KHÔNG đưa lên GitHub

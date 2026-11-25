@@ -47,7 +47,34 @@ public class Auth {
         if (!p.allows(u)) throw new AppException(403, "Tài khoản của bạn chưa được cấp quyền: " + p.label.toLowerCase());
     }
 
+    /** Kết quả bước 1 đăng nhập: user (đã xong) hoặc pendingToken (cần nhập mã 2 lớp). */
+    public record LoginStep(User user, String pendingToken) {
+        public boolean needCode() { return pendingToken != null; }
+    }
+
+    private TwoFactorService twoFactor;
+
+    public void setTwoFactor(TwoFactorService t) { this.twoFactor = t; }
+
+    /**
+     * Đăng nhập một bước (dùng cho tài khoản chưa bật 2FA).
+     * Tài khoản đã bật 2FA phải dùng begin() + TwoFactorService.finishPending().
+     */
     public User login(String username, String password) throws SQLException {
+        LoginStep s = begin(username, password);
+        if (s.needCode()) throw new AppException("Tài khoản này đã bật xác thực 2 lớp – cần nhập mã từ ứng dụng Google Authenticator");
+        return s.user();
+    }
+
+    /** Bước 1: kiểm tra mật khẩu. Nếu tài khoản bật 2FA thì trả phiếu chờ nhập mã. */
+    public LoginStep begin(String username, String password) throws SQLException {
+        User u = checkPassword(username, password);
+        if (twoFactor != null && twoFactor.isEnabled(u.id())) return new LoginStep(null, twoFactor.startPending(u));
+        audit.log(u, "ĐĂNG NHẬP", "app_user", u.id(), null);
+        return new LoginStep(u, null);
+    }
+
+    private User checkPassword(String username, String password) throws SQLException {
         String key = username == null ? "" : username.trim().toLowerCase();
         if (key.isEmpty() || password == null || password.isEmpty())
             throw new AppException("Vui lòng nhập tên đăng nhập và mật khẩu");
@@ -65,9 +92,7 @@ public class Auth {
         }
         if (!r.bool("active")) throw new AppException("Tài khoản đã bị khóa, vui lòng liên hệ quản lý");
         fails.remove(key);
-        User u = toUser(r);
-        audit.log(u, "ĐĂNG NHẬP", "app_user", u.id(), null);
-        return u;
+        return toUser(r);
     }
 
     public static User toUser(Row r) {

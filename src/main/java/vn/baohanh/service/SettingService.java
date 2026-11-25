@@ -33,12 +33,18 @@ public class SettingService {
         KEYS.put("bank_holder", "Tên chủ tài khoản");
         KEYS.put("kpi_commission_rate", "Hoa hồng kỹ thuật viên (% tiền công)");
         KEYS.put("kpi_bonus_per_ticket", "Thưởng mỗi phiếu hoàn thành (đồng)");
+        KEYS.put("po_lead_days", "Thời gian chờ hàng về (ngày)");
+        KEYS.put("po_cover_days", "Đặt đủ dùng trong (ngày)");
+        KEYS.put("remind_due_days", "Nhắc kỹ thuật viên trước hạn trả (ngày)");
         KEYS.put("portal_url", "Địa chỉ cổng tra cứu");
         KEYS.put("policy", "Điều khoản / chính sách bảo hành");
         HINTS.put("bank_bin", "Chọn ngân hàng để in mã QR chuyển khoản trên hóa đơn và cho khách thanh toán online");
         HINTS.put("bank_holder", "Viết hoa không dấu như trên app ngân hàng, vd NGUYEN VAN A");
         HINTS.put("kpi_commission_rate", "Để trống = 10%. Tính trên tiền công các phiếu có phí đã thu");
         HINTS.put("kpi_bonus_per_ticket", "Để trống = 20.000 đ cho mỗi phiếu đã trả máy");
+        HINTS.put("po_lead_days", "Để trống = 7. Dùng để dự báo: linh kiện hết trước khi hàng kịp về thì được gợi ý đặt sớm");
+        HINTS.put("po_cover_days", "Để trống = 30. Số lượng gợi ý đủ dùng thêm chừng ấy ngày sau khi hàng về");
+        HINTS.put("remind_due_days", "Để trống = 1 (nhắc trước 1 ngày). Phiếu quá hạn thì báo quản lý và tự gửi tin xin lỗi khách");
         HINTS.put("open_hours", "Mỗi dòng một mục, vd: Thứ 2 – Thứ 7: 8:00 – 20:00");
         HINTS.put("map_query", "Để trống = dùng địa chỉ cửa hàng. Có thể nhập tọa độ, vd 10.7626,106.6602");
         HINTS.put("social_link", "Đường dẫn bắt đầu bằng https://");

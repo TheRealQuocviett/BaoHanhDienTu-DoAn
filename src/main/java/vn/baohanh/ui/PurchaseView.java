@@ -21,8 +21,11 @@ public class PurchaseView extends MainFrame.View {
     private static final long serialVersionUID = 1L;
 
     private final Ui.RowModel sugModel = new Ui.RowModel(List.of(Ui.Col.text("code", "Mã", 100), Ui.Col.text("name", "Linh kiện", 230),
-            Ui.Col.num("stock", "Tồn"), Ui.Col.num("min_stock", "Tối thiểu"), Ui.Col.num("incoming", "Đang về"),
+            Ui.Col.num("stock", "Tồn"), Ui.Col.num("min_stock", "Tối thiểu"), Ui.Col.text("reason", "Lý do", 260), Ui.Col.num("incoming", "Đang về"),
             Ui.Col.num("suggest_qty", "Gợi ý đặt"), Ui.Col.money("cost_price", "Giá nhập")));
+    private final Ui.RowModel fcModel = new Ui.RowModel(List.of(Ui.Col.text("code", "Mã", 110), Ui.Col.text("name", "Linh kiện", 230),
+            Ui.Col.num("stock", "Tồn"), Ui.Col.text("monthly_text", "Dùng / tháng", 90), Ui.Col.text("days_text", "Còn đủ dùng", 110),
+            Ui.Col.date("stockout_date", "Dự kiến hết"), Ui.Col.text("reason", "Ghi chú", 300)));
     private final Ui.RowModel poModel = new Ui.RowModel(List.of(Ui.Col.text("code", "Mã đơn", 100), Ui.Col.text("supplier_name", "Nhà cung cấp", 240),
             Ui.Col.dateTime("created_at", "Ngày lập"), Ui.Col.num("lines", "Số dòng"), Ui.Col.money("total", "Tổng tiền"),
             Ui.Col.text("status_label", "Trạng thái", 150), Ui.Col.date("expected_date", "Cần hàng")));
@@ -34,12 +37,15 @@ public class PurchaseView extends MainFrame.View {
         super(ctx);
         admin = vn.baohanh.model.Perm.PURCHASE.allows(ctx.user());
         poTable = Ui.table(poModel, r -> showOrder(r.lng("id")));
-        add(Ui.header("Đặt hàng linh kiện", "Linh kiện dưới mức tồn tối thiểu được gợi ý sẵn. Nhận hàng sẽ tự cộng tồn kho và ghi thẻ kho.",
+        add(Ui.header("Đặt hàng linh kiện", "Gợi ý theo mức tồn tối thiểu và theo dự báo hết hàng (dựa trên lượng dùng 30/90 ngày). Nhận hàng sẽ tự cộng tồn kho và ghi thẻ kho.",
                 admin ? new java.awt.Component[]{Ui.primary("Tạo đơn từ gợi ý", this::createFromSuggestions)} : new java.awt.Component[0]),
                 BorderLayout.NORTH);
         JPanel grid = new JPanel(new GridLayout(2, 1, 0, 12));
         grid.setOpaque(false);
-        grid.add(Ui.card(withTitle("Cần đặt thêm (tồn ≤ mức tối thiểu)", Ui.scroll(sugTable))));
+        javax.swing.JTabbedPane tabs = new javax.swing.JTabbedPane();
+        tabs.addTab("Cần đặt thêm (tối thiểu + dự báo)", Ui.scroll(sugTable));
+        tabs.addTab("Dự báo tồn kho", Ui.scroll(Ui.table(fcModel, null)));
+        grid.add(Ui.card(tabs));
         JPanel actions = Ui.flow(
                 Ui.button("Xem / in đơn", () -> selected().ifPresent(r -> showOrder(r.lng("id")))),
                 Ui.button("Đánh dấu đã gửi đơn", () -> act(r -> ctx.app().purchases.markOrdered(user(), r.lng("id")), "Đã chuyển sang \"Đã đặt – chờ hàng\"")),
@@ -138,6 +144,12 @@ public class PurchaseView extends MainFrame.View {
     public void refresh() {
         Ui.run(this, () -> {
             sugModel.setRows(ctx.app().purchases.suggestions(user()));
+            @SuppressWarnings("unchecked") List<Row> fc = (List<Row>) ctx.app().purchases.forecast(user()).get("rows");
+            for (Row r : fc) {
+                r.put("monthly_text", r.lng("used_90") > 0 ? String.valueOf(r.get("monthly_use")) : "–");
+                r.put("days_text", r.get("days_left") == null ? "Chưa dùng gần đây" : r.lng("days_left") > 999 ? "> 999 ngày" : r.lng("days_left") + " ngày");
+            }
+            fcModel.setRows(fc);
             poModel.setRows(ctx.app().purchases.list(user(), ""));
         });
     }

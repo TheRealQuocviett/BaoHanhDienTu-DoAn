@@ -246,30 +246,65 @@ public final class Ui {
         return c;
     }
 
-    /** Biểu tượng logo: ô vuông bo góc xanh với hình khiên trắng. */
+    /** Logo phần mềm (khiên bảo hành + dấu tích + điểm mạch điện), giống web/logo.svg. */
     public static javax.swing.Icon logo(int size) {
         return new javax.swing.Icon() {
             public int getIconWidth() { return size; }
             public int getIconHeight() { return size; }
             public void paintIcon(Component c, Graphics g0, int x, int y) {
                 Graphics2D g = (Graphics2D) g0.create();
-                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g.setPaint(new java.awt.GradientPaint(x, y, new Color(0x3B82F6), x + size, y + size, ACCENT_DARK));
-                g.fillRoundRect(x, y, size, size, size * 3 / 10, size * 3 / 10);
-                double w = size * 0.42, h = size * 0.5, cx = x + size / 2.0, top = y + size * 0.24;
-                java.awt.geom.Path2D p = new java.awt.geom.Path2D.Double();
-                p.moveTo(cx, top);
-                p.lineTo(cx + w / 2, top + h * 0.18);
-                p.lineTo(cx + w / 2, top + h * 0.55);
-                p.lineTo(cx, top + h);
-                p.lineTo(cx - w / 2, top + h * 0.55);
-                p.lineTo(cx - w / 2, top + h * 0.18);
-                p.closePath();
-                g.setColor(Color.WHITE);
-                g.fill(p);
+                g.translate(x, y);
+                paintLogo(g, size);
                 g.dispose();
             }
         };
+    }
+
+    /** Vẽ logo trong ô size×size (thiết kế gốc trên lưới 128). */
+    public static void paintLogo(Graphics2D g, int size) {
+        g = (Graphics2D) g.create();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        double k = size / 128.0;
+        g.scale(k, k);
+        java.awt.geom.Path2D shield = new java.awt.geom.Path2D.Double();
+        shield.moveTo(64, 8); shield.lineTo(108, 24); shield.lineTo(108, 60);
+        shield.curveTo(108, 88, 89, 108, 64, 120);
+        shield.curveTo(39, 108, 20, 88, 20, 60);
+        shield.lineTo(20, 24); shield.closePath();
+        g.setPaint(new java.awt.GradientPaint(20, 8, new Color(0x3B82F6), 108, 120, new Color(0x1D4ED8)));
+        g.fill(shield);
+        java.awt.geom.Path2D half = new java.awt.geom.Path2D.Double();
+        half.moveTo(64, 8); half.lineTo(108, 24); half.lineTo(108, 60); half.curveTo(108, 88, 89, 108, 64, 120); half.closePath();
+        g.setColor(new Color(255, 255, 255, 20));
+        g.fill(half);
+        g.setColor(Color.WHITE);
+        g.setStroke(new java.awt.BasicStroke(11f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
+        java.awt.geom.Path2D check = new java.awt.geom.Path2D.Double();
+        check.moveTo(40, 64); check.lineTo(56, 80); check.lineTo(88, 46);
+        g.draw(check);
+        g.setStroke(new java.awt.BasicStroke(4f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
+        g.draw(new java.awt.geom.Line2D.Double(97, 46, 104, 46));
+        g.draw(new java.awt.geom.Line2D.Double(88, 37, 88, 30));
+        java.awt.geom.Ellipse2D dot = new java.awt.geom.Ellipse2D.Double(79, 37, 18, 18);
+        g.setColor(new Color(0xFBBF24));
+        g.fill(dot);
+        g.setColor(Color.WHITE);
+        g.draw(dot);
+        g.dispose();
+    }
+
+    /** Ảnh logo nhiều cỡ cho biểu tượng cửa sổ / thanh taskbar. */
+    public static java.util.List<java.awt.Image> logoImages() {
+        java.util.List<java.awt.Image> out = new java.util.ArrayList<>();
+        for (int s : new int[]{16, 20, 24, 32, 40, 48, 64, 128, 256}) {
+            java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(s, s, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = img.createGraphics();
+            paintLogo(g, s);
+            g.dispose();
+            out.add(img);
+        }
+        return out;
     }
 
     public static Font font(int style, int size) {

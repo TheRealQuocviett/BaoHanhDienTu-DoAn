@@ -139,6 +139,23 @@ public class TicketDialog extends JDialog {
                         + Fmt.html(rv.str("comment")) : "")
                 + "</html>")));
 
+        // ---------- Gợi ý chẩn đoán ----------
+        if (vn.baohanh.model.Perm.REPAIR.allows(ctx.user()) && !List.of("RETURNED", "CANCELLED").contains(t.str("status"))) {
+            javax.swing.JLabel dx = DiagnosisPanel.create();
+            dx.setAlignmentX(Component.LEFT_ALIGNMENT);
+            body.add(Box.createVerticalStrut(8));
+            body.add(dx);
+            long tid = t.lng("id");
+            new javax.swing.SwingWorker<Row, Void>() {
+                @Override protected Row doInBackground() throws Exception {
+                    return ctx.app().diagnosis.suggest(ctx.user(), java.util.Map.of("ticket_id", tid));
+                }
+                @Override protected void done() {
+                    try { DiagnosisPanel.show(dx, get(), 640); body.revalidate(); } catch (Exception ignored) { }
+                }
+            }.execute();
+        }
+
         // ---------- Chi phí ----------
         JPanel cost = section("Chi phí: " + Fmt.money(t.lng("total")));
         Ui.RowModel pm = new Ui.RowModel(List.of(Ui.Col.text("code", "Mã", 110), Ui.Col.text("name", "Linh kiện", 260),

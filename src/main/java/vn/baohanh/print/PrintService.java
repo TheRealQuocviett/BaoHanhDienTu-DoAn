@@ -145,7 +145,7 @@ public class PrintService {
         return "<!DOCTYPE html><html lang=\"vi\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
                 + "<title>" + h(title) + " " + h(code) + "</title><style>" + CSS + "</style></head><body>"
                 + "<div class=\"bar\"><button onclick=\"window.print()\">In / Lưu PDF</button><span>Khổ A5 · muốn lưu file: chọn máy in \"Lưu dưới dạng PDF\"</span></div>"
-                + "<main class=\"sheet\"><header><div><div class=\"shop\">" + h(shop.get("shop_name")) + "</div>"
+                + "<main class=\"sheet\"><header><div><div class=\"shop\"><img src=\"/logo.svg\" alt=\"\" width=\"30\" height=\"30\" style=\"vertical-align:-7px;margin-right:8px\">" + h(shop.get("shop_name")) + "</div>"
                 + "<div class=\"muted\">" + h(shop.get("shop_address")) + "</div><div class=\"muted\">ĐT: " + h(shop.get("shop_phone")) + "</div></div>"
                 + "<figure class=\"qr\">" + qr + "<figcaption>" + h(qrCaption) + "</figcaption></figure></header>"
                 + "<h1>" + h(title) + "</h1><div class=\"code\">Số: <b>" + h(code) + "</b></div>"

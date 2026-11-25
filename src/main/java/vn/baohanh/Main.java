@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+
 import vn.baohanh.api.ApiServer;
 import vn.baohanh.db.Database;
 import vn.baohanh.service.AppContext;
@@ -66,6 +67,8 @@ public class Main {
             if (filled > 0) System.out.println("Da bo sung dia chi cho " + filled + " khach hang mau.");
             int acc = SeedData.upgradeSampleAccounts(app);
             if (acc > 0) System.out.println("Da tao " + acc + " tai khoan khach hang mau (mat khau " + SeedData.SAMPLE_PASSWORD + ").");
+            int rep = SeedData.upgradeRepairHistory(app);
+            if (rep > 0) System.out.println("Da them " + rep + " phieu sua chua mau cho goi y chan doan / du bao kho.");
         }
 
         ApiServer server;
@@ -79,6 +82,7 @@ public class Main {
         server.start();
         app.backup.startAuto();
         app.notify.start();
+        app.alerts.start();
         String url = "http://localhost:" + port;
         System.out.println("==============================================================");
         System.out.println(" HE THONG QUAN LY BAO HANH DIEN TU dang chay");

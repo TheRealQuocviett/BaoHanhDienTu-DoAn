@@ -33,19 +33,87 @@ public class PurchaseService {
         this.audit = audit;
     }
 
-    /** Linh kiện cần đặt: tồn ≤ mức tối thiểu, trừ phần đang chờ về từ đơn đã đặt. Gợi ý số lượng = 2 × mức tối thiểu − tồn − đang về. */
-    public List<Row> suggestions(User u) throws SQLException {
-        Auth.need(u, vn.baohanh.model.Perm.PURCHASE_VIEW);
+    /** Số ngày chờ hàng về (mặc định) và số ngày muốn đủ dùng sau khi hàng về – chỉnh trong Thông tin cửa hàng. */
+    public static final int DEFAULT_LEAD_DAYS = 7, DEFAULT_COVER_DAYS = 30, SAFETY_DAYS = 7;
+
+    private SettingService settings;
+
+    public void setSettings(SettingService s) { this.settings = s; }
+
+    private int setting(String key, int def) {
+        try {
+            String v = settings == null ? null : settings.get(key);
+            return v == null || v.isBlank() ? def : Math.max(0, Integer.parseInt(v.trim()));
+        } catch (Exception e) {
+            return def;
+        }
+    }
+
+    /**
+     * Dự báo tồn kho cho mọi linh kiện: lượng dùng trung bình mỗi ngày (trộn 30 ngày gần nhất và 90 ngày, để bắt kịp xu hướng),
+     * số ngày còn đủ dùng, ngày dự kiến hết hàng, và số lượng nên đặt.
+     * Cần đặt khi: tồn ≤ mức tối thiểu, HOẶC (tồn + đang về) chỉ đủ dùng ≤ thời gian chờ hàng + 7 ngày dự phòng.
+     * Số lượng gợi ý = max(2 × tối thiểu − tồn − đang về, lượng dùng trong (thời gian chờ + số ngày muốn đủ dùng) + tối thiểu − tồn − đang về).
+     */
+    public static List<Row> plan(Database db, int leadDays, int coverDays) throws SQLException {
+        String d30 = Database.ts(java.time.LocalDateTime.now().minusDays(30)), d90 = Database.ts(java.time.LocalDateTime.now().minusDays(90));
         List<Row> list = db.query("SELECT p.id, p.code, p.name, p.unit, p.stock, p.min_stock, p.cost_price, COALESCE(b.name, '') AS brand_name, "
                 + "COALESCE((SELECT SUM(l.qty - l.received_qty) FROM purchase_order_line l JOIN purchase_order o ON o.id = l.po_id "
                 + "WHERE l.part_id = p.id AND o.status IN ('DRAFT','ORDERED')), 0) AS incoming, "
+                + "COALESCE((SELECT SUM(-m.qty) FROM stock_movement m WHERE m.part_id = p.id AND m.type IN ('OUT','RETURN') AND m.time >= ?), 0) AS used_30, "
+                + "COALESCE((SELECT SUM(-m.qty) FROM stock_movement m WHERE m.part_id = p.id AND m.type IN ('OUT','RETURN') AND m.time >= ?), 0) AS used_90, "
                 + "(SELECT COUNT(*) FROM ticket t WHERE t.status = 'WAITING_PARTS') AS waiting_tickets "
-                + "FROM part p LEFT JOIN brand b ON b.id = p.brand_id WHERE p.stock <= p.min_stock ORDER BY (p.stock - p.min_stock), p.name");
+                + "FROM part p LEFT JOIN brand b ON b.id = p.brand_id ORDER BY p.name", d30, d90);
+        java.time.LocalDate today = java.time.LocalDate.now();
         for (Row r : list) {
-            long need = Math.max(1, r.lng("min_stock") * 2 - r.lng("stock") - r.lng("incoming"));
-            r.put("suggest_qty", r.lng("incoming") >= Math.max(1, r.lng("min_stock") * 2 - r.lng("stock")) ? 0 : need);
+            long stock = r.lng("stock"), min = r.lng("min_stock"), incoming = r.lng("incoming");
+            double daily = Math.max(0, 0.5 * Math.max(0, r.lng("used_30")) / 30.0 + 0.5 * Math.max(0, r.lng("used_90")) / 90.0);
+            r.put("daily_use", Math.round(daily * 100) / 100.0);
+            r.put("monthly_use", Math.round(daily * 30 * 10) / 10.0);
+            Long daysLeft = daily <= 0 ? null : (long) Math.floor(stock / daily);
+            r.put("days_left", daysLeft);
+            r.put("stockout_date", daysLeft == null ? null : today.plusDays(daysLeft).toString());
+            boolean lowMin = stock <= min;
+            boolean lowForecast = daily > 0 && (stock + incoming) / daily <= leadDays + SAFETY_DAYS;
+            long byMin = 2 * min - stock - incoming;
+            long byUse = (long) Math.ceil(daily * (leadDays + coverDays)) + min - stock - incoming;
+            long qty = Math.max(0, Math.max(byMin, byUse));
+            if (lowMin && qty == 0 && incoming < Math.max(1, 2 * min - stock)) qty = 1;
+            r.put("suggest_qty", qty);
+            r.put("need", lowMin || lowForecast);
+            String reason;
+            if (lowMin && stock <= 0) reason = "Đã hết hàng";
+            else if (lowMin) reason = "Dưới mức tối thiểu (" + min + ")";
+            else if (lowForecast) reason = "Dự báo hết sau " + daysLeft + " ngày – hàng về mất " + leadDays + " ngày";
+            else reason = "";
+            if (!reason.isEmpty() && incoming > 0 && qty == 0) reason += " · đã có " + incoming + " đang về";
+            r.put("reason", reason);
         }
         return list;
+    }
+
+    /** Linh kiện cần đặt (theo mức tối thiểu hoặc theo dự báo hết hàng), gấp nhất đứng trước. */
+    public List<Row> suggestions(User u) throws SQLException {
+        Auth.need(u, vn.baohanh.model.Perm.PURCHASE_VIEW);
+        List<Row> out = new java.util.ArrayList<>(plan(db, setting("po_lead_days", DEFAULT_LEAD_DAYS), setting("po_cover_days", DEFAULT_COVER_DAYS))
+                .stream().filter(r -> Boolean.TRUE.equals(r.get("need"))).toList());
+        out.sort(java.util.Comparator.comparingLong((Row r) -> r.get("days_left") == null ? (r.lng("stock") - r.lng("min_stock")) * 1000 : r.lng("days_left"))
+                .thenComparing(r -> r.str("name")));
+        return out;
+    }
+
+    /** Bảng dự báo tồn kho: mọi linh kiện có phát sinh sử dụng trong 90 ngày, sắp xếp theo số ngày còn đủ dùng. */
+    public Row forecast(User u) throws SQLException {
+        Auth.need(u, vn.baohanh.model.Perm.PURCHASE_VIEW);
+        int lead = setting("po_lead_days", DEFAULT_LEAD_DAYS), cover = setting("po_cover_days", DEFAULT_COVER_DAYS);
+        List<Row> rows = plan(db, lead, cover).stream().filter(r -> r.lng("used_90") > 0 || Boolean.TRUE.equals(r.get("need")))
+                .sorted(java.util.Comparator.comparingLong((Row r) -> r.get("days_left") == null ? Long.MAX_VALUE : r.lng("days_left"))).toList();
+        return new Row().with("rows", rows).with("lead_days", (long) lead).with("cover_days", (long) cover);
+    }
+
+    /** Số linh kiện cần đặt (cho số trên menu, bảng điều khiển). */
+    public static long countToOrder(Database db, int lead, int cover) throws SQLException {
+        return plan(db, lead, cover).stream().filter(r -> Boolean.TRUE.equals(r.get("need")) && r.lng("suggest_qty") > 0).count();
     }
 
     public List<Row> list(User u, String status) throws SQLException {

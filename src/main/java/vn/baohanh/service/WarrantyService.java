@@ -89,19 +89,84 @@ public class WarrantyService {
         return w;
     }
 
-    public List<Row> listWarranties(User u, String q, String filter) throws SQLException {
-        Auth.require(u);
+    public static final int PAGE_SIZE = 50;
+    public static final int MAX_PAGE_SIZE = 500;
+    private static final String[] WARRANTY_SEARCH = {"serial", "code", "product_name", "brand_name", "customer_name", "customer_phone", "invoice_no"};
+    private static final String[] TICKET_SEARCH = {"code", "serial", "customer_phone", "customer_name", "product_name", "technician_name", "invoice_no"};
+
+    private String warrantyWhere(String filter) {
         String t = today().toString();
-        String where = switch (filter == null ? "" : filter) {
+        return switch (filter == null ? "" : filter) {
             case "active" -> "WHERE expiry_date >= '" + t + "'";
             case "expired" -> "WHERE expiry_date < '" + t + "'";
             case "expiring" -> "WHERE expiry_date BETWEEN '" + t + "' AND '" + today().plusDays(30) + "'";
             default -> "";
         };
+    }
+
+    /** Kết quả một trang: rows, total (tổng số dòng khớp), page (từ 1), pages, size. */
+    public static Row pageResult(List<Row> rows, long total, int page, int size) {
+        return new Row().with("rows", rows).with("total", total).with("page", page).with("size", size)
+                .with("pages", Math.max(1, (total + size - 1) / size));
+    }
+
+    /** Trang vượt quá số trang (vd. vừa lọc bớt) thì về trang cuối. */
+    static int clampPage(int page, long total, int size) {
+        return (int) Math.max(1, Math.min(page, (total + size - 1) / size));
+    }
+
+    private static int clampSize(int size) { return size <= 0 ? PAGE_SIZE : Math.min(size, MAX_PAGE_SIZE); }
+
+    /**
+     * Danh sách bảo hành theo trang (dùng khi dữ liệu lớn).
+     * Không gõ tìm kiếm: đếm + LIMIT/OFFSET trực tiếp trong SQL (dùng chỉ mục idx_warranty_created).
+     * Có tìm kiếm: quét các cột cần tìm (nhẹ) để lọc không dấu, rồi chỉ nạp đầy đủ các dòng của trang hiện tại.
+     */
+    public Row pageWarranties(User u, String q, String filter, int page, int size) throws SQLException {
+        Auth.require(u);
+        int sz = clampSize(size), pg = Math.max(1, page);
+        String where = warrantyWhere(filter);
+        String key = norm(q);
+        String order = " ORDER BY created_at DESC, id DESC";
+        List<Row> rows = new ArrayList<>();
+        long total;
+        if (key.isEmpty()) {
+            total = db.scalar("SELECT COUNT(*) FROM warranty " + where);
+            pg = clampPage(pg, total, sz);
+            for (Row w : db.query("SELECT * FROM v_warranty " + where + order + " LIMIT ? OFFSET ?", sz, (long) (pg - 1) * sz))
+                rows.add(warrantyView(w, today()));
+        } else {
+            List<Long> ids = new ArrayList<>();
+            for (Row w : db.query("SELECT id, serial, code, product_name, brand_name, customer_name, customer_phone, invoice_no FROM v_warranty "
+                    + where + order))
+                if (matches(key, w, WARRANTY_SEARCH)) ids.add(w.lng("id"));
+            total = ids.size();
+            pg = clampPage(pg, total, sz);
+            List<Long> slice = slice(ids, pg, sz);
+            if (!slice.isEmpty())
+                for (Row w : db.query("SELECT * FROM v_warranty WHERE id IN (" + placeholders(slice.size()) + ")" + order, slice.toArray()))
+                    rows.add(warrantyView(w, today()));
+        }
+        return pageResult(rows, total, pg, sz);
+    }
+
+    static <T> List<T> slice(List<T> all, int page, int size) {
+        int from = Math.min(all.size(), (page - 1) * size);
+        return all.subList(from, Math.min(all.size(), from + size));
+    }
+
+    static String placeholders(int n) {
+        return String.join(",", java.util.Collections.nCopies(n, "?"));
+    }
+
+    /** Toàn bộ danh sách (giữ cho xuất Excel / tương thích); màn hình dùng pageWarranties. */
+    public List<Row> listWarranties(User u, String q, String filter) throws SQLException {
+        Auth.require(u);
+        String where = warrantyWhere(filter);
         String key = norm(q);
         List<Row> out = new ArrayList<>();
         for (Row w : db.query("SELECT * FROM v_warranty " + where + " ORDER BY created_at DESC, id DESC")) {
-            if (matches(key, w, "serial", "code", "product_name", "brand_name", "customer_name", "customer_phone", "invoice_no"))
+            if (matches(key, w, WARRANTY_SEARCH))
                 out.add(warrantyView(w, today()));
         }
         return out;
@@ -225,9 +290,57 @@ public class WarrantyService {
      */
     public List<Row> listTickets(User u, String status, String q) throws SQLException {
         Auth.require(u);
+        List<Object> params = new ArrayList<>();
+        String where = ticketWhere(u, status, params);
+        String key = norm(q);
+        List<Row> out = new ArrayList<>();
+        for (Row t : db.query(TICKET_SQL + where + " ORDER BY t.received_at DESC, t.id DESC", params.toArray())) {
+            if (matches(key, t, TICKET_SEARCH))
+                out.add(ticketView(t));
+        }
+        return out;
+    }
+
+    /**
+     * Danh sách phiếu theo trang. Không tìm kiếm: SQL đếm + LIMIT/OFFSET, sắp xếp theo chỉ mục
+     * idx_ticket_received nên SQLite đọc đúng 50 phiếu đầu thay vì tính chi phí cho cả 50.000 phiếu.
+     */
+    public Row pageTickets(User u, String status, String q, int page, int size) throws SQLException {
+        Auth.require(u);
+        int sz = clampSize(size), pg = Math.max(1, page);
+        List<Object> params = new ArrayList<>();
+        String where = ticketWhere(u, status, params);
+        String key = norm(q);
+        String order = " ORDER BY t.received_at DESC, t.id DESC";
+        List<Row> rows = new ArrayList<>();
+        long total;
+        if (key.isEmpty()) {
+            total = db.scalar("SELECT COUNT(*) FROM ticket t " + where, params.toArray());
+            pg = clampPage(pg, total, sz);
+            List<Object> p2 = new ArrayList<>(params);
+            p2.add(sz);
+            p2.add((long) (pg - 1) * sz);
+            for (Row t : db.query(TICKET_SQL + where + order + " LIMIT ? OFFSET ?", p2.toArray())) rows.add(ticketView(t));
+        } else {
+            List<Long> ids = new ArrayList<>();
+            for (Row t : db.query("SELECT t.id, t.code, t.invoice_no, w.serial, cu.phone AS customer_phone, cu.name AS customer_name, "
+                    + "p.name AS product_name, tu.full_name AS technician_name FROM ticket t JOIN warranty w ON w.id = t.warranty_id "
+                    + "JOIN product p ON p.id = w.product_id JOIN customer cu ON cu.id = w.customer_id "
+                    + "LEFT JOIN app_user tu ON tu.id = t.technician_id " + where + order, params.toArray()))
+                if (matches(key, t, TICKET_SEARCH)) ids.add(t.lng("id"));
+            total = ids.size();
+            pg = clampPage(pg, total, sz);
+            List<Long> slice = slice(ids, pg, sz);
+            if (!slice.isEmpty())
+                for (Row t : db.query(TICKET_SQL + "WHERE t.id IN (" + placeholders(slice.size()) + ")" + order, slice.toArray()))
+                    rows.add(ticketView(t));
+        }
+        return pageResult(rows, total, pg, sz);
+    }
+
+    private String ticketWhere(User u, String status, List<Object> params) {
         String st = status == null ? "" : status;
         String where;
-        List<Object> params = new ArrayList<>();
         switch (st) {
             case "" -> where = "";
             case "OPEN" -> where = "WHERE t.status NOT IN " + TicketStatus.CLOSED_SQL;
@@ -240,13 +353,7 @@ public class WarrantyService {
                 params.add(st);
             }
         }
-        String key = norm(q);
-        List<Row> out = new ArrayList<>();
-        for (Row t : db.query(TICKET_SQL + where + " ORDER BY t.received_at DESC, t.id DESC", params.toArray())) {
-            if (matches(key, t, "code", "serial", "customer_phone", "customer_name", "product_name", "technician_name", "invoice_no"))
-                out.add(ticketView(t));
-        }
-        return out;
+        return where;
     }
 
     private Row ticketRow(long id) throws SQLException {
@@ -672,6 +779,15 @@ public class WarrantyService {
     //  TỔNG QUAN
     // =====================================================================
 
+    private int intSetting(String key, int def) {
+        try {
+            String v = settings == null ? null : settings.get(key);
+            return v == null || v.isBlank() ? def : Integer.parseInt(v.trim());
+        } catch (Exception e) {
+            return def;
+        }
+    }
+
     public Row dashboard(User u) throws SQLException {
         Auth.require(u);
         LocalDate t = today();
@@ -687,8 +803,9 @@ public class WarrantyService {
         m.put("my_tickets", db.scalar("SELECT COUNT(*) FROM ticket WHERE technician_id = ? AND status NOT IN " + TicketStatus.CLOSED_SQL, u.id()));
         m.put("low_stock", db.scalar("SELECT COUNT(*) FROM part WHERE stock <= min_stock"));
         m.put("new_requests", db.scalar("SELECT COUNT(*) FROM service_request WHERE status = 'NEW'"));
-        m.put("parts_to_order", db.scalar("SELECT COUNT(*) FROM part p WHERE p.stock <= p.min_stock AND NOT EXISTS (SELECT 1 FROM purchase_order_line l "
-                + "JOIN purchase_order o ON o.id = l.po_id WHERE l.part_id = p.id AND o.status IN ('DRAFT','ORDERED'))"));
+        m.put("parts_to_order", PurchaseService.countToOrder(db, intSetting("po_lead_days", PurchaseService.DEFAULT_LEAD_DAYS),
+                intSetting("po_cover_days", PurchaseService.DEFAULT_COVER_DAYS)));
+        m.put("alerts", db.scalar("SELECT COUNT(*) FROM staff_alert WHERE user_id = ? AND read_at IS NULL", u.id()));
         m.put("unread_messages", db.scalar("SELECT COUNT(DISTINCT ticket_id) FROM ticket_message WHERE sender = 'CUSTOMER' AND read_by_staff = 0"));
         m.put("today_events", db.scalar("SELECT COUNT(*) FROM service_request WHERE status = 'CONFIRMED' AND appointment = ?", t)
                 + db.scalar("SELECT COUNT(*) FROM ticket WHERE status NOT IN ('RETURNED','CANCELLED') AND due_date = ?", t));

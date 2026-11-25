@@ -48,6 +48,11 @@ public class MainFrame extends JFrame {
     private final Map<String, NavItem> navItems = new LinkedHashMap<>();
     private final JPanel side = new JPanel();
     private String current;
+    private final javax.swing.JButton alertsBtn = Ui.button("Nhắc việc", this::openAlerts);
+
+    private void openAlerts() {
+        AlertsDialog.open(ctx);
+    }
 
     /** Một trang trong cửa sổ chính. */
     public abstract static class View extends JPanel {
@@ -63,6 +68,12 @@ public class MainFrame extends JFrame {
 
         /** Nạp lại dữ liệu mỗi khi trang được mở. */
         public abstract void refresh();
+
+        /** Danh sách dòng trong kết quả phân trang. */
+        @SuppressWarnings("unchecked")
+        protected static java.util.List<vn.baohanh.db.Row> rows(vn.baohanh.db.Row pageResult) {
+            return (java.util.List<vn.baohanh.db.Row>) pageResult.get("rows");
+        }
 
         /** Nhận bộ lọc từ trang khác (vd ô số liệu ở Tổng quan). */
         public void applyFilter(String filter) { }
@@ -124,6 +135,7 @@ public class MainFrame extends JFrame {
 
     public MainFrame(AppContext app, User user, String webUrl) {
         super("Quản lý bảo hành điện tử – " + user.fullName() + " (" + user.role().getLabel() + ")");
+        setIconImages(Ui.logoImages());
         this.ctx = new Ui.Ctx(app, user, webUrl, this);
         open = true;
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -210,9 +222,10 @@ public class MainFrame extends JFrame {
         top.add(pageTitle, BorderLayout.WEST);
         JLabel who = new JLabel(user.fullName() + " · " + user.role().getLabel() + "   ");
         who.setForeground(Ui.MUTE);
-        top.add(Ui.flow(who,
+        top.add(Ui.flow(who, alertsBtn,
                 Ui.button(Ui.isDark() ? "Giao diện sáng" : "Giao diện tối", this::toggleTheme),
                 Ui.button("Mở giao diện web", () -> Ui.browse(this, webUrl)),
+                Ui.button("Bảo mật", () -> new TwoFactorDialog(this, ctx.app(), ctx.user()).setVisible(true)),
                 Ui.button("Đổi mật khẩu", this::changePassword),
                 Ui.button("Đăng xuất", this::logout)), BorderLayout.EAST);
 
@@ -264,6 +277,9 @@ public class MainFrame extends JFrame {
             badge("dat-hang", d.lng("parts_to_order"));
             badge("lich-hen", d.lng("today_events"));
             badge("thong-bao", d.lng("notify_failed"));
+            long al = d.lng("alerts");
+            alertsBtn.setText(al > 0 ? "Nhắc việc (" + al + ")" : "Nhắc việc");
+            alertsBtn.setForeground(al > 0 ? Ui.BAD : Ui.INK);
         } catch (Exception ignored) {
             // không quan trọng
         }

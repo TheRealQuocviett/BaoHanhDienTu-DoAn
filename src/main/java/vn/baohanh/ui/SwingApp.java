@@ -36,6 +36,7 @@ public final class SwingApp {
 
     static void showLogin(AppContext app, String webUrl) {
         JDialog d = new JDialog((JFrame) null, "Đăng nhập – Quản lý bảo hành", true);
+        d.setIconImages(Ui.logoImages());
         d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(Ui.CARD);
@@ -66,10 +67,24 @@ public final class SwingApp {
 
         JButton ok = Ui.primary("Đăng nhập", () -> {
             try {
-                User u = app.auth.login(user.getText(), new String(pass.getPassword()));
+                vn.baohanh.service.Auth.LoginStep st = app.auth.begin(user.getText(), new String(pass.getPassword()));
+                User u = st.user();
+                if (st.needCode()) {
+                    u = TwoFactorDialog.askCode(d, app, st.pendingToken());
+                    if (u == null) { pass.setText(""); pass.requestFocusInWindow(); return; }
+                }
                 d.dispose();
                 MainFrame mf = new MainFrame(app, u, webUrl);
                 mf.setVisible(true);
+                if (u.role() == vn.baohanh.model.Role.ADMIN && !app.twoFactor.isEnabled(u.id())) {
+                    User me = u;
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        if (javax.swing.JOptionPane.showConfirmDialog(mf, "<html>Tài khoản <b>Quản lý</b> chưa bật xác thực 2 lớp.<br>"
+                                + "Bật để lỡ lộ mật khẩu cũng không ai đăng nhập được. Cài đặt ngay?</html>", "Bảo mật tài khoản",
+                                javax.swing.JOptionPane.YES_NO_OPTION) == javax.swing.JOptionPane.YES_OPTION)
+                            new TwoFactorDialog(mf, app, me).setVisible(true);
+                    });
+                }
             } catch (Exception ex) {
                 err.setText(ex.getMessage());
                 pass.setText("");
